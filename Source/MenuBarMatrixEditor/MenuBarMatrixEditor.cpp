@@ -20,7 +20,8 @@
 
 #include <JuceHeader.h>
 
-#include "../MenuBarMatrixEditor/InputMixerComponent.h"
+#include "../MenuBarMatrixEditor/InputControlComponent.h"
+#include "../MenuBarMatrixEditor/OutputControlComponent.h"
 
 
 namespace MenuBarMatrix
@@ -30,14 +31,20 @@ namespace MenuBarMatrix
 MenuBarMatrixEditor::MenuBarMatrixEditor(AudioProcessor& processor)
     : AudioProcessorEditor(processor)
 {
-    m_mixer = std::make_unique<InputMixerComponent>();
-    addAndMakeVisible(m_mixer.get());
+    m_inputCtrl = std::make_unique<InputControlComponent>();
+    addAndMakeVisible(m_inputCtrl.get());
+    
+    m_outputCtrl = std::make_unique<OutputControlComponent>();
+    addAndMakeVisible(m_outputCtrl.get());
 
     auto MenuBarMatrixProc = dynamic_cast<MenuBarMatrixProcessor*>(&processor);
     if (MenuBarMatrixProc)
     {
-        MenuBarMatrixProc->addInputListener(m_mixer.get());
-        MenuBarMatrixProc->addInputCommander(m_mixer.get());
+        MenuBarMatrixProc->addInputListener(m_inputCtrl.get());
+        MenuBarMatrixProc->addInputCommander(m_inputCtrl.get());
+        
+        MenuBarMatrixProc->addOutputListener(m_outputCtrl.get());
+        MenuBarMatrixProc->addOutputCommander(m_outputCtrl.get());
     }
 
     setSize(800, 700);
@@ -64,16 +71,16 @@ void MenuBarMatrixEditor::paint (Graphics& g)
 void MenuBarMatrixEditor::resized()
 {
     auto bounds = getLocalBounds();
-    auto mixerBounds = bounds;
+    auto inputCtrlBounds = bounds;
     auto surroundFieldBounds = bounds;
 
     // horizontal layout
     if (m_editorLayouting == EL_Horizontal || (m_editorLayouting == EL_Dynamic && bounds.getWidth() > bounds.getHeight()))
     {
-        mixerBounds = bounds.removeFromLeft(static_cast<int>(bounds.getWidth() * 0.3f));
-        mixerBounds.reduce(0, 5);
-        mixerBounds.removeFromRight(5);
-        mixerBounds.removeFromLeft(5);
+        inputCtrlBounds = bounds.removeFromLeft(static_cast<int>(bounds.getWidth() * 0.3f));
+        inputCtrlBounds.reduce(0, 5);
+        inputCtrlBounds.removeFromRight(5);
+        inputCtrlBounds.removeFromLeft(5);
 
         surroundFieldBounds = bounds;
         surroundFieldBounds.reduce(0, 5);
@@ -82,17 +89,17 @@ void MenuBarMatrixEditor::resized()
     // vertical layout
     else if (m_editorLayouting == EL_Vertical || (m_editorLayouting == EL_Dynamic && bounds.getWidth() <= bounds.getHeight()))
     {
-        mixerBounds = bounds.removeFromBottom(static_cast<int>(bounds.getHeight() * 0.3f));
-        mixerBounds.reduce(5, 0);
-        mixerBounds.removeFromTop(5);
-        mixerBounds.removeFromBottom(5);
+        inputCtrlBounds = bounds.removeFromBottom(static_cast<int>(bounds.getHeight() * 0.3f));
+        inputCtrlBounds.reduce(5, 0);
+        inputCtrlBounds.removeFromTop(5);
+        inputCtrlBounds.removeFromBottom(5);
 
         surroundFieldBounds = bounds;
         surroundFieldBounds.reduce(5, 0);
         surroundFieldBounds.removeFromTop(5);
     }
 
-    m_mixer->setBounds(mixerBounds);
+    m_inputCtrl->setBounds(inputCtrlBounds);
 }
 
 void MenuBarMatrixEditor::lookAndFeelChanged()

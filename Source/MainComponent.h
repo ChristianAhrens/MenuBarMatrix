@@ -41,7 +41,6 @@ private:
     std::unique_ptr<MenuBarMatrix::MenuBarMatrix>    m_mbm;
 
     std::unique_ptr<TextButton> m_setupToggleButton;
-    std::unique_ptr<TextButton> m_lockLayoutButton;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

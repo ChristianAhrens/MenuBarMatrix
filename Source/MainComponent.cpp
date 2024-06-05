@@ -49,13 +49,6 @@ MainComponent::MainComponent()
     };
     addAndMakeVisible(m_setupToggleButton.get());
 
-    m_lockLayoutButton = std::make_unique<TextButton>("Lock Layout");
-    m_lockLayoutButton->setClickingTogglesState(true);
-    m_lockLayoutButton->onClick = [this] {
-        m_mbm->lockCurrentLayout(m_lockLayoutButton->getToggleState());
-    };
-    addAndMakeVisible(m_lockLayoutButton.get());
-
     setSize(900, 600);
 }
 
@@ -95,8 +88,6 @@ void MainComponent::resized()
     if (m_setupToggleButton)
         m_setupToggleButton->setBounds(setupAreaBounds.removeFromRight(100).removeFromTop(20));
     setupAreaBounds.removeFromRight(margin);
-    if (m_lockLayoutButton)
-        m_lockLayoutButton->setBounds(setupAreaBounds.removeFromRight(100).removeFromTop(20));
 
     auto MenuBarMatrixComponent = m_mbm->getUIComponent();
     if (MenuBarMatrixComponent)

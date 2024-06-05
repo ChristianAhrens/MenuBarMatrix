@@ -30,18 +30,17 @@ namespace MenuBarMatrix
 /**
  * fwd. decls.
  */
-class PositionEditorComponent;
 class MeterbridgeComponent;
 
 //==============================================================================
 /*
 */
-class InputMixerComponent : public AbstractAudioVisualizer, 
-                            public MenuBarMatrixProcessor::InputCommander
+class InputControlComponent :   public AbstractAudioVisualizer,
+                                public MenuBarMatrixProcessor::InputCommander
 {
 public:
-    InputMixerComponent();
-    ~InputMixerComponent();
+    InputControlComponent();
+    ~InputControlComponent();
 
     //==============================================================================
     void paint (Graphics&) override;
@@ -55,10 +54,6 @@ public:
 
     //==============================================================================
     void setInputMute(unsigned int channel, bool muteState) override;
-    void setInputGain(unsigned int channel, float gainValue) override;
-    void setInputPosition(unsigned int channel, juce::Point<float> positionValue) override;
-    void setInputSpread(unsigned int channel, float spreadValue) override;
-    void setInputReverb(unsigned int channel, float reverbValue) override;
 
 private:
     //==============================================================================
@@ -67,13 +62,9 @@ private:
     //==============================================================================
     ProcessorLevelData                                      m_levelData;
     std::unique_ptr<MeterbridgeComponent>                   m_inputLevels;
-    std::vector<std::unique_ptr<juce::Slider>>              m_inputReverbs;
-    std::vector<std::unique_ptr<juce::Slider>>              m_inputSpreads;
     std::vector<std::unique_ptr<TextButton>>                m_inputMutes;
-    std::vector<std::unique_ptr<PositionEditorComponent>>   m_inputPositions;
-    std::vector<std::unique_ptr<juce::Slider>>              m_inputGains;
     
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputMixerComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputControlComponent)
 };
 
 }
