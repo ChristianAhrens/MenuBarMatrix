@@ -58,10 +58,10 @@
               file="Source/MenuBarMatrixEditor/AudioSelectComponent.cpp"/>
         <FILE id="MkNFLQ" name="AudioSelectComponent.h" compile="0" resource="0"
               file="Source/MenuBarMatrixEditor/AudioSelectComponent.h"/>
-        <FILE id="rfMgcE" name="InputMixerComponent.cpp" compile="1" resource="0"
-              file="Source/MenuBarMatrixEditor/InputMixerComponent.cpp"/>
-        <FILE id="nMOL3A" name="InputMixerComponent.h" compile="0" resource="0"
-              file="Source/MenuBarMatrixEditor/InputMixerComponent.h"/>
+        <FILE id="rfMgcE" name="InputControlComponent.cpp" compile="1" resource="0"
+              file="Source/MenuBarMatrixEditor/InputControlComponent.cpp"/>
+        <FILE id="nMOL3A" name="InputControlComponent.h" compile="0" resource="0"
+              file="Source/MenuBarMatrixEditor/InputControlComponent.h"/>
         <FILE id="tdvRtd" name="MenuBarMatrixEditor.cpp" compile="1" resource="0"
               file="Source/MenuBarMatrixEditor/MenuBarMatrixEditor.cpp"/>
         <FILE id="ixyoIE" name="MenuBarMatrixEditor.h" compile="0" resource="0"
@@ -70,10 +70,10 @@
               file="Source/MenuBarMatrixEditor/MeterbridgeComponent.cpp"/>
         <FILE id="Msm5CT" name="MeterbridgeComponent.h" compile="0" resource="0"
               file="Source/MenuBarMatrixEditor/MeterbridgeComponent.h"/>
-        <FILE id="kYhc8f" name="PositionEditorComponent.cpp" compile="1" resource="0"
-              file="Source/MenuBarMatrixEditor/PositionEditorComponent.cpp"/>
-        <FILE id="T595m4" name="PositionEditorComponent.h" compile="0" resource="0"
-              file="Source/MenuBarMatrixEditor/PositionEditorComponent.h"/>
+        <FILE id="ZQkMLq" name="OutputControlComponent.cpp" compile="1" resource="0"
+              file="Source/MenuBarMatrixEditor/OutputControlComponent.cpp"/>
+        <FILE id="VL9U7B" name="OutputControlComponent.h" compile="0" resource="0"
+              file="Source/MenuBarMatrixEditor/OutputControlComponent.h"/>
       </GROUP>
       <FILE id="cIlQwP" name="MenuBarMatrix.cpp" compile="1" resource="0"
             file="Source/MenuBarMatrix.cpp"/>

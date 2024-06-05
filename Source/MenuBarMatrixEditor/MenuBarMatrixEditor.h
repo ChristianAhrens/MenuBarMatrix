@@ -27,15 +27,15 @@
 namespace MenuBarMatrix
 {
 
-class InputMixerComponent;
-class TwoDFieldOutputComponent;
+class InputControlComponent;
+class OutputControlComponent;
 
 
 //==============================================================================
 /*
 */
-class MenuBarMatrixEditor :    public juce::AudioProcessorEditor,
-                                public JUCEAppBasics::AppConfigurationBase::XmlConfigurableElement
+class MenuBarMatrixEditor : public juce::AudioProcessorEditor,
+                            public JUCEAppBasics::AppConfigurationBase::XmlConfigurableElement
 {
 public:
     enum EditorLayout
@@ -65,7 +65,8 @@ public:
     bool setStateXml(XmlElement* stateXml) override;
 
 private:
-    std::unique_ptr<InputMixerComponent>        m_mixer;
+    std::unique_ptr<InputControlComponent>    m_inputCtrl;
+    std::unique_ptr<OutputControlComponent>   m_outputCtrl;
 
     EditorLayout    m_editorLayouting{ EL_Dynamic };
 

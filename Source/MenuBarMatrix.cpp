@@ -26,28 +26,32 @@ namespace MenuBarMatrix
 
 //==============================================================================
 MenuBarMatrix::MenuBarMatrix() :
-    Component(),
-    JUCEAppBasics::AppConfigurationBase::XmlConfigurableElement()
+    Component()
 {
-    m_MenuBarMatrixProcessor = std::make_unique<MenuBarMatrixProcessor>();
+    m_menuBarMatrixProcessor = std::make_unique<MenuBarMatrixProcessor>();
 
-    m_audioDeviceSelectComponent = std::make_unique<AudioSelectComponent>(m_MenuBarMatrixProcessor->getDeviceManager(), 1, MenuBarMatrixProcessor::s_maxChannelCount, 1, 8, false, false, false, false);
+    m_audioDeviceSelectComponent = std::make_unique<AudioSelectComponent>(m_menuBarMatrixProcessor->getDeviceManager(),
+                                                                          MenuBarMatrixProcessor::s_minInputsCount,
+                                                                          MenuBarMatrixProcessor::s_maxChannelCount,
+                                                                          MenuBarMatrixProcessor::s_minOutputsCount,
+                                                                          MenuBarMatrixProcessor::s_maxChannelCount,
+                                                                          false, false, false, false);
 
 }
 
 MenuBarMatrix::~MenuBarMatrix()
 {
-    if (m_MenuBarMatrixProcessor)
-        m_MenuBarMatrixProcessor->editorBeingDeleted(m_MenuBarMatrixProcessor->getActiveEditor());
+    if (m_menuBarMatrixProcessor)
+        m_menuBarMatrixProcessor->editorBeingDeleted(m_menuBarMatrixProcessor->getActiveEditor());
 }
 
 juce::Component* MenuBarMatrix::getUIComponent()
 {
-    if (m_MenuBarMatrixProcessor)
+    if (m_menuBarMatrixProcessor)
     {
-        if (nullptr == m_MenuBarMatrixProcessor->getActiveEditor())
-            m_MenuBarMatrixProcessor->createEditorIfNeeded();
-        return m_MenuBarMatrixProcessor->getActiveEditor();
+        if (nullptr == m_menuBarMatrixProcessor->getActiveEditor())
+            m_menuBarMatrixProcessor->createEditorIfNeeded();
+        return m_menuBarMatrixProcessor->getActiveEditor();
     }
     else
         return nullptr;
@@ -59,26 +63,6 @@ juce::Component* MenuBarMatrix::getDeviceSetupComponent()
         return m_audioDeviceSelectComponent.get();
     else
         return nullptr;
-}
-
-std::unique_ptr<XmlElement> MenuBarMatrix::createStateXml()
-{
-    jassertfalse;
-    return nullptr;
-}
-
-bool MenuBarMatrix::setStateXml(XmlElement* stateXml)
-{
-    ignoreUnused(stateXml);
-    jassertfalse;
-    return false;
-}
-
-void MenuBarMatrix::lockCurrentLayout(bool doLock)
-{
-    auto MenuBarMatrixProcessorEditor = dynamic_cast<MenuBarMatrixEditor*>(getUIComponent());
-    if (MenuBarMatrixProcessorEditor)
-        MenuBarMatrixProcessorEditor->lockCurrentLayout(doLock);
 }
 
 

@@ -20,8 +20,6 @@
 
 #include <JuceHeader.h>
 
-#include "AppConfigurationBase.h"
-
 
 namespace MenuBarMatrix
 {
@@ -38,8 +36,7 @@ class MenuBarMatrixRemoteWrapper;
 /*
  *
  */
-class MenuBarMatrix   :    public Component,
-                                public JUCEAppBasics::AppConfigurationBase::XmlConfigurableElement
+class MenuBarMatrix   :    public Component
 {
 public:
     MenuBarMatrix();
@@ -49,15 +46,8 @@ public:
     juce::Component* getUIComponent();
     juce::Component* getDeviceSetupComponent();
 
-    //==========================================================================
-    std::unique_ptr<XmlElement> createStateXml() override;
-    bool setStateXml(XmlElement* stateXml) override;
-
-    //==========================================================================
-    void lockCurrentLayout(bool doLock);
-
 private:
-    std::unique_ptr<MenuBarMatrixProcessor>        m_MenuBarMatrixProcessor;
+    std::unique_ptr<MenuBarMatrixProcessor>        m_menuBarMatrixProcessor;
 
     std::unique_ptr<MenuBarMatrixEditor>           m_audioVisuComponent;
     std::unique_ptr<AudioSelectComponent>          m_audioDeviceSelectComponent;
