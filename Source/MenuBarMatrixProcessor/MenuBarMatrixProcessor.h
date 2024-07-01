@@ -109,12 +109,11 @@ public:
         CrosspointCommander();
         virtual ~CrosspointCommander() override;
 
-        void setCrosspointEnabledChangeCallback(const std::function<void(OutputCommander* sender, int, int, bool)>& callback);
-        void setCrosspointEnabledPollCallback(const std::function<void(OutputCommander* sender, int, int)>& callback);
+        void setCrosspointEnabledChangeCallback(const std::function<void(CrosspointCommander* sender, int, int, bool)>& callback);
+        void setCrosspointEnabledPollCallback(const std::function<void(CrosspointCommander* sender, int, int)>& callback);
 
         virtual void setCrosspointEnabledValue(int input, int output, bool enabledState) = 0;
 
-        std::function<void(OutputCommander* sender, int)>   m_outputLevelPollCallback{ nullptr };
     protected:
         void crosspointEnabledChange(int input, int output, bool enabledState);
         void crosspointEnabledPoll(int input, int output);
@@ -122,6 +121,20 @@ public:
     private:
         std::function<void(CrosspointCommander* sender, int, int, bool)> m_crosspointEnabledChangeCallback{ nullptr };
         std::function<void(CrosspointCommander* sender, int, int)>       m_crosspointEnabledPollCallback{ nullptr };
+    };
+
+private:
+    class ReinitIOCountMessage : public juce::Message
+    {
+    public:
+        ReinitIOCountMessage(int inputs, int outputs) { m_inputCount = inputs; m_outputCount = outputs; }
+
+        int getInputCount() const { return m_inputCount; };
+        int getOutputCount() const { return m_outputCount; };
+
+    private:
+        int m_inputCount = 0;
+        int m_outputCount = 0;
     };
 
 public:
@@ -138,9 +151,11 @@ public:
     void addInputCommander(InputCommander* commander);
     void initializeInputCommander(InputCommander* commander);
     void removeInputCommander(InputCommander* commander);
+
     void addOutputCommander(OutputCommander* commander);
     void initializeOutputCommander(OutputCommander* commander);
     void removeOutputCommander(OutputCommander* comander);
+
     void addCrosspointCommander(CrosspointCommander* commander);
     void initializeCrosspointCommander(CrosspointCommander* commander);
     void removeCrosspointCommander(CrosspointCommander* comander);

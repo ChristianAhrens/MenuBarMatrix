@@ -11,6 +11,10 @@
               file="submodules/JUCE-AppBasics/Source/AppConfigurationBase.cpp"/>
         <FILE id="B9B2m6" name="AppConfigurationBase.h" compile="0" resource="0"
               file="submodules/JUCE-AppBasics/Source/AppConfigurationBase.h"/>
+        <FILE id="tm5Iwr" name="CustomLookAndFeel.cpp" compile="1" resource="0"
+              file="submodules/JUCE-AppBasics/Source/CustomLookAndFeel.cpp"/>
+        <FILE id="H6sI3L" name="CustomLookAndFeel.h" compile="0" resource="0"
+              file="submodules/JUCE-AppBasics/Source/CustomLookAndFeel.h"/>
       </GROUP>
     </GROUP>
     <GROUP id="{72AB56DC-8637-938F-3846-2BD91435687D}" name="Resources">
@@ -58,6 +62,10 @@
               file="Source/MenuBarMatrixEditor/AudioSelectComponent.cpp"/>
         <FILE id="MkNFLQ" name="AudioSelectComponent.h" compile="0" resource="0"
               file="Source/MenuBarMatrixEditor/AudioSelectComponent.h"/>
+        <FILE id="mRFZza" name="CrosspointsControlComponent.cpp" compile="1"
+              resource="0" file="Source/MenuBarMatrixEditor/CrosspointsControlComponent.cpp"/>
+        <FILE id="iuXZaf" name="CrosspointsControlComponent.h" compile="0"
+              resource="0" file="Source/MenuBarMatrixEditor/CrosspointsControlComponent.h"/>
         <FILE id="rfMgcE" name="InputControlComponent.cpp" compile="1" resource="0"
               file="Source/MenuBarMatrixEditor/InputControlComponent.cpp"/>
         <FILE id="nMOL3A" name="InputControlComponent.h" compile="0" resource="0"

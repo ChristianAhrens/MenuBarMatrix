@@ -21,6 +21,7 @@
 #include <JuceHeader.h>
 
 #include "../MenuBarMatrixEditor/InputControlComponent.h"
+#include "../MenuBarMatrixEditor/CrosspointsControlComponent.h"
 #include "../MenuBarMatrixEditor/OutputControlComponent.h"
 
 
@@ -33,7 +34,10 @@ MenuBarMatrixEditor::MenuBarMatrixEditor(AudioProcessor& processor)
 {
     m_inputCtrl = std::make_unique<InputControlComponent>();
     addAndMakeVisible(m_inputCtrl.get());
-    
+
+    m_crosspointCtrl = std::make_unique<CrosspointsControlComponent>();
+    addAndMakeVisible(m_crosspointCtrl.get());
+
     m_outputCtrl = std::make_unique<OutputControlComponent>();
     addAndMakeVisible(m_outputCtrl.get());
 
@@ -42,12 +46,20 @@ MenuBarMatrixEditor::MenuBarMatrixEditor(AudioProcessor& processor)
     {
         MenuBarMatrixProc->addInputListener(m_inputCtrl.get());
         MenuBarMatrixProc->addInputCommander(m_inputCtrl.get());
+
+        MenuBarMatrixProc->addCrosspointCommander(m_crosspointCtrl.get());
         
         MenuBarMatrixProc->addOutputListener(m_outputCtrl.get());
         MenuBarMatrixProc->addOutputCommander(m_outputCtrl.get());
     }
 
-    setSize(800, 700);
+    m_gridLayout.templateRows = { juce::Grid::TrackInfo(juce::Grid::Px(30)), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
+    m_gridLayout.templateColumns = { juce::Grid::TrackInfo(juce::Grid::Px(30)), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
+    m_gridLayout.items = { juce::GridItem(), juce::GridItem(*m_inputCtrl), juce::GridItem(*m_outputCtrl), juce::GridItem(*m_crosspointCtrl) };
+    m_gridLayout.rowGap.pixels = 1.0;
+    m_gridLayout.columnGap.pixels = 1.0;
+
+    setSize(800, 800);
 }
 
 MenuBarMatrixEditor::MenuBarMatrixEditor(AudioProcessor* processor)
@@ -70,36 +82,7 @@ void MenuBarMatrixEditor::paint (Graphics& g)
 
 void MenuBarMatrixEditor::resized()
 {
-    auto bounds = getLocalBounds();
-    auto inputCtrlBounds = bounds;
-    auto surroundFieldBounds = bounds;
-
-    // horizontal layout
-    if (m_editorLayouting == EL_Horizontal || (m_editorLayouting == EL_Dynamic && bounds.getWidth() > bounds.getHeight()))
-    {
-        inputCtrlBounds = bounds.removeFromLeft(static_cast<int>(bounds.getWidth() * 0.3f));
-        inputCtrlBounds.reduce(0, 5);
-        inputCtrlBounds.removeFromRight(5);
-        inputCtrlBounds.removeFromLeft(5);
-
-        surroundFieldBounds = bounds;
-        surroundFieldBounds.reduce(0, 5);
-        surroundFieldBounds.removeFromRight(5);
-    }
-    // vertical layout
-    else if (m_editorLayouting == EL_Vertical || (m_editorLayouting == EL_Dynamic && bounds.getWidth() <= bounds.getHeight()))
-    {
-        inputCtrlBounds = bounds.removeFromBottom(static_cast<int>(bounds.getHeight() * 0.3f));
-        inputCtrlBounds.reduce(5, 0);
-        inputCtrlBounds.removeFromTop(5);
-        inputCtrlBounds.removeFromBottom(5);
-
-        surroundFieldBounds = bounds;
-        surroundFieldBounds.reduce(5, 0);
-        surroundFieldBounds.removeFromTop(5);
-    }
-
-    m_inputCtrl->setBounds(inputCtrlBounds);
+    m_gridLayout.performLayout(getLocalBounds());
 }
 
 void MenuBarMatrixEditor::lookAndFeelChanged()
@@ -165,16 +148,6 @@ bool MenuBarMatrixEditor::setStateXml(XmlElement* /*stateXml*/)
     //}
 
     return true;
-}
-
-void MenuBarMatrixEditor::lockCurrentLayout(bool doLock)
-{
-    if (doLock)
-        m_editorLayouting = (getLocalBounds().getWidth() > getLocalBounds().getHeight()) ? EL_Horizontal : EL_Vertical;
-    else
-        m_editorLayouting = EL_Dynamic;
-
-    resized();
 }
 
 }

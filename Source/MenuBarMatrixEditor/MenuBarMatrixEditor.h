@@ -28,6 +28,7 @@ namespace MenuBarMatrix
 {
 
 class InputControlComponent;
+class CrosspointsControlComponent;
 class OutputControlComponent;
 
 
@@ -38,20 +39,9 @@ class MenuBarMatrixEditor : public juce::AudioProcessorEditor,
                             public JUCEAppBasics::AppConfigurationBase::XmlConfigurableElement
 {
 public:
-    enum EditorLayout
-    {
-        EL_Dynamic,
-        EL_Horizontal,
-        EL_Vertical
-    };
-
-public:
     MenuBarMatrixEditor(juce::AudioProcessor& processor);
     MenuBarMatrixEditor(juce::AudioProcessor* processor);
     ~MenuBarMatrixEditor();
-
-    //==============================================================================
-    void lockCurrentLayout(bool doLock);
 
     //==============================================================================
     void paint(juce::Graphics&) override;
@@ -65,10 +55,11 @@ public:
     bool setStateXml(XmlElement* stateXml) override;
 
 private:
-    std::unique_ptr<InputControlComponent>    m_inputCtrl;
-    std::unique_ptr<OutputControlComponent>   m_outputCtrl;
+    std::unique_ptr<InputControlComponent>      m_inputCtrl;
+    std::unique_ptr<CrosspointsControlComponent> m_crosspointCtrl;
+    std::unique_ptr<OutputControlComponent>     m_outputCtrl;
 
-    EditorLayout    m_editorLayouting{ EL_Dynamic };
+    juce::Grid  m_gridLayout;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuBarMatrixEditor)
 };
