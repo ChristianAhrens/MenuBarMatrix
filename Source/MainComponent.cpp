@@ -21,6 +21,7 @@
 #include "MenuBarMatrix.h"
 
 #include <iOS_utils.h>
+#include <CustomLookAndFeel.h>
 
 MainComponent::MainComponent()
     : juce::Component()
@@ -49,7 +50,10 @@ MainComponent::MainComponent()
     };
     addAndMakeVisible(m_setupToggleButton.get());
 
-    setSize(900, 600);
+    juce::Desktop::getInstance().addDarkModeSettingListener(this);
+    darkModeSettingChanged(); // initially trigger correct colourscheme
+
+    setSize(800, 850);
 }
 
 MainComponent::~MainComponent()
@@ -60,34 +64,24 @@ void MainComponent::paint(Graphics &g)
 {
     g.fillAll(getLookAndFeel().findColour(AlertWindow::backgroundColourId).darker());
     
-    //auto safety = JUCEAppBasics::iOS_utils::getDeviceSafetyMargins();
     auto safeBounds = getLocalBounds();
-    //safeBounds.removeFromTop(safety._top);
-    //safeBounds.removeFromBottom(safety._bottom);
-    //safeBounds.removeFromLeft(safety._left);
-    //safeBounds.removeFromRight(safety._right);
-    
+
     auto setupAreaBounds = safeBounds.removeFromTop(26);
     g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
-    g.fillRect(setupAreaBounds.reduced(6, 0));
+    g.fillRect(setupAreaBounds);
 }
 
 void MainComponent::resized()
 {
-    //auto safety = JUCEAppBasics::iOS_utils::getDeviceSafetyMargins();
     auto safeBounds = getLocalBounds();
-    //safeBounds.removeFromTop(safety._top);
-    //safeBounds.removeFromBottom(safety._bottom);
-    //safeBounds.removeFromLeft(safety._left);
-    //safeBounds.removeFromRight(safety._right);
 
     auto margin = 3;
-    auto setupAreaBounds = safeBounds.removeFromTop(26).reduced(9, margin);
+    auto setupAreaBounds = safeBounds.removeFromTop(26).reduced(margin);
     auto contentAreaBounds = safeBounds;
+    contentAreaBounds.removeFromTop(1);
 
     if (m_setupToggleButton)
         m_setupToggleButton->setBounds(setupAreaBounds.removeFromRight(100).removeFromTop(20));
-    setupAreaBounds.removeFromRight(margin);
 
     auto MenuBarMatrixComponent = m_mbm->getUIComponent();
     if (MenuBarMatrixComponent)
@@ -96,5 +90,21 @@ void MainComponent::resized()
     auto setupComponent = m_mbm->getDeviceSetupComponent();
     if (setupComponent && setupComponent->isVisible())
         setupComponent->setBounds(contentAreaBounds.reduced(15));
+}
+
+void MainComponent::darkModeSettingChanged()
+{
+    if (juce::Desktop::getInstance().isDarkModeActive())
+    {
+        // go dark
+        m_lookAndFeel = std::make_unique<JUCEAppBasics::CustomLookAndFeel>(JUCEAppBasics::CustomLookAndFeel::PS_Dark);
+        Desktop::getInstance().setDefaultLookAndFeel(m_lookAndFeel.get());
+    }
+    else
+    {
+        // go light
+        m_lookAndFeel = std::make_unique<JUCEAppBasics::CustomLookAndFeel>(JUCEAppBasics::CustomLookAndFeel::PS_Light);
+        Desktop::getInstance().setDefaultLookAndFeel(m_lookAndFeel.get());
+    }
 }
 

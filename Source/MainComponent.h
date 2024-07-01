@@ -26,21 +26,24 @@ namespace MenuBarMatrix
 }
 
 
-class MainComponent   :  public juce::Component
+class MainComponent   :  public juce::Component,
+    public juce::DarkModeSettingListener
 {
 public:
     MainComponent();
     ~MainComponent() override;
+
+    //==============================================================================
+    void darkModeSettingChanged() override;
     
-    
-//========================================================================*
-  void paint(Graphics&) override;
+    //========================================================================*
+    void paint(Graphics&) override;
     void resized() override;
 
 private:
-    std::unique_ptr<MenuBarMatrix::MenuBarMatrix>    m_mbm;
-
-    std::unique_ptr<TextButton> m_setupToggleButton;
+    std::unique_ptr<MenuBarMatrix::MenuBarMatrix>   m_mbm;
+    std::unique_ptr<juce::TextButton>               m_setupToggleButton;
+    std::unique_ptr<juce::LookAndFeel>              m_lookAndFeel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
