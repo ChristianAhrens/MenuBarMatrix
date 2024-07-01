@@ -41,36 +41,7 @@ OutputControlComponent::~OutputControlComponent()
 
 void OutputControlComponent::resized()
 {
-    if (!m_OutputMutes.empty())
-    {
-        auto usableBounds = getLocalBounds().reduced(15);
-
-        auto maxcontrolElementWidth = 30;
-        auto fixedSizeCtrlsHeight = 130;
-        auto dynamicSizeCtrlsHeight = usableBounds.getHeight() - fixedSizeCtrlsHeight;
-
-        auto meterBridgeBounds = usableBounds.removeFromTop(static_cast<int>(0.4f * dynamicSizeCtrlsHeight));
-        auto fixedSizeCtrlsBounds = usableBounds.removeFromTop(fixedSizeCtrlsHeight);
-        auto gainCtrlBounds = usableBounds;
-
-        auto controlElementWidth = fixedSizeCtrlsBounds.getWidth() / static_cast<int>(m_OutputMutes.size());
-        controlElementWidth = controlElementWidth > maxcontrolElementWidth ? maxcontrolElementWidth : controlElementWidth;
-
-        if (m_OutputLevels)
-            m_OutputLevels->setBounds(meterBridgeBounds);
-
-        fixedSizeCtrlsBounds.removeFromTop(5);
-
-        auto muteButtonsBounds = fixedSizeCtrlsBounds.removeFromTop(20);
-        for (auto i = 0; i < m_OutputMutes.size(); i++)
-        {
-            auto const& muteButton = m_OutputMutes.at(i);
-            if (!muteButton)
-                continue;
-            muteButtonsBounds.removeFromLeft(10);
-            muteButton->setBounds(muteButtonsBounds.removeFromLeft(controlElementWidth));
-        }
-    }
+    DBG(__FUNCTION__);
 
     AbstractAudioVisualizer::resized();
 }
@@ -89,9 +60,7 @@ void OutputControlComponent::setOutputMute(unsigned int channel, bool muteState)
     if (channel > m_OutputMutes.size())
         setChannelCount(channel);
 
-    auto muteButtonIter = m_OutputMutes.begin() + channel - 1;
-    if (muteButtonIter != m_OutputMutes.end() && muteButtonIter->get())
-        muteButtonIter->get()->setToggleState(muteState, juce::dontSendNotification);
+    DBG(__FUNCTION__ << " " << int(channel) << " " << int(muteState));
 }
 
 void OutputControlComponent::processingDataChanged(AbstractProcessorData *data)
@@ -125,46 +94,11 @@ void OutputControlComponent::processChanges()
 
 void OutputControlComponent::setChannelCount(int channelCount)
 {
-    auto resizeRequired = false;
-
-    if (m_OutputMutes.size() != channelCount)
+    if (m_channelCount != channelCount)
     {
-        if (m_OutputMutes.size() < channelCount)
-        {
-            auto missingCnt = channelCount - m_OutputMutes.size();
-            for (; missingCnt > 0; missingCnt--)
-            {
-                m_OutputMutes.push_back(std::make_unique<TextButton>("M"));
-                auto muteButton = m_OutputMutes.back().get();
-                muteButton->setColour(TextButton::ColourIds::buttonOnColourId, juce::Colours::red);
-                muteButton->setClickingTogglesState(true);
-                muteButton->onClick = [muteButton, this] {
-                    auto foundMuteButtonIter = std::find_if(m_OutputMutes.begin(), m_OutputMutes.end(), [muteButton](std::unique_ptr<TextButton>& b) { return b.get() == muteButton; });
-                    if (foundMuteButtonIter == m_OutputMutes.end())
-                        return;
-                    auto channelIdx = foundMuteButtonIter - m_OutputMutes.begin();
-                    auto channel = static_cast<int>(channelIdx + 1);
-                    auto muteState = muteButton->getToggleState();
-                    outputMuteChange(channel, muteState);
-                };
-                addAndMakeVisible(*m_OutputMutes.back());
-            }
-        }
-        else if (m_OutputMutes.size() > channelCount)
-        {
-            auto overheadCnt = m_OutputMutes.size() - channelCount;
-            for (; overheadCnt; overheadCnt--)
-            {
-                removeChildComponent(m_OutputMutes.back().get());
-                m_OutputMutes.erase(m_OutputMutes.end());
-            }
-        }
-
-        resizeRequired = true;
+        m_channelCount = channelCount;
+        DBG(__FUNCTION__ << " " << channelCount);
     }
-
-    if (resizeRequired)
-        resized();
 }
 
 }

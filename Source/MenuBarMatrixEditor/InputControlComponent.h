@@ -63,6 +63,7 @@ private:
     ProcessorLevelData                                      m_levelData;
     std::unique_ptr<MeterbridgeComponent>                   m_inputLevels;
     std::vector<std::unique_ptr<TextButton>>                m_inputMutes;
+    int m_channelCount = 0;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputControlComponent)
 };
