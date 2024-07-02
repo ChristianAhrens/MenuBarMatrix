@@ -26,7 +26,7 @@ namespace MenuBarMatrix
 
 //==============================================================================
 MenuBarMatrix::MenuBarMatrix() :
-    Component()
+    juce::Component(), juce::Timer()
 {
     m_menuBarMatrixProcessor = std::make_unique<MenuBarMatrixProcessor>();
 
@@ -37,12 +37,21 @@ MenuBarMatrix::MenuBarMatrix() :
                                                                           MenuBarMatrixProcessor::s_maxChannelCount,
                                                                           false, false, false, false);
 
+    startTimer(250);
 }
 
 MenuBarMatrix::~MenuBarMatrix()
 {
     if (m_menuBarMatrixProcessor)
         m_menuBarMatrixProcessor->editorBeingDeleted(m_menuBarMatrixProcessor->getActiveEditor());
+}
+
+void MenuBarMatrix::timerCallback()
+{
+    if (m_menuBarMatrixProcessor && m_menuBarMatrixProcessor->getDeviceManager() && onCpuUsageUpdate)
+    {
+        onCpuUsageUpdate(int(m_menuBarMatrixProcessor->getDeviceManager()->getCpuUsage() * 100.0));
+    }
 }
 
 juce::Component* MenuBarMatrix::getUIComponent()
