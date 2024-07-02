@@ -23,6 +23,39 @@
 #include <iOS_utils.h>
 #include <CustomLookAndFeel.h>
 
+ //==============================================================================
+class LoadBar : public juce::Component
+{
+public:
+    LoadBar() : juce::Component::Component() {}
+    ~LoadBar() {}
+
+    //==============================================================================
+    void paint(Graphics& g) override
+    {
+        auto bounds = getLocalBounds().toFloat();
+
+        g.setColour(getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
+        
+        auto barBounds = bounds.reduced(1);
+        g.fillRect(barBounds.removeFromLeft(barBounds.getWidth() * (float(m_loadPercent) / 100.0f)));
+
+        g.drawRect(bounds, 1.0f);
+
+        g.drawText(juce::String("Load ") + juce::String(m_loadPercent) + juce::String("%"), bounds, juce::Justification::centred);
+    };
+
+    //==============================================================================
+    void setLoadPercent(int loadPercent)
+    {
+        m_loadPercent = loadPercent;
+        repaint();
+    };
+
+private:
+    int m_loadPercent = 0;
+};
+
 MainComponent::MainComponent()
     : juce::Component()
 {
@@ -49,6 +82,10 @@ MainComponent::MainComponent()
         }
     };
     addAndMakeVisible(m_setupToggleButton.get());
+
+    m_loadBar = std::make_unique<LoadBar>();
+    m_mbm->onCpuUsageUpdate = [=](int loadPercent) { m_loadBar->setLoadPercent(loadPercent); };
+    addAndMakeVisible(m_loadBar.get());
 
     juce::Desktop::getInstance().addDarkModeSettingListener(this);
     darkModeSettingChanged(); // initially trigger correct colourscheme
@@ -80,8 +117,11 @@ void MainComponent::resized()
     auto contentAreaBounds = safeBounds;
     contentAreaBounds.removeFromTop(1);
 
+    auto setupElementArea = setupAreaBounds.removeFromTop(20);
     if (m_setupToggleButton)
-        m_setupToggleButton->setBounds(setupAreaBounds.removeFromRight(100).removeFromTop(20));
+        m_setupToggleButton->setBounds(setupElementArea.removeFromRight(100));
+    if (m_loadBar)
+        m_loadBar->setBounds(setupElementArea.removeFromLeft(100));
 
     auto MenuBarMatrixComponent = m_mbm->getUIComponent();
     if (MenuBarMatrixComponent)

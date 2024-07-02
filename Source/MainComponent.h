@@ -24,6 +24,7 @@ namespace MenuBarMatrix
 {
     class MenuBarMatrix;
 }
+class LoadBar;
 
 
 class MainComponent   :  public juce::Component,
@@ -43,6 +44,7 @@ public:
 private:
     std::unique_ptr<MenuBarMatrix::MenuBarMatrix>   m_mbm;
     std::unique_ptr<juce::TextButton>               m_setupToggleButton;
+    std::unique_ptr<LoadBar>                        m_loadBar;
     std::unique_ptr<juce::LookAndFeel>              m_lookAndFeel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)

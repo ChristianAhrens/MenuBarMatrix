@@ -36,15 +36,21 @@ class MenuBarMatrixRemoteWrapper;
 /*
  *
  */
-class MenuBarMatrix   :    public Component
+class MenuBarMatrix   :    public juce::Component, public juce::Timer
 {
 public:
     MenuBarMatrix();
     ~MenuBarMatrix() override;
-    
+
+    //==========================================================================
+    void timerCallback() override;
+
     //==========================================================================
     juce::Component* getUIComponent();
     juce::Component* getDeviceSetupComponent();
+
+    //==========================================================================
+    std::function<void(int)> onCpuUsageUpdate;
 
 private:
     std::unique_ptr<MenuBarMatrixProcessor>        m_menuBarMatrixProcessor;
