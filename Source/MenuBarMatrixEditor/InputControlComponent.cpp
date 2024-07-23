@@ -43,6 +43,20 @@ void InputControlComponent::resized()
 {
     DBG(__FUNCTION__);
 
+    auto bounds = getLocalBounds();
+
+    if (m_inputLevels)
+        m_inputLevels->setBounds(bounds.removeFromTop(static_cast<int>(0.5f * bounds.getHeight())));
+
+    if (!m_inputMutes.empty())
+    {
+        auto muteWidth = bounds.getWidth() / m_inputMutes.size();
+        for (auto const& inputMuteKV : m_inputMutes)
+        {
+            inputMuteKV.second->setBounds(bounds.removeFromLeft(static_cast<int>(muteWidth)));
+        }
+    }
+
     AbstractAudioVisualizer::resized();
 }
 
@@ -57,24 +71,25 @@ void InputControlComponent::paint(Graphics& g)
 
 void InputControlComponent::setInputMute(unsigned int channel, bool muteState)
 {
-    if (channel > m_inputMutes.size())
-        setChannelCount(channel);
+    if (m_inputMutes.count(channel) != 1)
+        return;
 
-    DBG(__FUNCTION__ << " " << int(channel) << " " << int(muteState));
+    setChannelCount(channel);
+
+    if (m_inputMutes.at(channel))
+        m_inputMutes.at(channel)->setToggleState(muteState, juce::dontSendNotification);
 }
 
 void InputControlComponent::processingDataChanged(AbstractProcessorData *data)
 {
     if(!data)
         return;
-
-    if (m_inputLevels)
-        m_inputLevels->processingDataChanged(data);
     
     switch(data->GetDataType())
     {
         case AbstractProcessorData::Level:
             m_levelData = *(dynamic_cast<ProcessorLevelData*>(data));
+            DBG(juce::String(__FUNCTION__) << " c:" << m_levelData.GetChannelCount());
             notifyChanges();
             break;
         case AbstractProcessorData::AudioSignal:
@@ -89,6 +104,9 @@ void InputControlComponent::processChanges()
 {
     setChannelCount(static_cast<int>(m_levelData.GetChannelCount()));
 
+    if (m_inputLevels)
+        m_inputLevels->processingDataChanged(&m_levelData);
+
     AbstractAudioVisualizer::processChanges();
 }
 
@@ -98,7 +116,41 @@ void InputControlComponent::setChannelCount(int channelCount)
     {
         m_channelCount = channelCount;
         DBG(__FUNCTION__ << " " << channelCount);
+
+        auto channelsToRemove = std::vector<int>();
+        for (auto const& inputMuteKV : m_inputMutes)
+        {
+            if (inputMuteKV.first > channelCount)
+                channelsToRemove.push_back(inputMuteKV.first);
+        }
+        for (auto const& channel : channelsToRemove)
+        {
+            removeChildComponent(m_inputMutes.at(channel).get());
+            auto iter = std::find_if(m_inputMutes.begin(), m_inputMutes.end(), [=](const auto& inputMuteKV) { return inputMuteKV.first == channel; });
+            if (iter != m_inputMutes.end())
+                m_inputMutes.erase(iter);
+        }
+
+        for (int channel = 1; channel <= channelCount; channel++)
+        {
+            if (m_inputMutes.count(channel) == 0)
+            {
+                m_inputMutes[channel] = std::make_unique<juce::TextButton>("M", "Mute");
+                m_inputMutes.at(channel)->setClickingTogglesState(true);
+                m_inputMutes.at(channel)->addListener(this);
+                addAndMakeVisible(m_inputMutes.at(channel).get());
+            }
+        }
+
+        resized();
     }
+}
+
+void InputControlComponent::buttonClicked(juce::Button* button)
+{
+    auto iter = std::find_if(m_inputMutes.begin(), m_inputMutes.end(), [=](const auto& inputMuteKV) { return inputMuteKV.second.get() == button; });
+    if (iter != m_inputMutes.end() && nullptr != iter->second)
+        inputMuteChange(iter->first, iter->second->getToggleState());
 }
 
 }

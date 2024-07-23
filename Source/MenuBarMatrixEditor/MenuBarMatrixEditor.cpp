@@ -53,8 +53,8 @@ MenuBarMatrixEditor::MenuBarMatrixEditor(AudioProcessor& processor)
         MenuBarMatrixProc->addOutputCommander(m_outputCtrl.get());
     }
 
-    m_gridLayout.templateRows = { juce::Grid::TrackInfo(juce::Grid::Px(30)), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
-    m_gridLayout.templateColumns = { juce::Grid::TrackInfo(juce::Grid::Px(30)), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
+    m_gridLayout.templateRows = { juce::Grid::TrackInfo(juce::Grid::Px(40)), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
+    m_gridLayout.templateColumns = { juce::Grid::TrackInfo(juce::Grid::Px(40)), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
     m_gridLayout.items = { juce::GridItem(), juce::GridItem(*m_inputCtrl), juce::GridItem(*m_outputCtrl), juce::GridItem(*m_crosspointCtrl) };
     m_gridLayout.rowGap.pixels = 1.0;
     m_gridLayout.columnGap.pixels = 1.0;

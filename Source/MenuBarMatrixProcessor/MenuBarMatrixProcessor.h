@@ -31,9 +31,10 @@ namespace MenuBarMatrix
 //==============================================================================
 /*
 */
-class MenuBarMatrixProcessor : public AudioProcessor,
-					                public AudioIODeviceCallback,
-                                    public MessageListener
+class MenuBarMatrixProcessor :  public juce::AudioProcessor,
+					            public juce::AudioIODeviceCallback,
+                                public juce::MessageListener,
+                                public juce::ChangeListener
 {
 public:
     class ChannelCommander
@@ -206,6 +207,9 @@ public:
     
     void audioDeviceAboutToStart(AudioIODevice* device) override;
     void audioDeviceStopped() override;
+
+    //==============================================================================
+    void changeListenerCallback(ChangeBroadcaster* source) override;
 
     //==============================================================================
     float getInputToOutputGain(int input, int output);
