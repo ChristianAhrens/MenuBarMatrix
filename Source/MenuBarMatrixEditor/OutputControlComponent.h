@@ -35,8 +35,9 @@ class MeterbridgeComponent;
 //==============================================================================
 /*
 */
-class OutputControlComponent :   public AbstractAudioVisualizer,
-                                public MenuBarMatrixProcessor::OutputCommander
+class OutputControlComponent :  public AbstractAudioVisualizer,
+                                public MenuBarMatrixProcessor::OutputCommander,
+                                public juce::TextButton::Listener
 {
 public:
     OutputControlComponent();
@@ -55,14 +56,18 @@ public:
     //==============================================================================
     void setOutputMute(unsigned int channel, bool muteState) override;
 
+    //==============================================================================
+    void buttonClicked(juce::Button*) override;
+
 private:
     //==============================================================================
     void setChannelCount(int channelCount);
 
     //==============================================================================
-    ProcessorLevelData                                      m_levelData;
-    std::unique_ptr<MeterbridgeComponent>                   m_OutputLevels;
-    std::vector<std::unique_ptr<TextButton>>                m_OutputMutes;
+    ProcessorLevelData                          m_levelData;
+
+    std::unique_ptr<MeterbridgeComponent>       m_outputLevels;
+    std::map<int, std::unique_ptr<TextButton>>  m_outputMutes;
     int m_channelCount = 0;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OutputControlComponent)

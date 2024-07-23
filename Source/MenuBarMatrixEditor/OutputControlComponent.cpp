@@ -30,8 +30,8 @@ OutputControlComponent::OutputControlComponent()
 {
     setUsesValuesInDB(true);
 
-    m_OutputLevels = std::make_unique<MeterbridgeComponent>();
-    addAndMakeVisible(m_OutputLevels.get());
+    m_outputLevels = std::make_unique<MeterbridgeComponent>();
+    addAndMakeVisible(m_outputLevels.get());
 }
 
 OutputControlComponent::~OutputControlComponent()
@@ -42,6 +42,20 @@ OutputControlComponent::~OutputControlComponent()
 void OutputControlComponent::resized()
 {
     DBG(__FUNCTION__);
+
+    auto bounds = getLocalBounds();
+
+    if (m_outputLevels)
+        m_outputLevels->setBounds(bounds.removeFromRight(static_cast<int>(0.5f * bounds.getWidth())));
+
+    if (!m_outputMutes.empty())
+    {
+        auto muteHeight = bounds.getHeight() / m_outputMutes.size();
+        for (auto const& outputMuteKV : m_outputMutes)
+        {
+            outputMuteKV.second->setBounds(bounds.removeFromTop(static_cast<int>(muteHeight)));
+        }
+    }
 
     AbstractAudioVisualizer::resized();
 }
@@ -57,24 +71,25 @@ void OutputControlComponent::paint(Graphics& g)
 
 void OutputControlComponent::setOutputMute(unsigned int channel, bool muteState)
 {
-    if (channel > m_OutputMutes.size())
-        setChannelCount(channel);
-
-    DBG(__FUNCTION__ << " " << int(channel) << " " << int(muteState));
+    if (m_outputMutes.count(channel) != 1)
+        return;
+    
+    setChannelCount(channel);
+    
+    if (m_outputMutes.at(channel))
+        m_outputMutes.at(channel)->setToggleState(muteState, juce::dontSendNotification);
 }
 
 void OutputControlComponent::processingDataChanged(AbstractProcessorData *data)
 {
     if(!data)
         return;
-
-    if (m_OutputLevels)
-        m_OutputLevels->processingDataChanged(data);
     
     switch(data->GetDataType())
     {
         case AbstractProcessorData::Level:
             m_levelData = *(dynamic_cast<ProcessorLevelData*>(data));
+            DBG(juce::String(__FUNCTION__) << " c:" << m_levelData.GetChannelCount());
             notifyChanges();
             break;
         case AbstractProcessorData::AudioSignal:
@@ -89,6 +104,9 @@ void OutputControlComponent::processChanges()
 {
     setChannelCount(static_cast<int>(m_levelData.GetChannelCount()));
 
+    if (m_outputLevels)
+        m_outputLevels->processingDataChanged(&m_levelData);
+
     AbstractAudioVisualizer::processChanges();
 }
 
@@ -98,7 +116,41 @@ void OutputControlComponent::setChannelCount(int channelCount)
     {
         m_channelCount = channelCount;
         DBG(__FUNCTION__ << " " << channelCount);
+
+        auto channelsToRemove = std::vector<int>();
+        for (auto const& outputMuteKV : m_outputMutes)
+        {
+            if (outputMuteKV.first > channelCount)
+                channelsToRemove.push_back(outputMuteKV.first);
+        }
+        for (auto const& channel : channelsToRemove)
+        {
+            removeChildComponent(m_outputMutes.at(channel).get());
+            auto iter = std::find_if(m_outputMutes.begin(), m_outputMutes.end(), [=](const auto& outputMuteKV) { return outputMuteKV.first == channel; });
+            if (iter != m_outputMutes.end())
+                m_outputMutes.erase(iter);
+        }
+
+        for (int channel = 1; channel <= channelCount; channel++)
+        {
+            if (m_outputMutes.count(channel) == 0)
+            {
+                m_outputMutes[channel] =std::make_unique<juce::TextButton>("M", "Mute");
+                m_outputMutes.at(channel)->setClickingTogglesState(true);
+                m_outputMutes.at(channel)->addListener(this);
+                addAndMakeVisible(m_outputMutes.at(channel).get());
+            }
+        }
+
+        resized();
     }
+}
+
+void OutputControlComponent::buttonClicked(juce::Button* button)
+{
+    auto iter = std::find_if(m_outputMutes.begin(), m_outputMutes.end(), [=](const auto& outputMuteKV) { return outputMuteKV.second.get() == button; });
+    if (iter != m_outputMutes.end() && nullptr != iter->second)
+        outputMuteChange(iter->first, iter->second->getToggleState());
 }
 
 }

@@ -37,7 +37,7 @@ MenuBarMatrix::MenuBarMatrix() :
                                                                           MenuBarMatrixProcessor::s_maxChannelCount,
                                                                           false, false, false, false);
 
-    startTimer(250);
+    startTimer(500);
 }
 
 MenuBarMatrix::~MenuBarMatrix()

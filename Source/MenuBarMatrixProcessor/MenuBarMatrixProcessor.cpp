@@ -169,7 +169,7 @@ void MenuBarMatrixProcessor::CrosspointCommander::crosspointEnabledPoll(int inpu
 
 //==============================================================================
 MenuBarMatrixProcessor::MenuBarMatrixProcessor() :
-	AudioProcessor()
+	juce::AudioProcessor()
 {
 	// prepare max sized processing data buffer
 	m_processorChannels = new float* [s_maxChannelCount];
@@ -196,6 +196,7 @@ MenuBarMatrixProcessor::MenuBarMatrixProcessor() :
 	// and therefor no valid config file could be written by Auvi or the audio would not be running
 	// on first start and manual config would be required.
 	m_deviceManager->initialiseWithDefaultDevices(s_maxChannelCount, s_maxChannelCount);
+	m_deviceManager->addChangeListener(this);
 	auto audioDeviceSetup = m_deviceManager->getAudioDeviceSetup();
 	m_deviceManager->initialise(s_maxChannelCount, s_maxChannelCount, nullptr/*std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::DEVCFG)).get()*/, true, {}, &audioDeviceSetup);
 #if JUCE_IOS
@@ -511,26 +512,10 @@ void MenuBarMatrixProcessor::handleMessage(const Message& message)
 		if (m->getFlowDirection() == AudioBufferMessage::FlowDirection::Input && m_inputDataAnalyzer)
 		{
 			m_inputDataAnalyzer->analyzeData(m->getAudioBuffer());
-
-			for (auto const& inputCommander : m_inputCommanders)
-			{
-				auto levelData = m_inputDataAnalyzer->GetLevel();
-				auto channelCount = levelData.GetChannelCount();
-				for (std::uint16_t i = 1; i < channelCount+1; i++)
-					inputCommander->setInputLevel(i, levelData.GetLevel(i).GetFactorRMSdB());
-			}
 		}
 		else if (m->getFlowDirection() == AudioBufferMessage::FlowDirection::Output && m_outputDataAnalyzer)
 		{
 			m_outputDataAnalyzer->analyzeData(m->getAudioBuffer());
-
-			for (auto const& outputCommander : m_outputCommanders)
-			{
-				auto levelData = m_outputDataAnalyzer->GetLevel();
-				auto channelCount = levelData.GetChannelCount();
-				for (std::uint16_t i = 1; i < channelCount + 1; i++)
-					outputCommander->setOutputLevel(i, levelData.GetLevel(i).GetFactorRMSdB());
-			}
 		}
 	}
 }
@@ -655,6 +640,23 @@ void MenuBarMatrixProcessor::audioDeviceStopped()
 	releaseResources();
 }
 
+void MenuBarMatrixProcessor::changeListenerCallback(ChangeBroadcaster* source)
+{
+	if (m_deviceManager && m_deviceManager.get() == source)
+	{
+		auto audioDevice = m_deviceManager->getCurrentAudioDevice();
+
+		// the following somehow returns weird incorrect counts, instead the name list count used below seems to be correct...?
+		auto inputChannels = audioDevice->getActiveInputChannels().toInteger();
+		auto outputChannels = audioDevice->getActiveOutputChannels().toInteger();
+
+		auto inputChannelNames = audioDevice->getInputChannelNames();
+		auto outputChannelNames = audioDevice->getOutputChannelNames();
+
+		initializeCtrlValues(inputChannelNames.size(), outputChannelNames.size());
+	}
+}
+
 void MenuBarMatrixProcessor::initializeCtrlValues(int inputCount, int outputCount)
 {
 	auto inputChannelCount = (inputCount > s_minInputsCount) ? inputCount : s_minInputsCount;
@@ -667,7 +669,7 @@ void MenuBarMatrixProcessor::initializeCtrlValues(int inputCount, int outputCoun
     
     for (auto in = 1; in <= inputChannelCount; in++)
         for (auto out = 1; out <= outputChannelCount; out++)
-            setMatrixCrosspointEnabledValue(in, out, false);
+            setMatrixCrosspointEnabledValue(in, out, in == out);
 }
 
 
