@@ -453,13 +453,13 @@ void MenuBarMatrixProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffer
 
 	auto reinitRequired = false;
 
-	auto inputChannels = buffer.getNumChannels();
-	auto outputChannels = s_minOutputsCount;
+	jassert(s_minInputsCount <= m_inputChannelCount);
+	jassert(s_minOutputsCount <= m_outputChannelCount);
 
-	if (inputChannels > m_inputMuteStates.size())
+	if (m_inputChannelCount > m_inputMuteStates.size())
 		reinitRequired = true;
 
-	for (auto input = 1; input <= inputChannels; input++)
+	for (auto input = 1; input <= m_inputChannelCount; input++)
 	{
 		if (m_inputMuteStates[input])
 		{
@@ -472,10 +472,10 @@ void MenuBarMatrixProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffer
 
 	// process data in buffer to be what shall be used as output
 	AudioBuffer<float> processedBuffer;
-	processedBuffer.setSize(outputChannels, buffer.getNumSamples(), false, true, true);
-	for (auto inputIdx = 0; inputIdx < inputChannels; inputIdx++)
+	processedBuffer.setSize(m_outputChannelCount, buffer.getNumSamples(), false, true, true);
+	for (auto inputIdx = 0; inputIdx < m_inputChannelCount; inputIdx++)
 	{
-		for (auto outputIdx = 0; outputIdx < outputChannels; outputIdx++)
+		for (auto outputIdx = 0; outputIdx < m_outputChannelCount; outputIdx++)
 		{
             auto gain = m_matrixCrosspointEnabledValues[inputIdx + 1][outputIdx + 1] ? 1.0f : 0.0f;
 			processedBuffer.addFrom(outputIdx, 0, buffer.getReadPointer(inputIdx), buffer.getNumSamples(), gain);
@@ -483,10 +483,10 @@ void MenuBarMatrixProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffer
 	}
 	buffer.makeCopyOf(processedBuffer, true);
 
-	if (outputChannels > m_outputMuteStates.size())
+	if (m_outputChannelCount > m_outputMuteStates.size())
 		reinitRequired = true;
 
-	for (auto output = 1; output <= outputChannels; output++)
+	for (auto output = 1; output <= m_outputChannelCount; output++)
 	{
 		if (m_outputMuteStates[output])
 		{
@@ -498,7 +498,7 @@ void MenuBarMatrixProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffer
 	postMessage(new AudioOutputBufferMessage(buffer));
 
 	if (reinitRequired)
-		postMessage(new ReinitIOCountMessage(inputChannels, outputChannels));
+		postMessage(new ReinitIOCountMessage(m_inputChannelCount, m_outputChannelCount));
 }
 
 void MenuBarMatrixProcessor::handleMessage(const Message& message)
@@ -593,7 +593,16 @@ void MenuBarMatrixProcessor::audioDeviceIOCallbackWithContext(const float* const
     
 	const ScopedLock sl(m_readLock);
 
+	m_inputChannelCount = numInputChannels;
+	m_outputChannelCount = numOutputChannels;
+
 	auto maxActiveChannels = std::max(numInputChannels, numOutputChannels);
+
+	if (s_maxChannelCount < maxActiveChannels)
+	{
+		jassertfalse;
+		return;
+	}
 
 	// copy incoming data to processing data buffer
 	for (auto i = 0; i < numInputChannels && i < maxActiveChannels; i++)

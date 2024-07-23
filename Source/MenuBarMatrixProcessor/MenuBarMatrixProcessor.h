@@ -273,6 +273,10 @@ private:
     std::map<int, bool> m_outputMuteStates;
 
     //==============================================================================
+    int m_inputChannelCount{ 1 };
+    int m_outputChannelCount{ 1 };
+
+    //==============================================================================
     std::map<int, std::map<int, bool>>  m_matrixCrosspointEnabledValues;
 
     //==============================================================================
