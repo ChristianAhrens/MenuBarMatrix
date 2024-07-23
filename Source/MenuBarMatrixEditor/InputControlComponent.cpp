@@ -46,11 +46,13 @@ void InputControlComponent::resized()
     auto bounds = getLocalBounds();
 
     if (m_inputLevels)
-        m_inputLevels->setBounds(bounds.removeFromTop(static_cast<int>(0.5f * bounds.getHeight())));
+        m_inputLevels->setBounds(bounds
+            .removeFromTop(bounds.getHeight() - (23+1))
+            .removeFromLeft(m_inputMutes.size() * 23+1));
 
     if (!m_inputMutes.empty())
     {
-        auto muteWidth = bounds.getWidth() / m_inputMutes.size();
+        auto muteWidth = 23+1;
         for (auto const& inputMuteKV : m_inputMutes)
         {
             inputMuteKV.second->setBounds(bounds.removeFromLeft(static_cast<int>(muteWidth)));
@@ -89,7 +91,7 @@ void InputControlComponent::processingDataChanged(AbstractProcessorData *data)
     {
         case AbstractProcessorData::Level:
             m_levelData = *(dynamic_cast<ProcessorLevelData*>(data));
-            DBG(juce::String(__FUNCTION__) << " c:" << m_levelData.GetChannelCount());
+            //DBG(juce::String(__FUNCTION__) << " c:" << m_levelData.GetChannelCount());
             notifyChanges();
             break;
         case AbstractProcessorData::AudioSignal:

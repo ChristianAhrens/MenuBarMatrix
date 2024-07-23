@@ -72,10 +72,10 @@ void CrosspointsControlComponent::setIOCount(int inputCount, int outputCount)
         addAndMakeVisible(m_crosspointComponent[input][output].get());
 
         for (int j = m_matrixGrid.templateRows.size(); j < input; j++)
-            m_matrixGrid.templateRows.add(juce::Grid::TrackInfo(juce::Grid::Px(20)));
+            m_matrixGrid.templateRows.add(juce::Grid::TrackInfo(juce::Grid::Px(23)));
 
         for (int j = m_matrixGrid.templateColumns.size(); j < output; j++)
-            m_matrixGrid.templateColumns.add(juce::Grid::TrackInfo(juce::Grid::Px(20))); 
+            m_matrixGrid.templateColumns.add(juce::Grid::TrackInfo(juce::Grid::Px(23))); 
     };
 
     if (1 != m_crosspointEnabledValues.count(inputCount))

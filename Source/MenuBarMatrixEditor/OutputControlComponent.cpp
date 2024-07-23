@@ -46,14 +46,16 @@ void OutputControlComponent::resized()
     auto bounds = getLocalBounds();
 
     if (m_outputLevels)
-        m_outputLevels->setBounds(bounds.removeFromRight(static_cast<int>(0.5f * bounds.getWidth())));
+        m_outputLevels->setBounds(bounds
+            .removeFromRight(bounds.getWidth() - (23+1))
+            .removeFromTop(m_outputMutes.size() * 23+1));
 
     if (!m_outputMutes.empty())
     {
-        auto muteHeight = bounds.getHeight() / m_outputMutes.size();
+        auto muteHeight = 23+1;
         for (auto const& outputMuteKV : m_outputMutes)
         {
-            outputMuteKV.second->setBounds(bounds.removeFromTop(static_cast<int>(muteHeight)));
+            outputMuteKV.second->setBounds(bounds.removeFromTop(muteHeight));
         }
     }
 
@@ -89,7 +91,7 @@ void OutputControlComponent::processingDataChanged(AbstractProcessorData *data)
     {
         case AbstractProcessorData::Level:
             m_levelData = *(dynamic_cast<ProcessorLevelData*>(data));
-            DBG(juce::String(__FUNCTION__) << " c:" << m_levelData.GetChannelCount());
+            //DBG(juce::String(__FUNCTION__) << " c:" << m_levelData.GetChannelCount());
             notifyChanges();
             break;
         case AbstractProcessorData::AudioSignal:
