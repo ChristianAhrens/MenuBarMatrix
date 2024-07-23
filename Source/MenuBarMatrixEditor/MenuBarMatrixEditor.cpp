@@ -32,13 +32,40 @@ namespace MenuBarMatrix
 MenuBarMatrixEditor::MenuBarMatrixEditor(AudioProcessor& processor)
     : AudioProcessorEditor(processor)
 {
+    std::function<void()> boundsRequirementChange = [=]() {
+        if(m_crosspointCtrl && m_outputCtrl && m_inputCtrl)
+        {
+            auto requiredCrosspointsSize = m_crosspointCtrl->getRequiredSize();
+            auto requiredOutputCtrlSize = m_outputCtrl->getRequiredSize();
+            auto requiredInputCtrlSize = m_inputCtrl->getRequiredSize();
+
+            auto requiredSize = requiredCrosspointsSize;
+
+            // if the IO components require more than the central crosspoint component, take that into account here
+            if (requiredCrosspointsSize.getWidth() < requiredInputCtrlSize.getWidth())
+                requiredSize.setWidth(requiredInputCtrlSize.getWidth());
+            if (requiredCrosspointsSize.getHeight() < requiredOutputCtrlSize.getHeight())
+                requiredSize.setHeight(requiredOutputCtrlSize.getHeight());
+
+            // expand the required size with IO component 'framing' with
+            requiredSize.setWidth(requiredSize.getWidth() + requiredOutputCtrlSize.getWidth() + 1);
+            requiredSize.setHeight(requiredSize.getHeight() + requiredInputCtrlSize.getHeight() + 1);
+
+            if (onSizeChangeRequested)
+                onSizeChangeRequested(requiredSize);
+        }
+    };
+
     m_inputCtrl = std::make_unique<InputControlComponent>();
+    m_inputCtrl->onBoundsRequirementChange = boundsRequirementChange;
     addAndMakeVisible(m_inputCtrl.get());
 
     m_crosspointCtrl = std::make_unique<CrosspointsControlComponent>();
+    m_crosspointCtrl->onBoundsRequirementChange = boundsRequirementChange;
     addAndMakeVisible(m_crosspointCtrl.get());
 
     m_outputCtrl = std::make_unique<OutputControlComponent>();
+    m_outputCtrl->onBoundsRequirementChange = boundsRequirementChange;
     addAndMakeVisible(m_outputCtrl.get());
 
     auto MenuBarMatrixProc = dynamic_cast<MenuBarMatrixProcessor*>(&processor);
@@ -53,8 +80,8 @@ MenuBarMatrixEditor::MenuBarMatrixEditor(AudioProcessor& processor)
         MenuBarMatrixProc->addOutputCommander(m_outputCtrl.get());
     }
 
-    m_gridLayout.templateRows = { juce::Grid::TrackInfo(juce::Grid::Px(60)), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
-    m_gridLayout.templateColumns = { juce::Grid::TrackInfo(juce::Grid::Px(60)), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
+    m_gridLayout.templateRows = { juce::Grid::TrackInfo(juce::Grid::Px(m_inputCtrl->getRequiredSize().getHeight())), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
+    m_gridLayout.templateColumns = { juce::Grid::TrackInfo(juce::Grid::Px(m_outputCtrl->getRequiredSize().getWidth())), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
     m_gridLayout.items = { juce::GridItem(), juce::GridItem(*m_inputCtrl), juce::GridItem(*m_outputCtrl), juce::GridItem(*m_crosspointCtrl) };
     m_gridLayout.rowGap.pixels = 1.0;
     m_gridLayout.columnGap.pixels = 1.0;
@@ -146,9 +173,5 @@ bool MenuBarMatrixEditor::setStateXml(XmlElement* /*stateXml*/)
 
     return true;
 }
-
-//void MenuBarMatrixEditor::onBoundsrequirementChanged(juce::Rectangle<int> boundsRequirement, AbstractBoundsrequirementNotifier* listener)
-//{
-//}
 
 }

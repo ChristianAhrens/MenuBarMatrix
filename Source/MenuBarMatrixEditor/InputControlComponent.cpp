@@ -41,21 +41,19 @@ InputControlComponent::~InputControlComponent()
 
 void InputControlComponent::resized()
 {
-    DBG(__FUNCTION__);
-
     auto bounds = getLocalBounds();
 
     if (m_inputLevels)
         m_inputLevels->setBounds(bounds
-            .removeFromTop(bounds.getHeight() - (23+1))
-            .removeFromLeft(m_inputMutes.size() * 23+1));
+            .removeFromTop(bounds.getHeight() - int(s_channelSize + s_channelGap))
+            .removeFromLeft(int(m_inputMutes.size() * (s_channelSize + s_channelGap))));
 
     if (!m_inputMutes.empty())
     {
-        auto muteWidth = 23+1;
+        auto muteWidth = int(s_channelSize + s_channelGap);
         for (auto const& inputMuteKV : m_inputMutes)
         {
-            inputMuteKV.second->setBounds(bounds.removeFromLeft(static_cast<int>(muteWidth)));
+            inputMuteKV.second->setBounds(bounds.removeFromLeft(muteWidth));
         }
     }
 
@@ -91,7 +89,6 @@ void InputControlComponent::processingDataChanged(AbstractProcessorData *data)
     {
         case AbstractProcessorData::Level:
             m_levelData = *(dynamic_cast<ProcessorLevelData*>(data));
-            //DBG(juce::String(__FUNCTION__) << " c:" << m_levelData.GetChannelCount());
             notifyChanges();
             break;
         case AbstractProcessorData::AudioSignal:
@@ -140,9 +137,13 @@ void InputControlComponent::setChannelCount(int channelCount)
                 m_inputMutes[channel] = std::make_unique<juce::TextButton>("M", "Mute");
                 m_inputMutes.at(channel)->setClickingTogglesState(true);
                 m_inputMutes.at(channel)->addListener(this);
+                m_inputMutes.at(channel)->setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::red);
                 addAndMakeVisible(m_inputMutes.at(channel).get());
             }
         }
+
+        if (onBoundsRequirementChange)
+            onBoundsRequirementChange();
 
         resized();
     }
@@ -154,5 +155,11 @@ void InputControlComponent::buttonClicked(juce::Button* button)
     if (iter != m_inputMutes.end() && nullptr != iter->second)
         inputMuteChange(iter->first, iter->second->getToggleState());
 }
+
+juce::Rectangle<int> InputControlComponent::getRequiredSize()
+{
+    return { m_channelCount * int(s_channelSize + s_channelGap), 60 };
+}
+
 
 }

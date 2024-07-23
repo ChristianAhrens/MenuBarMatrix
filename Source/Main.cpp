@@ -66,13 +66,12 @@ public:
         {
             m_taskbarComponent.reset (new TaskbarComponent(*this));
             m_mainComponent.reset (new MainComponent ());
-            m_mainComponent->setSize(m_mainComponentW, m_mainComponentH);
             m_mainComponent->setVisible(m_isMainComponentVisible);
             
             int taskbarIconX = m_taskbarComponent->getX();
             
             m_mainComponent->addToDesktop(juce::ComponentPeer::windowHasDropShadow);
-            m_mainComponent->setTopLeftPosition(taskbarIconX - m_mainComponentW / 2, 50);
+            m_mainComponent->setTopLeftPosition(taskbarIconX, 50);
            
         }
         
@@ -100,12 +99,12 @@ public:
         {
             if (m_mainComponent != nullptr)
             {
-                m_mainComponent->setTopLeftPosition(iconCenterX - m_mainComponentW / 2, iconH);
+                m_mainComponent->setTopLeftPosition(iconCenterX, iconH);
             }
         }
         
         // Just add a simple icon to the Window system tray area or Mac menu bar..
-        struct TaskbarComponent  : public juce::SystemTrayIconComponent, private juce::Timer
+        struct TaskbarComponent  : public juce::SystemTrayIconComponent
         {
             
             TaskbarComponent( MainWindow& window) : m_mainWindow(window)
@@ -116,7 +115,7 @@ public:
             }
             
     
-            void mouseDown (const juce::MouseEvent& e) override
+            void mouseDown (const juce::MouseEvent&) override
             {
                 int iconCenterX = juce::Desktop::getMousePosition().x;
                 int iconH = getParentMonitorArea().getY() + 5;
@@ -129,10 +128,7 @@ public:
                 // get its act together and bring our windows to the front.
                 juce::Process::makeForegroundProcess();
                 m_mainWindow.toggleVisibilty();
-                
-                //startTimer (50);
             }
-            
             
             // This is invoked when the menu is clicked or dismissed
             static void menuInvocationCallback (int chosenItemID, TaskbarComponent*)
@@ -141,26 +137,12 @@ public:
                     JUCEApplication::getInstance()->systemRequestedQuit();
             }
             
-            void timerCallback() override
-            {
-                stopTimer();
-                
-                juce::PopupMenu m;
-                m.addItem (1, "Quit");
-                
-                // It's always better to open menus asynchronously when possible.
-                m.showMenuAsync (juce::PopupMenu::Options(),
-                                 juce::ModalCallbackFunction::forComponent (menuInvocationCallback, this));
-            }
-            
              MainWindow& m_mainWindow;
             
         };
         
         
     private:
-        int m_mainComponentW = 400;
-        int m_mainComponentH = 600;
         bool m_isMainComponentVisible = false;
         std::unique_ptr<MainComponent> m_mainComponent;
         std::unique_ptr<juce::Component> m_taskbarComponent;

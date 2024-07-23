@@ -503,9 +503,9 @@ void MenuBarMatrixProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffer
 
 void MenuBarMatrixProcessor::handleMessage(const Message& message)
 {
-	if (auto const m = dynamic_cast<const ReinitIOCountMessage*> (&message))
+	if (auto const iom = dynamic_cast<const ReinitIOCountMessage*> (&message))
 	{
-		initializeCtrlValues(m->getInputCount(), m->getOutputCount());
+		initializeCtrlValues(iom->getInputCount(), iom->getOutputCount());
 	}
 	else if (auto m = dynamic_cast<const AudioBufferMessage*> (&message))
 	{
@@ -634,8 +634,8 @@ void MenuBarMatrixProcessor::audioDeviceAboutToStart(AudioIODevice* device)
 		prepareToPlay(device->getCurrentSampleRate(), device->getCurrentBufferSizeSamples());
 
 		// the following somehow returns weird incorrect counts, instead the name list count used below seems to be correct...?
-		auto inputChannels = device->getActiveInputChannels().toInteger();
-		auto outputChannels = device->getActiveOutputChannels().toInteger();
+		//auto inputChannels = device->getActiveInputChannels().toInteger();
+		//auto outputChannels = device->getActiveOutputChannels().toInteger();
 
 		auto inputChannelNames = device->getInputChannelNames();
 		auto outputChannelNames = device->getOutputChannelNames();
@@ -656,8 +656,8 @@ void MenuBarMatrixProcessor::changeListenerCallback(ChangeBroadcaster* source)
 		auto audioDevice = m_deviceManager->getCurrentAudioDevice();
 
 		// the following somehow returns weird incorrect counts, instead the name list count used below seems to be correct...?
-		auto inputChannels = audioDevice->getActiveInputChannels().toInteger();
-		auto outputChannels = audioDevice->getActiveOutputChannels().toInteger();
+		//auto inputChannels = audioDevice->getActiveInputChannels().toInteger();
+		//auto outputChannels = audioDevice->getActiveOutputChannels().toInteger();
 
 		auto inputChannelNames = audioDevice->getInputChannelNames();
 		auto outputChannelNames = audioDevice->getOutputChannelNames();

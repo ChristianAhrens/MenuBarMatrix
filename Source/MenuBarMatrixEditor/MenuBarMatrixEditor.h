@@ -54,10 +54,13 @@ public:
     std::unique_ptr<XmlElement> createStateXml() override;
     bool setStateXml(XmlElement* stateXml) override;
 
+    //==========================================================================
+    std::function<void(juce::Rectangle<int>)> onSizeChangeRequested;
+
 private:
-    std::unique_ptr<InputControlComponent>      m_inputCtrl;
-    std::unique_ptr<CrosspointsControlComponent> m_crosspointCtrl;
-    std::unique_ptr<OutputControlComponent>     m_outputCtrl;
+    std::unique_ptr<InputControlComponent>          m_inputCtrl;
+    std::unique_ptr<CrosspointsControlComponent>    m_crosspointCtrl;
+    std::unique_ptr<OutputControlComponent>         m_outputCtrl;
 
     juce::Grid  m_gridLayout;
 

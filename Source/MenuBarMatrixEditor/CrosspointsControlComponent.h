@@ -86,6 +86,10 @@ public:
     //==============================================================================
     void setCrosspointEnabledValue(int input, int output, bool enabledState) override;
 
+    //==============================================================================
+    std::function<void()> onBoundsRequirementChange;
+    juce::Rectangle<int> getRequiredSize();
+
 private:
     //==============================================================================
     void setIOCount(int inputCount, int outputCount);
@@ -96,6 +100,9 @@ private:
 
     //==============================================================================
     juce::Grid  m_matrixGrid;
+
+    static constexpr int s_nodeSize = 23;
+    static constexpr double s_nodeGap = 1;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CrosspointsControlComponent)
 };

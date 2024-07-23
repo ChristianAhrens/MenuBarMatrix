@@ -59,6 +59,10 @@ public:
     //==============================================================================
     void buttonClicked(juce::Button*) override;
 
+    //==============================================================================
+    juce::Rectangle<int> getRequiredSize();
+    std::function<void()> onBoundsRequirementChange;
+
 private:
     //==============================================================================
     void setChannelCount(int channelCount);
@@ -68,6 +72,9 @@ private:
     std::unique_ptr<MeterbridgeComponent>       m_inputLevels;
     std::map<int, std::unique_ptr<TextButton>>  m_inputMutes;
     int m_channelCount = 0;
+
+    static constexpr int s_channelSize = 23;
+    static constexpr double s_channelGap = 1;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputControlComponent)
 };

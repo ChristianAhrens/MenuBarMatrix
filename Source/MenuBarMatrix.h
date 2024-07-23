@@ -51,6 +51,7 @@ public:
 
     //==========================================================================
     std::function<void(int)> onCpuUsageUpdate;
+    std::function<void(juce::Rectangle<int>)> onSizeChangeRequested;
 
 private:
     std::unique_ptr<MenuBarMatrixProcessor>        m_menuBarMatrixProcessor;
