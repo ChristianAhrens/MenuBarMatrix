@@ -26,8 +26,8 @@ namespace MenuBarMatrix
 CrosspointsControlComponent::CrosspointsControlComponent()
     : MenuBarMatrixProcessor::CrosspointCommander()
 {
-    m_matrixGrid.rowGap.pixels = 1.0;
-    m_matrixGrid.columnGap.pixels = 1.0;
+    m_matrixGrid.rowGap.pixels = s_nodeGap;
+    m_matrixGrid.columnGap.pixels = s_nodeGap;
 }
 
 CrosspointsControlComponent::~CrosspointsControlComponent()
@@ -50,8 +50,6 @@ void CrosspointsControlComponent::setCrosspointEnabledValue(int input, int outpu
     if (input > m_crosspointEnabledValues.size() || output > m_crosspointEnabledValues[input].size())
         setIOCount(input, output);
 
-    DBG(__FUNCTION__ << " " << input << " " << output << " " << int(enabledState));
-
     m_crosspointEnabledValues[input][output] = enabledState;
     if (m_crosspointComponent[input][output])
         m_crosspointComponent[input][output]->setChecked(enabledState);
@@ -67,15 +65,17 @@ void CrosspointsControlComponent::setIOCount(int inputCount, int outputCount)
         m_crosspointEnabledValues[input][output] = false;
         m_crosspointComponent[input][output] = std::make_unique<CrosspointComponent>();
         m_crosspointComponent[input][output]->onCheckedChanged = [=](bool checkedState, CrosspointComponent* sender) {
+            ignoreUnused(checkedState);
+            ignoreUnused(sender);
             // emit smth here
         };
         addAndMakeVisible(m_crosspointComponent[input][output].get());
 
         for (int j = m_matrixGrid.templateRows.size(); j < input; j++)
-            m_matrixGrid.templateRows.add(juce::Grid::TrackInfo(juce::Grid::Px(23)));
+            m_matrixGrid.templateRows.add(juce::Grid::TrackInfo(juce::Grid::Px(s_nodeSize)));
 
         for (int j = m_matrixGrid.templateColumns.size(); j < output; j++)
-            m_matrixGrid.templateColumns.add(juce::Grid::TrackInfo(juce::Grid::Px(23))); 
+            m_matrixGrid.templateColumns.add(juce::Grid::TrackInfo(juce::Grid::Px(s_nodeSize))); 
     };
 
     if (1 != m_crosspointEnabledValues.count(inputCount))
@@ -106,6 +106,17 @@ void CrosspointsControlComponent::setIOCount(int inputCount, int outputCount)
                 jassertfalse;
         }
     }
+
+    if (onBoundsRequirementChange)
+        onBoundsRequirementChange();
+}
+
+juce::Rectangle<int> CrosspointsControlComponent::getRequiredSize()
+{
+    if (m_crosspointComponent.size() > 0 && m_crosspointComponent.count(1) != 0 && m_crosspointComponent.at(1).size() > 0)
+        return { int(m_crosspointComponent.at(1).size() * (s_nodeGap + s_nodeSize)), int(m_crosspointComponent.size() * (s_nodeGap + s_nodeSize)) };
+    else
+        return {};
 }
 
 }

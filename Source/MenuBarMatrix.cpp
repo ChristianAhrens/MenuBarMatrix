@@ -60,6 +60,10 @@ juce::Component* MenuBarMatrix::getUIComponent()
     {
         if (nullptr == m_menuBarMatrixProcessor->getActiveEditor())
             m_menuBarMatrixProcessor->createEditorIfNeeded();
+
+        if (auto editor = dynamic_cast<MenuBarMatrixEditor*>(m_menuBarMatrixProcessor->getActiveEditor()))
+            editor->onSizeChangeRequested = onSizeChangeRequested;
+
         return m_menuBarMatrixProcessor->getActiveEditor();
     }
     else

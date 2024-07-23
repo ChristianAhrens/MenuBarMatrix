@@ -41,18 +41,16 @@ OutputControlComponent::~OutputControlComponent()
 
 void OutputControlComponent::resized()
 {
-    DBG(__FUNCTION__);
-
     auto bounds = getLocalBounds();
 
     if (m_outputLevels)
         m_outputLevels->setBounds(bounds
-            .removeFromRight(bounds.getWidth() - (23+1))
-            .removeFromTop(m_outputMutes.size() * 23+1));
+            .removeFromRight(bounds.getWidth() - int(s_channelSize + s_channelGap))
+            .removeFromTop(int(m_outputMutes.size() * (s_channelSize + s_channelGap))));
 
     if (!m_outputMutes.empty())
     {
-        auto muteHeight = 23+1;
+        auto muteHeight = int(s_channelSize + s_channelGap);
         for (auto const& outputMuteKV : m_outputMutes)
         {
             outputMuteKV.second->setBounds(bounds.removeFromTop(muteHeight));
@@ -91,7 +89,6 @@ void OutputControlComponent::processingDataChanged(AbstractProcessorData *data)
     {
         case AbstractProcessorData::Level:
             m_levelData = *(dynamic_cast<ProcessorLevelData*>(data));
-            //DBG(juce::String(__FUNCTION__) << " c:" << m_levelData.GetChannelCount());
             notifyChanges();
             break;
         case AbstractProcessorData::AudioSignal:
@@ -140,9 +137,13 @@ void OutputControlComponent::setChannelCount(int channelCount)
                 m_outputMutes[channel] =std::make_unique<juce::TextButton>("M", "Mute");
                 m_outputMutes.at(channel)->setClickingTogglesState(true);
                 m_outputMutes.at(channel)->addListener(this);
+                m_outputMutes.at(channel)->setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::red);
                 addAndMakeVisible(m_outputMutes.at(channel).get());
             }
         }
+
+        if (onBoundsRequirementChange)
+            onBoundsRequirementChange();
 
         resized();
     }
@@ -154,5 +155,11 @@ void OutputControlComponent::buttonClicked(juce::Button* button)
     if (iter != m_outputMutes.end() && nullptr != iter->second)
         outputMuteChange(iter->first, iter->second->getToggleState());
 }
+
+juce::Rectangle<int> OutputControlComponent::getRequiredSize()
+{
+    return { 60, m_channelCount * int(s_channelSize + s_channelGap) };
+}
+
 
 }

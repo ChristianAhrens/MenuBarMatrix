@@ -60,6 +60,7 @@ MainComponent::MainComponent()
     : juce::Component()
 {
     m_mbm = std::make_unique<MenuBarMatrix::MenuBarMatrix>();
+    m_mbm->onSizeChangeRequested = [=](juce::Rectangle<int> requestedSize) { setSize(requestedSize.getWidth(), requestedSize.getHeight()); };
     addAndMakeVisible(m_mbm->getUIComponent());
 
     m_setupToggleButton = std::make_unique<TextButton>("Audio Device Setup");
@@ -83,14 +84,12 @@ MainComponent::MainComponent()
     };
     addAndMakeVisible(m_setupToggleButton.get());
 
-    m_loadBar = std::make_unique<LoadBar>();
-    m_mbm->onCpuUsageUpdate = [=](int loadPercent) { m_loadBar->setLoadPercent(loadPercent); };
-    addAndMakeVisible(m_loadBar.get());
+    m_sysLoadBar = std::make_unique<LoadBar>();
+    m_mbm->onCpuUsageUpdate = [=](int loadPercent) { m_sysLoadBar->setLoadPercent(loadPercent); };
+    addAndMakeVisible(m_sysLoadBar.get());
 
     juce::Desktop::getInstance().addDarkModeSettingListener(this);
     darkModeSettingChanged(); // initially trigger correct colourscheme
-
-    setSize(800, 850);
 }
 
 MainComponent::~MainComponent()
@@ -120,8 +119,8 @@ void MainComponent::resized()
     auto setupElementArea = setupAreaBounds.removeFromTop(20);
     if (m_setupToggleButton)
         m_setupToggleButton->setBounds(setupElementArea.removeFromRight(100));
-    if (m_loadBar)
-        m_loadBar->setBounds(setupElementArea.removeFromLeft(100));
+    if (m_sysLoadBar)
+        m_sysLoadBar->setBounds(setupElementArea.removeFromLeft(100));
 
     auto MenuBarMatrixComponent = m_mbm->getUIComponent();
     if (MenuBarMatrixComponent)
