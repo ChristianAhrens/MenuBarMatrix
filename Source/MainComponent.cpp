@@ -70,13 +70,14 @@ MainComponent::MainComponent()
         {
             if (setupComponent->isVisible())
             {
-                removeChildComponent(setupComponent);
                 setupComponent->setVisible(false);
+                setupComponent->removeFromDesktop();
             }
             else
             {
                 setupComponent->setVisible(true);
-                addAndMakeVisible(setupComponent);
+                setupComponent->addToDesktop(juce::ComponentPeer::StyleFlags::windowHasDropShadow | juce::ComponentPeer::StyleFlags::windowHasCloseButton);
+                setupComponent->setBounds(getScreenBounds().translated(0, 27));
             }
 
             resized();
@@ -125,10 +126,6 @@ void MainComponent::resized()
     auto MenuBarMatrixComponent = m_mbm->getUIComponent();
     if (MenuBarMatrixComponent)
         MenuBarMatrixComponent->setBounds(contentAreaBounds);
-
-    auto setupComponent = m_mbm->getDeviceSetupComponent();
-    if (setupComponent && setupComponent->isVisible())
-        setupComponent->setBounds(contentAreaBounds.reduced(15));
 }
 
 void MainComponent::darkModeSettingChanged()
