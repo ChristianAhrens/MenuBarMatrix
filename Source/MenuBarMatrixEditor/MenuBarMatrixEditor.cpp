@@ -56,6 +56,9 @@ MenuBarMatrixEditor::MenuBarMatrixEditor(AudioProcessor& processor)
         }
     };
 
+    m_ioLabel = std::make_unique<IOLabelComponent>(IOLabelComponent::Direction::OI);
+    addAndMakeVisible(m_ioLabel.get());
+
     m_inputCtrl = std::make_unique<InputControlComponent>();
     m_inputCtrl->onBoundsRequirementChange = boundsRequirementChange;
     addAndMakeVisible(m_inputCtrl.get());
@@ -82,7 +85,7 @@ MenuBarMatrixEditor::MenuBarMatrixEditor(AudioProcessor& processor)
 
     m_gridLayout.templateRows = { juce::Grid::TrackInfo(juce::Grid::Px(m_inputCtrl->getRequiredSize().getHeight())), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
     m_gridLayout.templateColumns = { juce::Grid::TrackInfo(juce::Grid::Px(m_outputCtrl->getRequiredSize().getWidth())), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
-    m_gridLayout.items = { juce::GridItem(), juce::GridItem(*m_inputCtrl), juce::GridItem(*m_outputCtrl), juce::GridItem(*m_crosspointCtrl) };
+    m_gridLayout.items = { juce::GridItem(*m_ioLabel), juce::GridItem(*m_inputCtrl), juce::GridItem(*m_outputCtrl), juce::GridItem(*m_crosspointCtrl) };
     m_gridLayout.rowGap.pixels = 1.0;
     m_gridLayout.columnGap.pixels = 1.0;
 
@@ -101,7 +104,7 @@ MenuBarMatrixEditor::~MenuBarMatrixEditor()
 void MenuBarMatrixEditor::paint (Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
+    g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
 }
 
 void MenuBarMatrixEditor::resized()

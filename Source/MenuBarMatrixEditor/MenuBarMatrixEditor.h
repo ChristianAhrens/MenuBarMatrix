@@ -32,6 +32,62 @@ class CrosspointsControlComponent;
 class OutputControlComponent;
 
 
+class IOLabelComponent : public juce::Component
+{
+public:
+    enum Direction
+    {
+        IO,
+        OI
+    };
+
+public:
+    IOLabelComponent() {};
+    IOLabelComponent(Direction d)
+    {
+        setDirection(d);
+    };
+    ~IOLabelComponent() {};
+
+    void setDirection(Direction d)
+    {
+        m_direction = d;
+
+        repaint();
+    };
+
+    void paint(Graphics& g)
+    {
+        // (Our component is opaque, so we must completely fill the background with a solid colour)
+        g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
+
+        float dashValues[2] = {4, 4};
+        g.drawDashedLine(juce::Line<float>(getLocalBounds().getTopLeft().toFloat(), getLocalBounds().getBottomRight().toFloat()), dashValues, 2);
+
+        auto trString = "";
+        auto blString = "";
+
+        switch (m_direction)
+        {
+        case IO:
+            trString = "O";
+            blString = "I";
+            break;
+        case OI:
+        default:
+            trString = "I";
+            blString = "O";
+            break;
+        }
+
+        g.drawFittedText(trString, getLocalBounds().removeFromTop(getHeight() / 2).removeFromRight(getWidth() / 2), juce::Justification::centred, 1);
+        g.drawFittedText(blString, getLocalBounds().removeFromBottom(getHeight() / 2).removeFromLeft(getWidth() / 2), juce::Justification::centred, 1);
+    }
+
+private:
+    Direction m_direction{ IO };
+};
+
 //==============================================================================
 /*
 */
@@ -58,6 +114,7 @@ public:
     std::function<void(juce::Rectangle<int>)> onSizeChangeRequested;
 
 private:
+    std::unique_ptr<IOLabelComponent>               m_ioLabel;
     std::unique_ptr<InputControlComponent>          m_inputCtrl;
     std::unique_ptr<CrosspointsControlComponent>    m_crosspointCtrl;
     std::unique_ptr<OutputControlComponent>         m_outputCtrl;
