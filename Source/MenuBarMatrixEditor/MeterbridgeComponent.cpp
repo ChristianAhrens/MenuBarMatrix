@@ -28,6 +28,12 @@ MeterbridgeComponent::MeterbridgeComponent()
     setUsesValuesInDB(true);
 }
 
+MeterbridgeComponent::MeterbridgeComponent(Direction direction)
+    : MeterbridgeComponent()
+{
+    setDirection(direction);
+}
+
 MeterbridgeComponent::~MeterbridgeComponent()
 {
 
@@ -40,68 +46,132 @@ void MeterbridgeComponent::paint(Graphics& g)
 
 	// calculate what we need for our center circle
 	auto margin = 20;
-    auto maxMeterWidth = 30;
 	auto visuAreaWidth = static_cast<float>(getWidth());
 	auto visuAreaHeight = static_cast<float>(getHeight());
 
-    auto visuArea = getLocalBounds();
-	auto visuAreaOrigY = visuAreaHeight;
-
-	// draw meters
-    auto meterSpacing = margin * 0.5f;
-    auto meterWidth = (visuArea.getWidth() - (m_levelData.GetChannelCount() + 1) * meterSpacing) / m_levelData.GetChannelCount();
-    meterWidth = meterWidth > maxMeterWidth ? maxMeterWidth : meterWidth;
-    auto meterMaxHeight = visuArea.getHeight();
-    auto meterLeft = meterSpacing;
-
-    g.setFont(14.0f);
-    for(unsigned long i=1; i<=m_levelData.GetChannelCount(); ++i)
+    if (m_direction == Direction::Horizontal)
     {
-        auto level = m_levelData.GetLevel(i);
-        float peakMeterHeight {0};
-        float rmsMeterHeight  {0};
-        float holdMeterHeight {0};
+        auto visuArea = getLocalBounds();
+        auto visuAreaOrigY = visuAreaHeight;
+
+        // draw meters
+        auto meterSpacing = margin * 0.5f;
+        auto meterThickness = (visuArea.getWidth() - (m_levelData.GetChannelCount() + 1) * meterSpacing) / m_levelData.GetChannelCount();
+        auto meterMaxLength = visuArea.getHeight();
+        auto meterLeft = meterSpacing;
+
+        g.setFont(14.0f);
+        for (unsigned long i = 1; i <= m_levelData.GetChannelCount(); ++i)
+        {
+            auto level = m_levelData.GetLevel(i);
+            float peakMeterLength{ 0 };
+            float rmsMeterLength{ 0 };
+            float holdMeterLength{ 0 };
+            if (getUsesValuesInDB())
+            {
+                peakMeterLength = meterMaxLength * level.GetFactorPEAKdB();
+                rmsMeterLength = meterMaxLength * level.GetFactorRMSdB();
+                holdMeterLength = meterMaxLength * level.GetFactorHOLDdB();
+            }
+            else
+            {
+                peakMeterLength = meterMaxLength * level.peak;
+                rmsMeterLength = meterMaxLength * level.rms;
+                holdMeterLength = meterMaxLength * level.hold;
+            }
+
+            // peak bar
+            g.setColour(juce::Colours::forestgreen.darker());
+            g.fillRect(juce::Rectangle<float>(meterLeft, visuAreaOrigY - peakMeterLength, meterThickness, peakMeterLength));
+            // rms bar
+            g.setColour(Colours::forestgreen);
+            g.fillRect(juce::Rectangle<float>(meterLeft, visuAreaOrigY - rmsMeterLength, meterThickness, rmsMeterLength));
+            // hold strip
+            g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
+            g.drawLine(juce::Line<float>(meterLeft, visuAreaOrigY - holdMeterLength, meterLeft + meterThickness, visuAreaOrigY - holdMeterLength));
+            // channel # label
+            g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
+            g.drawText(juce::String(i), juce::Rectangle<float>(meterLeft, visuAreaOrigY, meterThickness, float(margin)), juce::Justification::centred, true);
+
+            meterLeft += meterThickness + meterSpacing;
+        }
+
+        // draw a simple baseline
+        g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
+        g.drawLine(juce::Line<float>(0.0f, visuAreaOrigY, visuAreaWidth, visuAreaOrigY));
+        // draw dBFS
+        g.setFont(12.0f);
+        g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
+        juce::String rangeText;
         if (getUsesValuesInDB())
-        {
-            peakMeterHeight = meterMaxHeight * level.GetFactorPEAKdB();
-            rmsMeterHeight = meterMaxHeight * level.GetFactorRMSdB();
-            holdMeterHeight = meterMaxHeight * level.GetFactorHOLDdB();
-        }
+            rangeText = juce::String(MenuBarMatrixProcessor::getGlobalMindB()) + " ... " + juce::String(MenuBarMatrixProcessor::getGlobalMaxdB()) + " dBFS";
         else
+            rangeText = "0 ... 1";
+        g.drawText(rangeText, visuArea, juce::Justification::topRight, true);
+    }
+    else
+    {
+        auto visuArea = getLocalBounds();
+        auto visuAreaOrigX = 0.0f;
+
+        // draw meters
+        auto meterSpacing = margin * 0.5f;
+        auto meterThickness = (visuArea.getHeight() - (m_levelData.GetChannelCount() + 1) * meterSpacing) / m_levelData.GetChannelCount();
+        auto meterMaxLength = visuArea.getWidth();
+        auto meterTop = meterSpacing;
+
+        g.setFont(14.0f);
+        for (unsigned long i = 1; i <= m_levelData.GetChannelCount(); ++i)
         {
-            peakMeterHeight = meterMaxHeight * level.peak;
-            rmsMeterHeight = meterMaxHeight * level.rms;
-            holdMeterHeight = meterMaxHeight * level.hold;
+            auto level = m_levelData.GetLevel(i);
+            float peakMeterLength{ 0 };
+            float rmsMeterLength{ 0 };
+            float holdMeterLength{ 0 };
+            if (getUsesValuesInDB())
+            {
+                peakMeterLength = meterMaxLength * level.GetFactorPEAKdB();
+                rmsMeterLength = meterMaxLength * level.GetFactorRMSdB();
+                holdMeterLength = meterMaxLength * level.GetFactorHOLDdB();
+            }
+            else
+            {
+                peakMeterLength = meterMaxLength * level.peak;
+                rmsMeterLength = meterMaxLength * level.rms;
+                holdMeterLength = meterMaxLength * level.hold;
+            }
+
+            // peak bar
+            g.setColour(juce::Colours::forestgreen.darker());
+            g.fillRect(juce::Rectangle<float>(visuAreaOrigX - peakMeterLength, meterTop, peakMeterLength, meterThickness));
+            // rms bar
+            g.setColour(Colours::forestgreen);
+            g.fillRect(juce::Rectangle<float>(visuAreaOrigX - rmsMeterLength, meterTop, meterThickness, rmsMeterLength));
+            // hold strip
+            g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
+            g.drawLine(juce::Line<float>(visuAreaOrigX - holdMeterLength, meterTop, visuAreaOrigX - holdMeterLength, meterTop + meterThickness));
+            // channel # label
+            g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
+            g.drawText(juce::String(i), juce::Rectangle<float>(visuAreaOrigX, meterTop, float(margin), meterThickness), juce::Justification::centred, true);
+
+            meterTop += meterThickness + meterSpacing;
         }
 
-        // peak bar
-        g.setColour(Colours::forestgreen.darker());
-        g.fillRect(Rectangle<float>(meterLeft, visuAreaOrigY - peakMeterHeight, meterWidth, peakMeterHeight));
-        // rms bar
-        g.setColour(Colours::forestgreen);
-        g.fillRect(Rectangle<float>(meterLeft, visuAreaOrigY - rmsMeterHeight, meterWidth, rmsMeterHeight));
-        // hold strip
-        g.setColour(Colours::grey);
-        g.drawLine(Line<float>(meterLeft, visuAreaOrigY - holdMeterHeight, meterLeft + meterWidth, visuAreaOrigY - holdMeterHeight));
-        // channel # label
-		g.setColour(Colours::white);
-        g.drawText(String(i), Rectangle<float>(meterLeft, visuAreaOrigY, meterWidth, float(margin)), Justification::centred, true);
+        // draw a simple baseline
+        g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
+        g.drawLine(juce::Line<float>(0.0f, 0.0f, 0.0f, visuAreaHeight));
+        // draw dBFS
+        g.setFont(12.0f);
+        g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
+        juce::String rangeText;
+        if (getUsesValuesInDB())
+            rangeText = juce::String(MenuBarMatrixProcessor::getGlobalMindB()) + " ... " + juce::String(MenuBarMatrixProcessor::getGlobalMaxdB()) + " dBFS";
+        else
+            rangeText = "0 ... 1";
 
-        meterLeft += meterWidth + meterSpacing;
+        g.setOrigin(visuArea.getBottomLeft());
+        g.addTransform(juce::AffineTransform().rotated(90));
+        g.drawText(rangeText, visuArea, juce::Justification::topRight, true);
     }
-
-    // draw a simple baseline
-    g.setColour(Colours::grey);
-    g.drawLine(Line<float>(0.0f, visuAreaOrigY, visuAreaWidth, visuAreaOrigY));
-    // draw dBFS
-    g.setFont(12.0f);
-    g.setColour(Colours::grey);
-    String rangeText;
-    if (getUsesValuesInDB())
-        rangeText = String(MenuBarMatrixProcessor::getGlobalMindB()) + " ... " + String(MenuBarMatrixProcessor::getGlobalMaxdB()) + " dBFS";
-    else
-        rangeText = "0 ... 1";
-    g.drawText(rangeText, Rectangle<float>(visuAreaWidth - 100.0f, 0.0f, 110.0f, float(margin)), Justification::centred, true);
 }
 
 void MeterbridgeComponent::processingDataChanged(AbstractProcessorData* data)
@@ -121,6 +191,12 @@ void MeterbridgeComponent::processingDataChanged(AbstractProcessorData* data)
     default:
         break;
     }
+}
+
+void MeterbridgeComponent::setDirection(Direction direction)
+{
+    m_direction = direction;
+    repaint();
 }
 
 
