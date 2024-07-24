@@ -30,7 +30,7 @@ OutputControlComponent::OutputControlComponent()
 {
     setUsesValuesInDB(true);
 
-    m_outputLevels = std::make_unique<MeterbridgeComponent>();
+    m_outputLevels = std::make_unique<MeterbridgeComponent>(MeterbridgeComponent::Direction::Vertical);
     addAndMakeVisible(m_outputLevels.get());
 }
 
@@ -53,7 +53,7 @@ void OutputControlComponent::resized()
         auto muteHeight = int(s_channelSize + s_channelGap);
         for (auto const& outputMuteKV : m_outputMutes)
         {
-            outputMuteKV.second->setBounds(bounds.removeFromTop(muteHeight));
+            outputMuteKV.second->setBounds(bounds.removeFromTop(muteHeight).reduced(2));
         }
     }
 

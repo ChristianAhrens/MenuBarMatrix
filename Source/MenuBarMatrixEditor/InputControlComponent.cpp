@@ -30,7 +30,7 @@ InputControlComponent::InputControlComponent()
 {
     setUsesValuesInDB(true);
 
-    m_inputLevels = std::make_unique<MeterbridgeComponent>();
+    m_inputLevels = std::make_unique<MeterbridgeComponent>(MeterbridgeComponent::Direction::Horizontal);
     addAndMakeVisible(m_inputLevels.get());
 }
 
@@ -53,7 +53,7 @@ void InputControlComponent::resized()
         auto muteWidth = int(s_channelSize + s_channelGap);
         for (auto const& inputMuteKV : m_inputMutes)
         {
-            inputMuteKV.second->setBounds(bounds.removeFromLeft(muteWidth));
+            inputMuteKV.second->setBounds(bounds.removeFromLeft(muteWidth).reduced(2));
         }
     }
 

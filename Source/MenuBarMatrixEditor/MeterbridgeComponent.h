@@ -32,7 +32,15 @@ namespace MenuBarMatrix
 class MeterbridgeComponent : public AbstractAudioVisualizer
 {
 public:
+    enum Direction
+    {
+        Horizontal,
+        Vertical
+    };
+
+public:
     MeterbridgeComponent();
+    MeterbridgeComponent(Direction direction);
     ~MeterbridgeComponent();
 
     //==============================================================================
@@ -41,8 +49,12 @@ public:
     //==============================================================================
     void processingDataChanged(AbstractProcessorData* data) override;
 
+    //==============================================================================
+    void setDirection(Direction direction);
+
 private:
     ProcessorLevelData  m_levelData;
+    Direction m_direction{ Vertical };
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MeterbridgeComponent)
 };
