@@ -83,8 +83,6 @@ MenuBarMatrixEditor::MenuBarMatrixEditor(AudioProcessor& processor)
         MenuBarMatrixProc->addOutputCommander(m_outputCtrl.get());
     }
 
-    m_gridLayout.templateRows = { juce::Grid::TrackInfo(juce::Grid::Px(m_inputCtrl->getRequiredSize().getHeight())), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
-    m_gridLayout.templateColumns = { juce::Grid::TrackInfo(juce::Grid::Px(m_outputCtrl->getRequiredSize().getWidth())), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
     m_gridLayout.items = { juce::GridItem(*m_ioLabel), juce::GridItem(*m_inputCtrl), juce::GridItem(*m_outputCtrl), juce::GridItem(*m_crosspointCtrl) };
     m_gridLayout.rowGap.pixels = 1.0;
     m_gridLayout.columnGap.pixels = 1.0;
@@ -109,6 +107,8 @@ void MenuBarMatrixEditor::paint (Graphics& g)
 
 void MenuBarMatrixEditor::resized()
 {
+    m_gridLayout.templateRows = { juce::Grid::TrackInfo(juce::Grid::Px(m_inputCtrl->getRequiredSize().getHeight())), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
+    m_gridLayout.templateColumns = { juce::Grid::TrackInfo(juce::Grid::Px(m_outputCtrl->getRequiredSize().getWidth())), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
     m_gridLayout.performLayout(getLocalBounds());
 }
 

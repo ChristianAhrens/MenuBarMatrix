@@ -62,7 +62,10 @@ juce::Component* MenuBarMatrix::getUIComponent()
             m_menuBarMatrixProcessor->createEditorIfNeeded();
 
         if (auto editor = dynamic_cast<MenuBarMatrixEditor*>(m_menuBarMatrixProcessor->getActiveEditor()))
+        {
+            jassert(onSizeChangeRequested); // should be set before handling the ui component!
             editor->onSizeChangeRequested = onSizeChangeRequested;
+        }
 
         return m_menuBarMatrixProcessor->getActiveEditor();
     }
