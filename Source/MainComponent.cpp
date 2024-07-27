@@ -60,7 +60,7 @@ MainComponent::MainComponent()
     : juce::Component()
 {
     m_mbm = std::make_unique<MenuBarMatrix::MenuBarMatrix>();
-    m_mbm->onSizeChangeRequested = [=](juce::Rectangle<int> requestedSize) { setSize(requestedSize.getWidth(), requestedSize.getHeight()); };
+    m_mbm->onSizeChangeRequested = [=](juce::Rectangle<int> requestedSize) { setSize(requestedSize.getWidth(), requestedSize.getHeight() + 26); };
     addAndMakeVisible(m_mbm->getUIComponent());
 
     m_setupToggleButton = std::make_unique<TextButton>("Audio Device Setup");

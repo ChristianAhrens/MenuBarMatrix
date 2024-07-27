@@ -45,20 +45,21 @@ void MeterbridgeComponent::paint(Graphics& g)
 	g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
 
 	// calculate what we need for our center circle
-	auto margin = 20;
 	auto visuAreaWidth = static_cast<float>(getWidth());
 	auto visuAreaHeight = static_cast<float>(getHeight());
 
     if (m_direction == Direction::Horizontal)
     {
+        auto margin = getWidth() / ((2 * m_levelData.GetChannelCount()) + 1);
+
         auto visuArea = getLocalBounds();
         auto visuAreaOrigY = visuAreaHeight;
 
         // draw meters
-        auto meterSpacing = margin * 0.5f;
-        auto meterThickness = (visuArea.getWidth() - (m_levelData.GetChannelCount() + 1) * meterSpacing) / m_levelData.GetChannelCount();
+        auto meterSpacing = margin;
+        auto meterThickness = (visuArea.getWidth() - (m_levelData.GetChannelCount()) * meterSpacing) / m_levelData.GetChannelCount();
         auto meterMaxLength = visuArea.getHeight();
-        auto meterLeft = meterSpacing;
+        auto meterLeft = 0.5f * meterSpacing;
 
         g.setFont(14.0f);
         for (unsigned long i = 1; i <= m_levelData.GetChannelCount(); ++i)
@@ -84,14 +85,14 @@ void MeterbridgeComponent::paint(Graphics& g)
             g.setColour(juce::Colours::forestgreen.darker());
             g.fillRect(juce::Rectangle<float>(meterLeft, visuAreaOrigY - peakMeterLength, meterThickness, peakMeterLength));
             // rms bar
-            g.setColour(Colours::forestgreen);
+            g.setColour(juce::Colours::forestgreen);
             g.fillRect(juce::Rectangle<float>(meterLeft, visuAreaOrigY - rmsMeterLength, meterThickness, rmsMeterLength));
             // hold strip
             g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
             g.drawLine(juce::Line<float>(meterLeft, visuAreaOrigY - holdMeterLength, meterLeft + meterThickness, visuAreaOrigY - holdMeterLength));
             // channel # label
             g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
-            g.drawText(juce::String(i), juce::Rectangle<float>(meterLeft, visuAreaOrigY, meterThickness, float(margin)), juce::Justification::centred, true);
+            g.drawText(juce::String(i), juce::Rectangle<float>(meterLeft, visuAreaOrigY - float(margin), meterThickness, float(margin)), juce::Justification::centred);
 
             meterLeft += meterThickness + meterSpacing;
         }
@@ -111,14 +112,16 @@ void MeterbridgeComponent::paint(Graphics& g)
     }
     else
     {
+        auto margin = getHeight() / ((2 * m_levelData.GetChannelCount()) + 1);
+
         auto visuArea = getLocalBounds();
         auto visuAreaOrigX = 0.0f;
 
         // draw meters
-        auto meterSpacing = margin * 0.5f;
-        auto meterThickness = (visuArea.getHeight() - (m_levelData.GetChannelCount() + 1) * meterSpacing) / m_levelData.GetChannelCount();
+        auto meterSpacing = margin;
+        auto meterThickness = (visuArea.getHeight() - (m_levelData.GetChannelCount()) * meterSpacing) / m_levelData.GetChannelCount();
         auto meterMaxLength = visuArea.getWidth();
-        auto meterTop = meterSpacing;
+        auto meterTop = 0.5f * meterSpacing;
 
         g.setFont(14.0f);
         for (unsigned long i = 1; i <= m_levelData.GetChannelCount(); ++i)
@@ -142,16 +145,16 @@ void MeterbridgeComponent::paint(Graphics& g)
 
             // peak bar
             g.setColour(juce::Colours::forestgreen.darker());
-            g.fillRect(juce::Rectangle<float>(visuAreaOrigX - peakMeterLength, meterTop, peakMeterLength, meterThickness));
+            g.fillRect(juce::Rectangle<float>(visuAreaOrigX, meterTop, peakMeterLength, meterThickness));
             // rms bar
-            g.setColour(Colours::forestgreen);
-            g.fillRect(juce::Rectangle<float>(visuAreaOrigX - rmsMeterLength, meterTop, meterThickness, rmsMeterLength));
+            g.setColour(juce::Colours::forestgreen);
+            g.fillRect(juce::Rectangle<float>(visuAreaOrigX, meterTop, rmsMeterLength, meterThickness));
             // hold strip
             g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
-            g.drawLine(juce::Line<float>(visuAreaOrigX - holdMeterLength, meterTop, visuAreaOrigX - holdMeterLength, meterTop + meterThickness));
+            g.drawLine(juce::Line<float>(visuAreaOrigX + holdMeterLength, meterTop, visuAreaOrigX + holdMeterLength, meterTop + meterThickness));
             // channel # label
             g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
-            g.drawText(juce::String(i), juce::Rectangle<float>(visuAreaOrigX, meterTop, float(margin), meterThickness), juce::Justification::centred, true);
+            g.drawText(juce::String(i), juce::Rectangle<float>(visuAreaOrigX, meterTop, float(margin), meterThickness), juce::Justification::centred);
 
             meterTop += meterThickness + meterSpacing;
         }
