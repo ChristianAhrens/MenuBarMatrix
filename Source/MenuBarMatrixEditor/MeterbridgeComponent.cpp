@@ -57,7 +57,7 @@ void MeterbridgeComponent::paint(Graphics& g)
 
         // draw meters
         auto meterSpacing = margin;
-        auto meterThickness = (visuArea.getWidth() - (m_levelData.GetChannelCount()) * meterSpacing) / m_levelData.GetChannelCount();
+        auto meterThickness = float(visuArea.getWidth() - (m_levelData.GetChannelCount()) * meterSpacing) / float(m_levelData.GetChannelCount());
         auto meterMaxLength = visuArea.getHeight();
         auto meterLeft = 0.5f * meterSpacing;
 
@@ -119,7 +119,7 @@ void MeterbridgeComponent::paint(Graphics& g)
 
         // draw meters
         auto meterSpacing = margin;
-        auto meterThickness = (visuArea.getHeight() - (m_levelData.GetChannelCount()) * meterSpacing) / m_levelData.GetChannelCount();
+        auto meterThickness = float(visuArea.getHeight() - (m_levelData.GetChannelCount()) * meterSpacing) / float(m_levelData.GetChannelCount());
         auto meterMaxLength = visuArea.getWidth();
         auto meterTop = 0.5f * meterSpacing;
 
