@@ -63,11 +63,10 @@ void CrosspointsControlComponent::setIOCount(int inputCount, int outputCount)
 
     std::function<void(int, int)> initCrosspoint = [=](int input, int output) {
         m_crosspointEnabledValues[input][output] = false;
-        m_crosspointComponent[input][output] = std::make_unique<CrosspointComponent>();
+        m_crosspointComponent[input][output] = std::make_unique<CrosspointComponent>(std::make_pair(input, output));
         m_crosspointComponent[input][output]->onCheckedChanged = [=](bool checkedState, CrosspointComponent* sender) {
-            ignoreUnused(checkedState);
-            ignoreUnused(sender);
-            // emit smth here
+            if (nullptr != sender)
+                crosspointEnabledChange(sender->getIdent().first, sender->getIdent().second, checkedState);
         };
         addAndMakeVisible(m_crosspointComponent[input][output].get());
 
