@@ -43,6 +43,8 @@ public:
         ChannelCommander();
         virtual ~ChannelCommander();
 
+        virtual void setChannelCount(int channelCount) = 0;
+
     protected:
 
     private:
@@ -115,11 +117,15 @@ public:
 
         virtual void setCrosspointEnabledValue(int input, int output, bool enabledState) = 0;
 
+        virtual void setIOCount(int inputCount, int outputCount) = 0;
+
     protected:
         void crosspointEnabledChange(int input, int output, bool enabledState);
         void crosspointEnabledPoll(int input, int output);
 
     private:
+        void setChannelCount(int channelCount) override { ignoreUnused(channelCount); };
+
         std::function<void(CrosspointCommander* sender, int, int, bool)> m_crosspointEnabledChangeCallback{ nullptr };
         std::function<void(CrosspointCommander* sender, int, int)>       m_crosspointEnabledPollCallback{ nullptr };
     };

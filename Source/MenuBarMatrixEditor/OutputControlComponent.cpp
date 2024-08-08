@@ -74,8 +74,6 @@ void OutputControlComponent::setOutputMute(unsigned int channel, bool muteState)
     if (m_outputMutes.count(channel) != 1)
         return;
     
-    setChannelCount(channel);
-    
     if (m_outputMutes.at(channel))
         m_outputMutes.at(channel)->setToggleState(muteState, juce::dontSendNotification);
 }
@@ -101,7 +99,6 @@ void OutputControlComponent::processingDataChanged(AbstractProcessorData *data)
 
 void OutputControlComponent::processChanges()
 {
-    setChannelCount(static_cast<int>(m_levelData.GetChannelCount()));
 
     if (m_outputLevels)
         m_outputLevels->processingDataChanged(&m_levelData);

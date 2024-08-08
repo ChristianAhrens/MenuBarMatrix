@@ -74,8 +74,6 @@ void InputControlComponent::setInputMute(unsigned int channel, bool muteState)
     if (m_inputMutes.count(channel) != 1)
         return;
 
-    setChannelCount(channel);
-
     if (m_inputMutes.at(channel))
         m_inputMutes.at(channel)->setToggleState(muteState, juce::dontSendNotification);
 }
@@ -101,7 +99,6 @@ void InputControlComponent::processingDataChanged(AbstractProcessorData *data)
 
 void InputControlComponent::processChanges()
 {
-    setChannelCount(static_cast<int>(m_levelData.GetChannelCount()));
 
     if (m_inputLevels)
         m_inputLevels->processingDataChanged(&m_levelData);
