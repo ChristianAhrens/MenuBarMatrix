@@ -70,34 +70,37 @@ void CrosspointsControlComponent::setIOCount(int inputCount, int outputCount)
         };
         addAndMakeVisible(m_crosspointComponent[input][output].get());
 
-        for (int j = m_matrixGrid.templateRows.size(); j < input; j++)
-            m_matrixGrid.templateRows.add(juce::Grid::TrackInfo(juce::Grid::Px(s_nodeSize)));
+        for (int j = m_matrixGrid.templateColumns.size(); j < input; j++)
+            m_matrixGrid.templateColumns.add(juce::Grid::TrackInfo(juce::Grid::Px(s_nodeSize)));
 
-        for (int j = m_matrixGrid.templateColumns.size(); j < output; j++)
-            m_matrixGrid.templateColumns.add(juce::Grid::TrackInfo(juce::Grid::Px(s_nodeSize))); 
+        for (int j = m_matrixGrid.templateRows.size(); j < output; j++)
+            m_matrixGrid.templateRows.add(juce::Grid::TrackInfo(juce::Grid::Px(s_nodeSize))); 
     };
 
-    if (1 != m_crosspointEnabledValues.count(inputCount))
+    for (int i = 1; i <= inputCount; i++)
     {
-        for (int i = 1; i <= outputCount; i++)
-            initCrosspoint(inputCount, i);
-    }
-    else
-    {
-        if (1 != m_crosspointEnabledValues[inputCount].count(outputCount))
+        if (1 != m_crosspointEnabledValues.count(i))
         {
-            for (int i = 1; i <= outputCount; i++)
+            for (int o = 1; o <= outputCount; o++)
+                initCrosspoint(i, o);
+        }
+        else
+        {
+            if (1 != m_crosspointEnabledValues[i].count(outputCount))
             {
-                if (1 != m_crosspointEnabledValues[inputCount].count(i))
-                    initCrosspoint(inputCount, i);
+                for (int o = 1; o <= outputCount; o++)
+                {
+                    if (1 != m_crosspointEnabledValues[i].count(o))
+                        initCrosspoint(i, o);
+                }
             }
         }
     }
 
     m_matrixGrid.items.clear();
-    for (int i = 1; i <= inputCount; i++)
+    for (int o = 1; o <= outputCount; o++)
     {
-        for (int o = 1; o <= outputCount; o++)
+        for (int i = 1; i <= inputCount; i++)
         {
             if (m_crosspointComponent.at(i).at(o))
                 m_matrixGrid.items.add(juce::GridItem(m_crosspointComponent.at(i).at(o).get()));
