@@ -63,10 +63,10 @@ public:
     juce::Rectangle<int> getRequiredSize();
     std::function<void()> onBoundsRequirementChange;
 
-private:
     //==============================================================================
-    void setChannelCount(int channelCount);
+    void setChannelCount(int channelCount) override;
 
+private:
     //==============================================================================
     ProcessorLevelData                          m_levelData;
 

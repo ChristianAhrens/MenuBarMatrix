@@ -95,10 +95,10 @@ public:
     std::function<void()> onBoundsRequirementChange;
     juce::Rectangle<int> getRequiredSize();
 
-private:
     //==============================================================================
-    void setIOCount(int inputCount, int outputCount);
+    void setIOCount(int inputCount, int outputCount) override;
 
+private:
     //==============================================================================
     std::map<int, std::map<int, bool>> m_crosspointEnabledValues;
     std::map<int, std::map<int, std::unique_ptr<CrosspointComponent>>> m_crosspointComponent;

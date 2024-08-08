@@ -505,6 +505,20 @@ void MenuBarMatrixProcessor::handleMessage(const Message& message)
 {
 	if (auto const iom = dynamic_cast<const ReinitIOCountMessage*> (&message))
 	{
+		auto inputCount = iom->getInputCount();
+		jassert(inputCount > 0);
+		auto outputCount = iom->getOutputCount();
+		jassert(outputCount > 0);
+
+		for (auto const& inputCommander : m_inputCommanders)
+			inputCommander->setChannelCount(inputCount);
+		
+		for (auto const& outputCommander : m_outputCommanders)
+			outputCommander->setChannelCount(outputCount);
+
+		for (auto const& crosspointCommander : m_crosspointCommanders)
+			crosspointCommander->setIOCount(inputCount, outputCount);
+
 		initializeCtrlValues(iom->getInputCount(), iom->getOutputCount());
 	}
 	else if (auto m = dynamic_cast<const AudioBufferMessage*> (&message))
@@ -593,8 +607,19 @@ void MenuBarMatrixProcessor::audioDeviceIOCallbackWithContext(const float* const
     
 	const ScopedLock sl(m_readLock);
 
-	m_inputChannelCount = numInputChannels;
-	m_outputChannelCount = numOutputChannels;
+	auto reinitRequired = false;
+	if (m_inputChannelCount != numInputChannels)
+	{
+		m_inputChannelCount = numInputChannels;
+		reinitRequired = true;
+	}
+	if (m_outputChannelCount != numOutputChannels)
+	{
+		m_outputChannelCount = numOutputChannels;
+		reinitRequired = true;
+	}
+	if (reinitRequired)
+		postMessage(new ReinitIOCountMessage(m_inputChannelCount, m_outputChannelCount));
 
 	auto maxActiveChannels = std::max(numInputChannels, numOutputChannels);
 
@@ -630,18 +655,7 @@ void MenuBarMatrixProcessor::audioDeviceIOCallbackWithContext(const float* const
 void MenuBarMatrixProcessor::audioDeviceAboutToStart(AudioIODevice* device)
 {
 	if (device)
-	{
 		prepareToPlay(device->getCurrentSampleRate(), device->getCurrentBufferSizeSamples());
-
-		// the following somehow returns weird incorrect counts, instead the name list count used below seems to be correct...?
-		//auto inputChannels = device->getActiveInputChannels().toInteger();
-		//auto outputChannels = device->getActiveOutputChannels().toInteger();
-
-		auto inputChannelNames = device->getInputChannelNames();
-		auto outputChannelNames = device->getOutputChannelNames();
-
-		initializeCtrlValues(inputChannelNames.size(), outputChannelNames.size());
-	}
 }
 
 void MenuBarMatrixProcessor::audioDeviceStopped()
@@ -651,19 +665,7 @@ void MenuBarMatrixProcessor::audioDeviceStopped()
 
 void MenuBarMatrixProcessor::changeListenerCallback(ChangeBroadcaster* source)
 {
-	if (m_deviceManager && m_deviceManager.get() == source)
-	{
-		auto audioDevice = m_deviceManager->getCurrentAudioDevice();
-
-		// the following somehow returns weird incorrect counts, instead the name list count used below seems to be correct...?
-		//auto inputChannels = audioDevice->getActiveInputChannels().toInteger();
-		//auto outputChannels = audioDevice->getActiveOutputChannels().toInteger();
-
-		auto inputChannelNames = audioDevice->getInputChannelNames();
-		auto outputChannelNames = audioDevice->getOutputChannelNames();
-
-		initializeCtrlValues(inputChannelNames.size(), outputChannelNames.size());
-	}
+	ignoreUnused(source);
 }
 
 void MenuBarMatrixProcessor::initializeCtrlValues(int inputCount, int outputCount)
@@ -675,7 +677,9 @@ void MenuBarMatrixProcessor::initializeCtrlValues(int inputCount, int outputCoun
     auto outputChannelCount = (outputCount > s_minOutputsCount) ? outputCount : s_minOutputsCount;
     for (auto channel = 1; channel <= outputChannelCount; channel++)
         setOutputMuteState(channel, false);
-    
+
+	DBG(juce::String(__FUNCTION__) << " " << inputChannelCount << " " << outputChannelCount);
+
     for (auto in = 1; in <= inputChannelCount; in++)
         for (auto out = 1; out <= outputChannelCount; out++)
             setMatrixCrosspointEnabledValue(in, out, in == out);

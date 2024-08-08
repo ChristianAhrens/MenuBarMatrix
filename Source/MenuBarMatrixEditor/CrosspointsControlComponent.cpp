@@ -47,12 +47,9 @@ void CrosspointsControlComponent::paint(Graphics& g)
 
 void CrosspointsControlComponent::setCrosspointEnabledValue(int input, int output, bool enabledState)
 {
-    if (input > m_crosspointEnabledValues.size() || output > m_crosspointEnabledValues[input].size())
-        setIOCount(input, output);
-
     m_crosspointEnabledValues[input][output] = enabledState;
-    if (m_crosspointComponent[input][output])
-        m_crosspointComponent[input][output]->setChecked(enabledState);
+    if (1 == m_crosspointComponent.count(input) && 1 != m_crosspointComponent.at(input).count(output) && m_crosspointComponent.at(input).at(output))
+        m_crosspointComponent.at(input).at(output)->setChecked(enabledState);
 
     repaint();
 }
@@ -79,18 +76,18 @@ void CrosspointsControlComponent::setIOCount(int inputCount, int outputCount)
 
     for (int i = 1; i <= inputCount; i++)
     {
-        if (1 != m_crosspointEnabledValues.count(i))
+        if (1 != m_crosspointComponent.count(i))
         {
             for (int o = 1; o <= outputCount; o++)
                 initCrosspoint(i, o);
         }
         else
         {
-            if (1 != m_crosspointEnabledValues[i].count(outputCount))
+            if (1 != m_crosspointComponent.at(i).count(outputCount))
             {
                 for (int o = 1; o <= outputCount; o++)
                 {
-                    if (1 != m_crosspointEnabledValues[i].count(o))
+                    if (1 != m_crosspointComponent.at(i).count(o))
                         initCrosspoint(i, o);
                 }
             }
