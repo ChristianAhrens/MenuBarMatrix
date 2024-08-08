@@ -29,9 +29,13 @@ namespace MenuBarMatrix
 //==============================================================================
 class CrosspointComponent : public juce::Component
 {
+using crosspointIdent = std::pair<int, int>;
+
 public:
-    CrosspointComponent() : juce::Component::Component() {}
+    CrosspointComponent(const crosspointIdent& ident) : juce::Component::Component() { m_ident = ident; }
     ~CrosspointComponent() {}
+
+    const crosspointIdent& getIdent() { return m_ident; };
 
     //==============================================================================
     void paint(Graphics& g) override
@@ -69,6 +73,7 @@ public:
 
 private:
     bool m_checked = false;
+    crosspointIdent m_ident = { -1, -1 };
 };
 
 //==============================================================================
