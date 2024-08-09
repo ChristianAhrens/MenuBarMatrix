@@ -51,10 +51,12 @@ public:
 
     //==============================================================================
     void setDirection(Direction direction);
+    void setChannelCount(int channelCount);
 
 private:
     ProcessorLevelData  m_levelData;
     Direction m_direction{ Vertical };
+    int m_channelCount{ 0 };
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MeterbridgeComponent)
 };

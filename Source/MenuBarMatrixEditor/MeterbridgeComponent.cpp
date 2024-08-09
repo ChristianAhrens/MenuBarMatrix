@@ -48,21 +48,25 @@ void MeterbridgeComponent::paint(Graphics& g)
 	auto visuAreaWidth = static_cast<float>(getWidth());
 	auto visuAreaHeight = static_cast<float>(getHeight());
 
+    auto channelCount = m_channelCount;
+
     if (m_direction == Direction::Horizontal)
     {
-        auto margin = getWidth() / ((2 * m_levelData.GetChannelCount()) + 1);
+        DBG(juce::String(__FUNCTION__) << " hor " << channelCount);
+
+        auto margin = getWidth() / ((2 * channelCount) + 1);
 
         auto visuArea = getLocalBounds();
         auto visuAreaOrigY = visuAreaHeight;
 
         // draw meters
         auto meterSpacing = margin;
-        auto meterThickness = float(visuArea.getWidth() - (m_levelData.GetChannelCount()) * meterSpacing) / float(m_levelData.GetChannelCount());
+        auto meterThickness = float(visuArea.getWidth() - (channelCount) * meterSpacing) / float(channelCount);
         auto meterMaxLength = visuArea.getHeight();
         auto meterLeft = 0.5f * meterSpacing;
 
         g.setFont(14.0f);
-        for (unsigned long i = 1; i <= m_levelData.GetChannelCount(); ++i)
+        for (unsigned long i = 1; i <= channelCount; ++i)
         {
             auto level = m_levelData.GetLevel(i);
             float peakMeterLength{ 0 };
@@ -112,19 +116,21 @@ void MeterbridgeComponent::paint(Graphics& g)
     }
     else
     {
-        auto margin = getHeight() / ((2 * m_levelData.GetChannelCount()) + 1);
+        DBG(juce::String(__FUNCTION__) << " vert " << channelCount);
+
+        auto margin = getHeight() / ((2 * channelCount) + 1);
 
         auto visuArea = getLocalBounds();
         auto visuAreaOrigX = 0.0f;
 
         // draw meters
         auto meterSpacing = margin;
-        auto meterThickness = float(visuArea.getHeight() - (m_levelData.GetChannelCount()) * meterSpacing) / float(m_levelData.GetChannelCount());
+        auto meterThickness = float(visuArea.getHeight() - (channelCount) * meterSpacing) / float(channelCount);
         auto meterMaxLength = visuArea.getWidth();
         auto meterTop = 0.5f * meterSpacing;
 
         g.setFont(14.0f);
-        for (unsigned long i = 1; i <= m_levelData.GetChannelCount(); ++i)
+        for (unsigned long i = 1; i <= channelCount; ++i)
         {
             auto level = m_levelData.GetLevel(i);
             float peakMeterLength{ 0 };
@@ -200,6 +206,11 @@ void MeterbridgeComponent::setDirection(Direction direction)
 {
     m_direction = direction;
     repaint();
+}
+
+void MeterbridgeComponent::setChannelCount(int channelCount)
+{
+    m_channelCount = channelCount;
 }
 
 

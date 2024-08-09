@@ -113,6 +113,8 @@ void OutputControlComponent::setChannelCount(int channelCount)
         m_channelCount = channelCount;
         DBG(__FUNCTION__ << " " << channelCount);
 
+        m_outputLevels->setChannelCount(channelCount);
+
         auto channelsToRemove = std::vector<int>();
         for (auto const& outputMuteKV : m_outputMutes)
         {
