@@ -25,6 +25,7 @@ namespace MenuBarMatrix
     class MenuBarMatrix;
 }
 class LoadBar;
+class EmptySpace;
 
 
 class MainComponent   :  public juce::Component,
@@ -41,9 +42,14 @@ public:
     void paint(Graphics&) override;
     void resized() override;
 
+    //========================================================================*
+    void lookAndFeelChanged() override;
+
 private:
     std::unique_ptr<MenuBarMatrix::MenuBarMatrix>   m_mbm;
-    std::unique_ptr<juce::TextButton>               m_setupToggleButton;
+    std::unique_ptr<juce::DrawableButton>           m_setupToggleButton;
+    std::unique_ptr<juce::DrawableButton>           m_powerButton;
+    std::unique_ptr<EmptySpace>                     m_emptySpace;
     std::unique_ptr<LoadBar>                        m_sysLoadBar;
     std::unique_ptr<juce::LookAndFeel>              m_lookAndFeel;
 

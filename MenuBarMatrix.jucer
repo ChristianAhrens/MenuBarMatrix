@@ -23,7 +23,9 @@
               file="Resources/Images/grid_4x4_24dp.png"/>
         <FILE id="yNWVs5" name="MenuBarMatrix.png" compile="0" resource="1"
               file="Resources/Images/MenuBarMatrix.png"/>
-        <FILE id="JNPMBK" name="tune_24dp.png" compile="0" resource="1" file="Resources/Images/tune_24dp.png"/>
+        <FILE id="EwG2UG" name="power_settings_24dp.svg" compile="0" resource="1"
+              file="Resources/Images/power_settings_24dp.svg"/>
+        <FILE id="xCV27q" name="tune_24dp.svg" compile="0" resource="1" file="Resources/Images/tune_24dp.svg"/>
       </GROUP>
     </GROUP>
     <GROUP id="{B4C42B10-6A29-1C3A-435D-5CB7A9DE671E}" name="Source">

@@ -48,7 +48,7 @@ void MeterbridgeComponent::paint(Graphics& g)
 	auto visuAreaWidth = static_cast<float>(getWidth());
 	auto visuAreaHeight = static_cast<float>(getHeight());
 
-    auto channelCount = m_channelCount;
+    auto channelCount = static_cast<unsigned long>(m_channelCount);
 
     if (m_direction == Direction::Horizontal)
     {
