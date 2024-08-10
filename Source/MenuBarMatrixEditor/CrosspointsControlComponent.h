@@ -106,6 +106,8 @@ private:
     //==============================================================================
     juce::Grid  m_matrixGrid;
 
+    std::pair<int, int> m_ioCount{ std::make_pair(-1, -1) };
+
     static constexpr int s_nodeSize = 23;
     static constexpr double s_nodeGap = 1;
     

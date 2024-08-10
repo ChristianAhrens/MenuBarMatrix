@@ -52,8 +52,6 @@ void MeterbridgeComponent::paint(Graphics& g)
 
     if (m_direction == Direction::Horizontal)
     {
-        DBG(juce::String(__FUNCTION__) << " hor " << channelCount);
-
         auto margin = getWidth() / ((2 * channelCount) + 1);
 
         auto visuArea = getLocalBounds();
@@ -116,8 +114,6 @@ void MeterbridgeComponent::paint(Graphics& g)
     }
     else
     {
-        DBG(juce::String(__FUNCTION__) << " vert " << channelCount);
-
         auto margin = getHeight() / ((2 * channelCount) + 1);
 
         auto visuArea = getLocalBounds();

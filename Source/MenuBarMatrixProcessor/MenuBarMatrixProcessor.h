@@ -218,9 +218,6 @@ public:
     void changeListenerCallback(ChangeBroadcaster* source) override;
 
     //==============================================================================
-    float getInputToOutputGain(int input, int output);
-
-    //==============================================================================
     void handleMessage(const Message& message) override;
 
     //==============================================================================
@@ -251,9 +248,6 @@ protected:
     void initializeCtrlValues(int inputCount, int outputCount);
 
 private:
-    //==============================================================================
-    const juce::Point<float> getNormalizedDefaultPosition(juce::AudioChannelSet::ChannelType channelIdent);
-
     //==============================================================================
     juce::String    m_Name;
 
