@@ -48,7 +48,7 @@ void CrosspointsControlComponent::paint(Graphics& g)
 void CrosspointsControlComponent::setCrosspointEnabledValue(int input, int output, bool enabledState)
 {
     m_crosspointEnabledValues[input][output] = enabledState;
-    if (1 == m_crosspointComponent.count(input) && 1 != m_crosspointComponent.at(input).count(output) && m_crosspointComponent.at(input).at(output))
+    if (1 == m_crosspointComponent.count(input) && 1 == m_crosspointComponent.at(input).count(output) && m_crosspointComponent.at(input).at(output))
         m_crosspointComponent.at(input).at(output)->setChecked(enabledState);
 
     repaint();
@@ -56,58 +56,62 @@ void CrosspointsControlComponent::setCrosspointEnabledValue(int input, int outpu
 
 void CrosspointsControlComponent::setIOCount(int inputCount, int outputCount)
 {
-    DBG(__FUNCTION__ << " " << inputCount << " " << outputCount);
-
-    std::function<void(int, int)> initCrosspoint = [=](int input, int output) {
-        m_crosspointEnabledValues[input][output] = false;
-        m_crosspointComponent[input][output] = std::make_unique<CrosspointComponent>(std::make_pair(input, output));
-        m_crosspointComponent[input][output]->onCheckedChanged = [=](bool checkedState, CrosspointComponent* sender) {
-            if (nullptr != sender)
-                crosspointEnabledChange(sender->getIdent().first, sender->getIdent().second, checkedState);
-        };
-        addAndMakeVisible(m_crosspointComponent[input][output].get());
-
-        for (int j = m_matrixGrid.templateColumns.size(); j < input; j++)
-            m_matrixGrid.templateColumns.add(juce::Grid::TrackInfo(juce::Grid::Px(s_nodeSize)));
-
-        for (int j = m_matrixGrid.templateRows.size(); j < output; j++)
-            m_matrixGrid.templateRows.add(juce::Grid::TrackInfo(juce::Grid::Px(s_nodeSize))); 
-    };
-
-    for (int i = 1; i <= inputCount; i++)
+    if (m_ioCount != std::make_pair(inputCount, outputCount))
     {
-        if (1 != m_crosspointComponent.count(i))
+        m_ioCount = std::make_pair(inputCount, outputCount);
+        DBG(__FUNCTION__ << " " << inputCount << " " << outputCount);
+
+        std::function<void(int, int)> initCrosspoint = [=](int input, int output) {
+            m_crosspointEnabledValues[input][output] = false;
+            m_crosspointComponent[input][output] = std::make_unique<CrosspointComponent>(std::make_pair(input, output));
+            m_crosspointComponent[input][output]->onCheckedChanged = [=](bool checkedState, CrosspointComponent* sender) {
+                if (nullptr != sender)
+                    crosspointEnabledChange(sender->getIdent().first, sender->getIdent().second, checkedState);
+                };
+            addAndMakeVisible(m_crosspointComponent[input][output].get());
+
+            for (int j = m_matrixGrid.templateColumns.size(); j < input; j++)
+                m_matrixGrid.templateColumns.add(juce::Grid::TrackInfo(juce::Grid::Px(s_nodeSize)));
+
+            for (int j = m_matrixGrid.templateRows.size(); j < output; j++)
+                m_matrixGrid.templateRows.add(juce::Grid::TrackInfo(juce::Grid::Px(s_nodeSize)));
+            };
+
+        for (int i = 1; i <= inputCount; i++)
         {
-            for (int o = 1; o <= outputCount; o++)
-                initCrosspoint(i, o);
-        }
-        else
-        {
-            if (1 != m_crosspointComponent.at(i).count(outputCount))
+            if (1 != m_crosspointComponent.count(i))
             {
                 for (int o = 1; o <= outputCount; o++)
+                    initCrosspoint(i, o);
+            }
+            else
+            {
+                if (1 != m_crosspointComponent.at(i).count(outputCount))
                 {
-                    if (1 != m_crosspointComponent.at(i).count(o))
-                        initCrosspoint(i, o);
+                    for (int o = 1; o <= outputCount; o++)
+                    {
+                        if (1 != m_crosspointComponent.at(i).count(o))
+                            initCrosspoint(i, o);
+                    }
                 }
             }
         }
-    }
 
-    m_matrixGrid.items.clear();
-    for (int o = 1; o <= outputCount; o++)
-    {
-        for (int i = 1; i <= inputCount; i++)
+        m_matrixGrid.items.clear();
+        for (int o = 1; o <= outputCount; o++)
         {
-            if (m_crosspointComponent.at(i).at(o))
-                m_matrixGrid.items.add(juce::GridItem(m_crosspointComponent.at(i).at(o).get()));
-            else
-                jassertfalse;
+            for (int i = 1; i <= inputCount; i++)
+            {
+                if (m_crosspointComponent.at(i).at(o))
+                    m_matrixGrid.items.add(juce::GridItem(m_crosspointComponent.at(i).at(o).get()));
+                else
+                    jassertfalse;
+            }
         }
-    }
 
-    if (onBoundsRequirementChange)
-        onBoundsRequirementChange();
+        if (onBoundsRequirementChange)
+            onBoundsRequirementChange();
+    }
 }
 
 juce::Rectangle<int> CrosspointsControlComponent::getRequiredSize()
