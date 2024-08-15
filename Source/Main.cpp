@@ -24,7 +24,8 @@ class MenuBarMatrixApplication  : public juce::JUCEApplication
 {
 public:
     //==============================================================================
-    MenuBarMatrixApplication() {}
+    MenuBarMatrixApplication() {};
+    ~MenuBarMatrixApplication() {};
 
     const juce::String getApplicationName() override       { return ProjectInfo::projectName; }
     const juce::String getApplicationVersion() override    { return ProjectInfo::versionString; }
@@ -33,12 +34,17 @@ public:
     //==============================================================================
     void initialise (const juce::String& /*commandLine*/) override
     {
-        m_mainWindow.reset (new MainWindow (getApplicationName()));
+        m_taskbarComponent = std::make_unique<TaskbarComponent>(*this);
+
+        m_mainComponent = (std::make_unique<MainComponent>());
+        m_mainComponent->setVisible(m_isMainComponentVisible);
+        m_mainComponent->addToDesktop(juce::ComponentPeer::windowHasDropShadow);
+        m_mainComponent->setTopLeftPosition(m_taskbarComponent->getX(), 50);
     }
 
     void shutdown() override
     {
-        m_mainWindow.reset(); // (deletes our window)
+        m_mainComponent.reset();
     }
 
     //==============================================================================
@@ -53,105 +59,60 @@ public:
         // this method is invoked, and the commandLine parameter tells you what
         // the other instance's command-line arguments were.
     }
-
-    //==============================================================================
-    /*
-        This class implements the desktop window that contains an instance of
-        our MainComponent class.
-    */
-    class MainWindow
+        
+    void toggleVisibilty()
     {
-    public:
-        MainWindow (juce::String name)
+        if (m_mainComponent != nullptr)
         {
-            m_taskbarComponent.reset (new TaskbarComponent(*this));
-            m_mainComponent.reset (new MainComponent ());
-            m_mainComponent->setVisible(m_isMainComponentVisible);
-            
-            int taskbarIconX = m_taskbarComponent->getX();
-            
-            m_mainComponent->addToDesktop(juce::ComponentPeer::windowHasDropShadow);
-            m_mainComponent->setTopLeftPosition(taskbarIconX, 50);
-           
+            m_mainComponent->setVisible(!m_mainComponent->isVisible());
+            m_isMainComponentVisible = m_mainComponent->isVisible();
         }
+    }
         
-        /* Note: Be careful if you override any DocumentWindow methods - the base
-         class uses a lot of them, so by overriding you might break its functionality.
-         It's best to do all your work in your content component instead, but if
-         you really have to override any DocumentWindow methods, make sure your
-         subclass also calls the superclass's method.
-         */
-        ~MainWindow()
+    void updatePositionFromTrayIcon(int topleftX, int topleftY)
+    {
+        if (m_mainComponent != nullptr)
         {
-            m_mainComponent.reset();
+            auto const display = juce::Desktop::getInstance().getDisplays().getPrimaryDisplay();
+            if (nullptr != display && nullptr != m_mainComponent && display->totalArea.getHeight() < topleftY + m_mainComponent->getHeight())
+                topleftY -= m_mainComponent->getHeight() + 30;
+            m_mainComponent->setTopLeftPosition(topleftX, topleftY);
         }
+    }
         
-        void toggleVisibilty()
+    // Just add a simple icon to the Window system tray area or Mac menu bar..
+    struct TaskbarComponent : public juce::SystemTrayIconComponent
+    {
+        TaskbarComponent(MenuBarMatrixApplication& app) : m_appRef(app)
         {
-            if (m_mainComponent != nullptr)
-             {
-                 m_mainComponent->setVisible(!m_mainComponent->isVisible());
-                 m_isMainComponentVisible = m_mainComponent->isVisible();
-            }
+            setIconImage(juce::ImageFileFormat::loadFrom(BinaryData::grid_4x4_24dp_png, BinaryData::grid_4x4_24dp_pngSize),
+                juce::ImageFileFormat::loadFrom(BinaryData::grid_4x4_24dp_png, BinaryData::grid_4x4_24dp_pngSize));
+            setIconTooltip(JUCEApplication::getInstance()->getApplicationName());
         }
-        
-        void updatePositionFromTrayIcon(int topleftX, int topleftY)
+
+        void mouseDown(const juce::MouseEvent&) override
         {
-            if (m_mainComponent != nullptr)
-            {
-                auto const display = juce::Desktop::getInstance().getDisplays().getPrimaryDisplay();
-                if (nullptr != display && nullptr != m_mainComponent && display->totalArea.getHeight() < topleftY + m_mainComponent->getHeight())
-                    topleftY -= m_mainComponent->getHeight() + 30;
-                m_mainComponent->setTopLeftPosition(topleftX, topleftY);
-            }
+            m_appRef.updatePositionFromTrayIcon(juce::Desktop::getMousePosition().x, juce::Desktop::getMousePosition().y);
+
+            // On OSX, there can be problems launching a menu when we're not the foreground
+            // process, so just in case, we'll first make our process active, and then use a
+            // timer to wait a moment before opening our menu, which gives the OS some time to
+            // get its act together and bring our windows to the front.
+            juce::Process::makeForegroundProcess();
+            m_appRef.toggleVisibilty();
         }
-        
-        // Just add a simple icon to the Window system tray area or Mac menu bar..
-        struct TaskbarComponent  : public juce::SystemTrayIconComponent
-        {
-            
-            TaskbarComponent( MainWindow& window) : m_mainWindow(window)
-            {
-                setIconImage (juce::ImageFileFormat::loadFrom(BinaryData::grid_4x4_24dp_png, BinaryData::grid_4x4_24dp_pngSize),
-                              juce::ImageFileFormat::loadFrom(BinaryData::grid_4x4_24dp_png, BinaryData::grid_4x4_24dp_pngSize));
-                setIconTooltip (JUCEApplication::getInstance()->getApplicationName());
-            }
-            
-    
-            void mouseDown (const juce::MouseEvent&) override
-            {
-                m_mainWindow.updatePositionFromTrayIcon(juce::Desktop::getMousePosition().x, juce::Desktop::getMousePosition().y);
-                
-                // On OSX, there can be problems launching a menu when we're not the foreground
-                // process, so just in case, we'll first make our process active, and then use a
-                // timer to wait a moment before opening our menu, which gives the OS some time to
-                // get its act together and bring our windows to the front.
-                juce::Process::makeForegroundProcess();
-                m_mainWindow.toggleVisibilty();
-            }
-            
-            // This is invoked when the menu is clicked or dismissed
-            static void menuInvocationCallback (int chosenItemID, TaskbarComponent*)
-            {
-                if (chosenItemID == 1)
-                    JUCEApplication::getInstance()->systemRequestedQuit();
-            }
-            
-             MainWindow& m_mainWindow;
-            
-        };
-        
-        
+
     private:
-        bool m_isMainComponentVisible = false;
-        std::unique_ptr<MainComponent> m_mainComponent;
-        std::unique_ptr<juce::Component> m_taskbarComponent;
-        
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
+        MenuBarMatrixApplication& m_appRef;
     };
 
 private:
-    std::unique_ptr<MainWindow> m_mainWindow;
+
+    bool m_isMainComponentVisible = false;
+    std::unique_ptr<MainComponent> m_mainComponent;
+    std::unique_ptr<juce::Component> m_taskbarComponent;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MenuBarMatrixApplication)
 };
 
 //==============================================================================
