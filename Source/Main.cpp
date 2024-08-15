@@ -29,17 +29,20 @@ public:
 
     const juce::String getApplicationName() override       { return ProjectInfo::projectName; }
     const juce::String getApplicationVersion() override    { return ProjectInfo::versionString; }
-    bool moreThanOneInstanceAllowed() override             { return true; }
+    bool moreThanOneInstanceAllowed() override             { return false; }
 
     //==============================================================================
     void initialise (const juce::String& /*commandLine*/) override
     {
         m_taskbarComponent = std::make_unique<TaskbarComponent>(*this);
+        m_taskbarComponent->setName("MenuBarMatrix taskbar icon");
 
         m_mainComponent = (std::make_unique<MainComponent>());
         m_mainComponent->setVisible(m_isMainComponentVisible);
         m_mainComponent->addToDesktop(juce::ComponentPeer::windowHasDropShadow);
         m_mainComponent->setTopLeftPosition(m_taskbarComponent->getX(), 50);
+        m_mainComponent->onFocusLostWhileVisible = [=]() { toggleVisibilty(); };
+        m_mainComponent->setName("MenuBarMatrix content component");
     }
 
     void shutdown() override
