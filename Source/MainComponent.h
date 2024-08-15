@@ -29,7 +29,8 @@ class EmptySpace;
 
 
 class MainComponent :   public juce::Component,
-                        public juce::DarkModeSettingListener
+                        public juce::DarkModeSettingListener,
+                        public juce::FocusChangeListener
 {
 public:
     MainComponent();
@@ -44,6 +45,12 @@ public:
 
     //========================================================================*
     void lookAndFeelChanged() override;
+
+    //========================================================================*
+    void globalFocusChanged(Component* focusedComponent) override;
+
+    //========================================================================*
+    std::function<void()> onFocusLostWhileVisible;
 
 private:
     std::unique_ptr<MenuBarMatrix::MenuBarMatrix>   m_mbm;

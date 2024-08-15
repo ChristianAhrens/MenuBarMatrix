@@ -67,6 +67,9 @@ public:
     {
         if (m_mainComponent != nullptr)
         {
+            if (!m_isMainComponentVisible)
+                m_mainComponent->grabKeyboardFocus();
+
             m_mainComponent->setVisible(!m_mainComponent->isVisible());
             m_isMainComponentVisible = m_mainComponent->isVisible();
         }

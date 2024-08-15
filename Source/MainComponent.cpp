@@ -117,6 +117,8 @@ MainComponent::MainComponent()
 
     juce::Desktop::getInstance().addDarkModeSettingListener(this);
     darkModeSettingChanged(); // initially trigger correct colourscheme
+
+    juce::Desktop::getInstance().addFocusChangeListener(this);
 }
 
 MainComponent::~MainComponent()
@@ -125,7 +127,7 @@ MainComponent::~MainComponent()
 
 void MainComponent::paint(Graphics &g)
 {
-    g.fillAll(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId).darker());
+    g.fillAll(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
 }
 
 void MainComponent::resized()
@@ -181,5 +183,17 @@ void MainComponent::lookAndFeelChanged()
     auto setupToggleDrawable = juce::Drawable::createFromSVG(*juce::XmlDocument::parse(BinaryData::tune_24dp_svg).get());
     setupToggleDrawable->replaceColour(juce::Colours::black, getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
     m_setupToggleButton->setImages(setupToggleDrawable.get());
+}
+
+void MainComponent::globalFocusChanged(Component* focusedComponent)
+{
+    if(nullptr == focusedComponent)
+    {
+        if (onFocusLostWhileVisible && isVisible())
+            onFocusLostWhileVisible();
+    }
+    else
+    {
+    }
 }
 
