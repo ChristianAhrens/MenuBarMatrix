@@ -42,7 +42,7 @@ MeterbridgeComponent::~MeterbridgeComponent()
 void MeterbridgeComponent::paint(Graphics& g)
 {
 	// (Our component is opaque, so we must completely fill the background with a solid colour)
-	g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
+	g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
 	// calculate what we need for our center circle
 	auto visuAreaWidth = static_cast<float>(getWidth());
@@ -90,11 +90,11 @@ void MeterbridgeComponent::paint(Graphics& g)
             g.setColour(juce::Colours::forestgreen);
             g.fillRect(juce::Rectangle<float>(meterLeft, visuAreaOrigY - rmsMeterLength, meterThickness, rmsMeterLength));
             // hold strip
-            g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
+            g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
             g.drawLine(juce::Line<float>(meterLeft, visuAreaOrigY - holdMeterLength, meterLeft + meterThickness, visuAreaOrigY - holdMeterLength));
             // channel # label
-            g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
-            g.drawText(juce::String(i), juce::Rectangle<float>(meterLeft, visuAreaOrigY - float(margin), meterThickness, float(margin)), juce::Justification::centred);
+            g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
+            g.drawText(juce::String(i), juce::Rectangle<float>(meterLeft - (0.5f * meterSpacing), visuAreaOrigY - float(margin), meterThickness + meterSpacing, float(margin)), juce::Justification::centred);
 
             meterLeft += meterThickness + meterSpacing;
         }
@@ -104,7 +104,7 @@ void MeterbridgeComponent::paint(Graphics& g)
         g.drawLine(juce::Line<float>(0.0f, visuAreaOrigY, visuAreaWidth, visuAreaOrigY));
         // draw dBFS
         g.setFont(12.0f);
-        g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
+        g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
         juce::String rangeText;
         if (getUsesValuesInDB())
             rangeText = juce::String(MenuBarMatrixProcessor::getGlobalMindB()) + " ... " + juce::String(MenuBarMatrixProcessor::getGlobalMaxdB()) + " dBFS";
@@ -152,11 +152,11 @@ void MeterbridgeComponent::paint(Graphics& g)
             g.setColour(juce::Colours::forestgreen);
             g.fillRect(juce::Rectangle<float>(visuAreaOrigX, meterTop, rmsMeterLength, meterThickness));
             // hold strip
-            g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
+            g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
             g.drawLine(juce::Line<float>(visuAreaOrigX + holdMeterLength, meterTop, visuAreaOrigX + holdMeterLength, meterTop + meterThickness));
             // channel # label
-            g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
-            g.drawText(juce::String(i), juce::Rectangle<float>(visuAreaOrigX, meterTop, float(margin), meterThickness), juce::Justification::centred);
+            g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
+            g.drawText(juce::String(i), juce::Rectangle<float>(visuAreaOrigX, meterTop - (0.5f * meterSpacing), float(0.5f * meterMaxLength), meterThickness), juce::Justification::centred);
 
             meterTop += meterThickness + meterSpacing;
         }
@@ -166,7 +166,7 @@ void MeterbridgeComponent::paint(Graphics& g)
         g.drawLine(juce::Line<float>(0.0f, 0.0f, 0.0f, visuAreaHeight));
         // draw dBFS
         g.setFont(12.0f);
-        g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
+        g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
         juce::String rangeText;
         if (getUsesValuesInDB())
             rangeText = juce::String(MenuBarMatrixProcessor::getGlobalMindB()) + " ... " + juce::String(MenuBarMatrixProcessor::getGlobalMaxdB()) + " dBFS";
