@@ -28,8 +28,8 @@ class LoadBar;
 class EmptySpace;
 
 
-class MainComponent   :  public juce::Component,
-    public juce::DarkModeSettingListener
+class MainComponent :   public juce::Component,
+                        public juce::DarkModeSettingListener
 {
 public:
     MainComponent();
