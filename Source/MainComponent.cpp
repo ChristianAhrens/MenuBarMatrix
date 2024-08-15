@@ -189,7 +189,7 @@ void MainComponent::globalFocusChanged(Component* focusedComponent)
 {
     if(nullptr == focusedComponent)
     {
-        if (onFocusLostWhileVisible && isVisible())
+        if (onFocusLostWhileVisible && isVisible() && (m_mbm && !m_mbm->getDeviceSetupComponent()->isVisible()))
             onFocusLostWhileVisible();
     }
     else
