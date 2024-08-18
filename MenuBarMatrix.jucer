@@ -38,6 +38,10 @@
               file="Source/MenuBarMatrixProcessor/MenuBarMatrixProcessor.cpp"/>
         <FILE id="RzppHQ" name="MenuBarMatrixProcessor.h" compile="0" resource="0"
               file="Source/MenuBarMatrixProcessor/MenuBarMatrixProcessor.h"/>
+        <FILE id="jIXB0T" name="MenuBarMatrixServiceData.cpp" compile="1" resource="0"
+              file="Source/MenuBarMatrixProcessor/MenuBarMatrixServiceData.cpp"/>
+        <FILE id="zrQIOc" name="MenuBarMatrixServiceData.h" compile="0" resource="0"
+              file="Source/MenuBarMatrixProcessor/MenuBarMatrixServiceData.h"/>
         <FILE id="KDfy8D" name="ProcessorAudioSignalData.cpp" compile="1" resource="0"
               file="Source/MenuBarMatrixProcessor/ProcessorAudioSignalData.cpp"/>
         <FILE id="KQN7Cj" name="ProcessorAudioSignalData.h" compile="0" resource="0"
