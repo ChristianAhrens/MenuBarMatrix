@@ -282,6 +282,9 @@ private:
     //==============================================================================
     std::unique_ptr<MenuBarMatrixEditor>  m_processorEditor;
 
+    //==============================================================================
+    std::unique_ptr<juce::NetworkServiceDiscovery::Advertiser>  m_serviceAdvertiser;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MenuBarMatrixProcessor)
 };
 

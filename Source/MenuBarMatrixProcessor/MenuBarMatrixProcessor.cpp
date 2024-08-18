@@ -18,6 +18,8 @@
 
 #include "MenuBarMatrixProcessor.h"
 
+#include "MenuBarMatrixServiceData.h"
+
 namespace MenuBarMatrix
 {
 
@@ -205,6 +207,12 @@ MenuBarMatrixProcessor::MenuBarMatrixProcessor() :
 #endif
 	m_deviceManager->setAudioDeviceSetup(audioDeviceSetup, true);
 
+	// init the announcement of this app instance as discoverable service
+	m_serviceAdvertiser = std::make_unique<juce::NetworkServiceDiscovery::Advertiser>(
+		MenuBarMatrix::ServiceData::getServiceTypeUID(), 
+		MenuBarMatrix::ServiceData::getServiceDescription(),
+		MenuBarMatrix::ServiceData::getBroadcastPort(),
+		MenuBarMatrix::ServiceData::getConnectionPort());
 }
 
 MenuBarMatrixProcessor::~MenuBarMatrixProcessor()
