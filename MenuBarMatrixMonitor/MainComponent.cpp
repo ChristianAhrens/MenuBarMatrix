@@ -19,11 +19,28 @@
 #include "MainComponent.h"
 
 #include <CustomLookAndFeel.h>
-
+#include "../Source/MenuBarMatrixProcessor/MenuBarMatrixServiceData.h"
 
 MainComponent::MainComponent()
     : juce::Component()
 {
+    m_availableServices = std::make_unique<juce::NetworkServiceDiscovery::AvailableServiceList>(
+        MenuBarMatrix::ServiceData::getServiceTypeUID(), 
+        MenuBarMatrix::ServiceData::getBroadcastPort());
+    std::function<void()> updateServicesString = [=]() {
+        auto services = m_availableServices->getServices();
+        m_servicesString.clear();
+        for (auto const& service : services)
+        {
+            m_servicesString += juce::String(service.description + " (" + service.instanceID + ")\n");
+        }
+        repaint();
+    };
+    m_availableServices->onChange = [=]() { 
+        updateServicesString();
+        repaint();
+    };
+    updateServicesString();
 
     setSize(400, 350);
 }
@@ -37,7 +54,7 @@ void MainComponent::paint(Graphics &g)
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::ColourIds::backgroundColourId));
 
     g.setColour(getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
-    g.drawText(juce::JUCEApplication::getInstance()->getApplicationName(), getLocalBounds().toFloat(), juce::Justification::centred);
+    g.drawText(juce::JUCEApplication::getInstance()->getApplicationName() + " found:\n" + m_servicesString, getLocalBounds().toFloat(), juce::Justification::centred);
 }
 
 void MainComponent::resized()

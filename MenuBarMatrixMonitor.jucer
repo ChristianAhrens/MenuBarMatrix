@@ -28,6 +28,10 @@
       <FILE id="g0bV2G" name="MainComponent.cpp" compile="1" resource="0"
             file="MenuBarMatrixMonitor/MainComponent.cpp"/>
       <FILE id="tAVzYo" name="MainComponent.h" compile="0" resource="0" file="MenuBarMatrixMonitor/MainComponent.h"/>
+      <FILE id="q4KsuZ" name="MenuBarMatrixServiceData.cpp" compile="1" resource="0"
+            file="Source/MenuBarMatrixProcessor/MenuBarMatrixServiceData.cpp"/>
+      <FILE id="VTLvdW" name="MenuBarMatrixServiceData.h" compile="0" resource="0"
+            file="Source/MenuBarMatrixProcessor/MenuBarMatrixServiceData.h"/>
     </GROUP>
   </MAINGROUP>
   <MODULES>
