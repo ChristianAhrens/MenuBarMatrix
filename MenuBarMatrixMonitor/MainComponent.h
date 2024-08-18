@@ -32,7 +32,8 @@ public:
     void resized() override;
 
 private:
-
+    std::unique_ptr<juce::NetworkServiceDiscovery::AvailableServiceList>    m_availableServices;
+    juce::String    m_servicesString;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
