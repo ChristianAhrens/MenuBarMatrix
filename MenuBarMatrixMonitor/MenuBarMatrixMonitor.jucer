@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="ja98xe" name="MenuBarMatrixMonitor" projectType="guiapp"
+              useAppConfig="0" jucerFormatVersion="1" version="0.0.1" companyWebsite="github.com/ChristianAhrens/MenuBarMatrix"
+              bundleIdentifier="com.ChristianAhrens.MenuBarMatrixMonitor" headerPath="../../../submodules/JUCE-AppBasics/Source&#10;../../../Source"
+              defines="JUCE_USE_LAME_AUDIO_FORMAT=1,&#10;JUCE_USE_MP3AUDIOFORMAT=1,&#10;JUCE_DISPLAY_SPLASH_SCREEN=0">
+  <MAINGROUP id="YIs3Nm" name="MenuBarMatrixMonitor">
+    <GROUP id="{60526C8C-38C9-8A62-4BE8-08FDFBF21423}" name="submodules">
+      <GROUP id="{A748DC48-D24B-A4B1-772D-A48B7873F767}" name="JUCEAppBascics">
+        <FILE id="TQ34xv" name="CustomLookAndFeel.cpp" compile="1" resource="0"
+              file="../submodules/JUCE-AppBasics/Source/CustomLookAndFeel.cpp"/>
+        <FILE id="JS6zlP" name="CustomLookAndFeel.h" compile="0" resource="0"
+              file="../submodules/JUCE-AppBasics/Source/CustomLookAndFeel.h"/>
+      </GROUP>
+    </GROUP>
+    <GROUP id="{72AB56DC-8637-938F-3846-2BD91435687D}" name="Resources">
+      <GROUP id="{5418C8BA-AFDC-83EF-A716-D3FB9CE9A772}" name="Images">
+        <FILE id="D0LA6R" name="grid_4x4_24dp.svg" compile="0" resource="1"
+              file="../Resources/Images/grid_4x4_24dp.svg"/>
+        <FILE id="BRhtKu" name="MenuBarMatrix.png" compile="0" resource="1"
+              file="../Resources/Images/MenuBarMatrix.png"/>
+        <FILE id="dEu5Q1" name="power_settings_24dp.svg" compile="0" resource="1"
+              file="../Resources/Images/power_settings_24dp.svg"/>
+      </GROUP>
+    </GROUP>
+    <GROUP id="{B4C42B10-6A29-1C3A-435D-5CB7A9DE671E}" name="Source">
+      <FILE id="Y0aPvI" name="Main.cpp" compile="1" resource="0" file="Main.cpp"/>
+      <FILE id="ijXJpV" name="MainComponent.cpp" compile="1" resource="0"
+            file="MainComponent.cpp"/>
+      <FILE id="UysMVV" name="MainComponent.h" compile="0" resource="0" file="MainComponent.h"/>
+      <FILE id="t4b487" name="MenuBarMatrixServiceData.cpp" compile="1" resource="0"
+            file="../Source/MenuBarMatrixProcessor/MenuBarMatrixServiceData.cpp"/>
+      <FILE id="lU2qId" name="MenuBarMatrixServiceData.h" compile="0" resource="0"
+            file="../Source/MenuBarMatrixProcessor/MenuBarMatrixServiceData.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX" smallIcon="yNWVs5" bigIcon="yNWVs5">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../submodules/JUCE/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+    <VS2022 targetFolder="Builds/VisualStudio2022" smallIcon="yNWVs5" bigIcon="yNWVs5">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="..\submodules\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_devices" path="..\submodules\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_formats" path="..\submodules\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_processors" path="..\submodules\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_utils" path="..\submodules\JUCE\modules"/>
+        <MODULEPATH id="juce_core" path="..\submodules\JUCE\modules"/>
+        <MODULEPATH id="juce_data_structures" path="..\submodules\JUCE\modules"/>
+        <MODULEPATH id="juce_events" path="..\submodules\JUCE\modules"/>
+        <MODULEPATH id="juce_graphics" path="..\submodules\JUCE\modules"/>
+        <MODULEPATH id="juce_gui_basics" path="..\submodules\JUCE\modules"/>
+        <MODULEPATH id="juce_gui_extra" path="..\submodules\JUCE\modules"/>
+        <MODULEPATH id="juce_dsp" path="..\submodules\JUCE\modules"/>
+      </MODULEPATHS>
+    </VS2022>
+  </EXPORTFORMATS>
+</JUCERPROJECT>

@@ -19,7 +19,7 @@
 #include "MainComponent.h"
 
 #include <CustomLookAndFeel.h>
-#include "../Source/MenuBarMatrixProcessor/MenuBarMatrixServiceData.h"
+#include "MenuBarMatrixProcessor/MenuBarMatrixServiceData.h"
 
 MainComponent::MainComponent()
     : juce::Component()
