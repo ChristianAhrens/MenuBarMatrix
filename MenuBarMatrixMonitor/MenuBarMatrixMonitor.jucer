@@ -28,6 +28,14 @@
       <FILE id="ijXJpV" name="MainComponent.cpp" compile="1" resource="0"
             file="MainComponent.cpp"/>
       <FILE id="UysMVV" name="MainComponent.h" compile="0" resource="0" file="MainComponent.h"/>
+      <FILE id="V5pNU2" name="MenuBarMatrixDiscoverComponent.cpp" compile="1"
+            resource="0" file="MenuBarMatrixDiscoverComponent.cpp"/>
+      <FILE id="GyjlFi" name="MenuBarMatrixDiscoverComponent.h" compile="0"
+            resource="0" file="MenuBarMatrixDiscoverComponent.h"/>
+      <FILE id="cFC35K" name="MenuBarMatrixMonitorComponent.cpp" compile="1"
+            resource="0" file="MenuBarMatrixMonitorComponent.cpp"/>
+      <FILE id="NrmWuX" name="MenuBarMatrixMonitorComponent.h" compile="0"
+            resource="0" file="MenuBarMatrixMonitorComponent.h"/>
       <FILE id="t4b487" name="MenuBarMatrixServiceData.cpp" compile="1" resource="0"
             file="../Source/MenuBarMatrixProcessor/MenuBarMatrixServiceData.cpp"/>
       <FILE id="lU2qId" name="MenuBarMatrixServiceData.h" compile="0" resource="0"

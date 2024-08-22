@@ -213,10 +213,15 @@ MenuBarMatrixProcessor::MenuBarMatrixProcessor() :
 		MenuBarMatrix::ServiceData::getServiceDescription(),
 		MenuBarMatrix::ServiceData::getBroadcastPort(),
 		MenuBarMatrix::ServiceData::getConnectionPort());
+
+	m_networkServer = std::make_unique<InterprocessConnectionServerImpl>();
+	m_networkServer->beginWaitingForSocket(MenuBarMatrix::ServiceData::getConnectionPort());
 }
 
 MenuBarMatrixProcessor::~MenuBarMatrixProcessor()
 {
+	m_networkServer->stop();
+
 	m_deviceManager->removeAudioCallback(this);
 
 	// cleanup processing data buffer (do this elsewhere in productive code to avoid excessive mem alloc/free)
@@ -528,6 +533,9 @@ void MenuBarMatrixProcessor::handleMessage(const Message& message)
 			crosspointCommander->setIOCount(inputCount, outputCount);
 
 		initializeCtrlValues(iom->getInputCount(), iom->getOutputCount());
+
+		if (m_networkServer && m_networkServer->hasActiveConnection())
+			m_networkServer->getActiveConnection()->sendMessage(iom->getSerializedMessage());
 	}
 	else if (auto m = dynamic_cast<const AudioBufferMessage*> (&message))
 	{
@@ -539,6 +547,9 @@ void MenuBarMatrixProcessor::handleMessage(const Message& message)
 		{
 			m_outputDataAnalyzer->analyzeData(m->getAudioBuffer());
 		}
+
+		if (m_networkServer && m_networkServer->hasActiveConnection())
+			m_networkServer->getActiveConnection()->sendMessage(m->getSerializedMessage());
 	}
 }
 

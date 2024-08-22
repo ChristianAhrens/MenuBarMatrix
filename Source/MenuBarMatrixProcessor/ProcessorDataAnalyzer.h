@@ -45,6 +45,8 @@ public:
     AudioBufferMessage(AudioBuffer<float>& buffer);
     ~AudioBufferMessage();
 
+    juce::MemoryBlock getSerializedMessage() const;
+
     const AudioBuffer<float>& getAudioBuffer() const;
     const FlowDirection getFlowDirection() const { return m_direction; };
 

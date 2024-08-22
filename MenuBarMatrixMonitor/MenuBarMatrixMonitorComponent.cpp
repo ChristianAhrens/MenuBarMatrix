@@ -16,27 +16,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "MenuBarMatrixMonitorComponent.h"
 
-#include <JuceHeader.h>
-
-class MenuBarMatrixMonitorComponent;
-class MenuBarMatrixDiscoverComponent;
-
-class MainComponent :   public juce::Component
+MenuBarMatrixMonitorComponent::MenuBarMatrixMonitorComponent()
+    : juce::Component()
 {
-public:
-    MainComponent();
-    ~MainComponent() override;
+}
 
-    //========================================================================*
-    void resized() override;
+MenuBarMatrixMonitorComponent::~MenuBarMatrixMonitorComponent()
+{
+}
 
-private:
-    std::unique_ptr<juce::NetworkServiceDiscovery::AvailableServiceList>    m_availableServices;
-    std::unique_ptr<MenuBarMatrixMonitorComponent>                          m_monitorComponent;
-    std::unique_ptr<MenuBarMatrixDiscoverComponent>                         m_discoverComponent;
+void MenuBarMatrixMonitorComponent::paint(Graphics &g)
+{
+}
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
-};
+void MenuBarMatrixMonitorComponent::resized()
+{
+
+}
 

@@ -20,23 +20,20 @@
 
 #include <JuceHeader.h>
 
-class MenuBarMatrixMonitorComponent;
-class MenuBarMatrixDiscoverComponent;
 
-class MainComponent :   public juce::Component
+class MenuBarMatrixMonitorComponent :   public juce::Component
 {
 public:
-    MainComponent();
-    ~MainComponent() override;
+    MenuBarMatrixMonitorComponent();
+    ~MenuBarMatrixMonitorComponent() override;
 
     //========================================================================*
+    void paint(Graphics&) override;
     void resized() override;
 
 private:
-    std::unique_ptr<juce::NetworkServiceDiscovery::AvailableServiceList>    m_availableServices;
-    std::unique_ptr<MenuBarMatrixMonitorComponent>                          m_monitorComponent;
-    std::unique_ptr<MenuBarMatrixDiscoverComponent>                         m_discoverComponent;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuBarMatrixMonitorComponent)
 };
 

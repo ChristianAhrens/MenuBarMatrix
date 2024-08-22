@@ -136,12 +136,61 @@ private:
     public:
         ReinitIOCountMessage(int inputs, int outputs) { m_inputCount = inputs; m_outputCount = outputs; }
 
+        juce::MemoryBlock getSerializedMessage() const
+        {
+            juce::MemoryBlock data;
+            data.append(&m_inputCount, sizeof(int));
+            data.append(&m_outputCount, sizeof(int));
+            return data;
+        };
+
         int getInputCount() const { return m_inputCount; };
         int getOutputCount() const { return m_outputCount; };
 
     private:
         int m_inputCount = 0;
         int m_outputCount = 0;
+    };
+
+    class InterprocessConnectionImpl : public juce::InterprocessConnection
+    {
+    public:
+        InterprocessConnectionImpl() : juce::InterprocessConnection() {};
+        virtual ~InterprocessConnectionImpl() {};
+
+        void connectionMade() override {};
+
+        void connectionLost() override {};
+
+        void messageReceived(const MemoryBlock& message) override {};
+
+    private:
+
+    };
+
+    class InterprocessConnectionServerImpl : public juce::InterprocessConnectionServer
+    {
+    public:
+        InterprocessConnectionServerImpl() : juce::InterprocessConnectionServer() {};
+        virtual ~InterprocessConnectionServerImpl() {};
+
+        bool hasActiveConnection() { return m_connection && m_connection->isConnected(); };
+
+        const std::unique_ptr<InterprocessConnectionImpl>& getActiveConnection() { return m_connection; };
+
+        std::function<void()>   onConnectionCreated;
+
+    private:
+        InterprocessConnection* createConnectionObject() {
+            m_connection = std::make_unique<InterprocessConnectionImpl>();
+
+            if (onConnectionCreated)
+                onConnectionCreated();
+
+            return m_connection.get();
+        };
+
+        std::unique_ptr<InterprocessConnectionImpl> m_connection;
     };
 
 public:
@@ -284,6 +333,7 @@ private:
 
     //==============================================================================
     std::unique_ptr<juce::NetworkServiceDiscovery::Advertiser>  m_serviceAdvertiser;
+    std::unique_ptr<InterprocessConnectionServerImpl> m_networkServer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MenuBarMatrixProcessor)
 };
