@@ -36,6 +36,14 @@ AudioBufferMessage::~AudioBufferMessage()
 
 }
 
+juce::MemoryBlock AudioBufferMessage::getSerializedMessage() const
+{
+	juce::MemoryBlock data;
+	data.append(&m_direction, sizeof(FlowDirection));
+	data.append(m_buffer.getReadPointer(1), sizeof(float) * m_buffer.getNumChannels() * m_buffer.getNumSamples());
+	return data;
+}
+
 const AudioBuffer<float>& AudioBufferMessage::getAudioBuffer() const
 {
 	return m_buffer;
