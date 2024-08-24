@@ -34,9 +34,13 @@ public:
     //========================================================================*
     void setDiscoveredServices(const std::vector<juce::NetworkServiceDiscovery::Service>& services);
 
+    //========================================================================*
+    std::function<void(const juce::NetworkServiceDiscovery::Service&)> onServiceSelected;
+
 private:
-    std::unique_ptr<juce::Label>    m_discoveredServicesLabel;
-    std::unique_ptr<juce::ComboBox> m_discoveredServicesSelection;
+    std::unique_ptr<juce::Label>                        m_discoveredServicesLabel;
+    std::unique_ptr<juce::ComboBox>                     m_discoveredServicesSelection;
+    std::vector<juce::NetworkServiceDiscovery::Service> m_discoveredServices;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuBarMatrixDiscoverComponent)
 };
