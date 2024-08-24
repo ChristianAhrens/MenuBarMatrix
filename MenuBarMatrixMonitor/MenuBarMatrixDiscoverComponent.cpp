@@ -26,9 +26,13 @@ MenuBarMatrixDiscoverComponent::MenuBarMatrixDiscoverComponent()
 
     m_discoveredServicesSelection = std::make_unique<juce::ComboBox>("ServicesComboBox");
     m_discoveredServicesSelection->onChange = [=]() {
-        m_discoveredServicesSelection->getSelectedId();
-        jassertfalse; // do something here
+        auto idx = m_discoveredServicesSelection->getSelectedItemIndex();
+        
+        if (onServiceSelected && m_discoveredServices.size() > idx)
+            onServiceSelected(m_discoveredServices.at(idx));
     };
+    m_discoveredServicesSelection->setTextWhenNoChoicesAvailable("Select an instance to connect");
+    m_discoveredServicesSelection->setTextWhenNoChoicesAvailable("None");
     addAndMakeVisible(m_discoveredServicesSelection.get());
 }
 
@@ -54,6 +58,8 @@ void MenuBarMatrixDiscoverComponent::resized()
 
 void MenuBarMatrixDiscoverComponent::setDiscoveredServices(const std::vector<juce::NetworkServiceDiscovery::Service>& services)
 {
+    m_discoveredServices = services;
+
     m_discoveredServicesSelection->clear();
     int i = 1;
     for (auto const& service : services)

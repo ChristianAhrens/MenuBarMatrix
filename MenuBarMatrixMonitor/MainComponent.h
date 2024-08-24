@@ -26,6 +26,13 @@ class MenuBarMatrixDiscoverComponent;
 class MainComponent :   public juce::Component
 {
 public:
+    enum Status
+    {
+        Discovering,
+        Monitoring
+    };
+
+public:
     MainComponent();
     ~MainComponent() override;
 
@@ -33,9 +40,35 @@ public:
     void resized() override;
 
 private:
+    //========================================================================*
+    class InterprocessConnectionImpl : public juce::InterprocessConnection
+    {
+    public:
+        InterprocessConnectionImpl() : juce::InterprocessConnection() {};
+        virtual ~InterprocessConnectionImpl() {};
+
+        void connectionMade() override { if (onConnectionMade) onConnectionMade(); };
+
+        void connectionLost() override { if (onConnectionLost) onConnectionLost(); };
+
+        void messageReceived(const MemoryBlock& message) override { if (onMessageReceived) onMessageReceived(message); };
+
+        std::function<void()>                   onConnectionMade;
+        std::function<void()>                   onConnectionLost;
+        std::function<void(const MemoryBlock&)> onMessageReceived;
+
+    private:
+
+    };
+
+    //========================================================================*
     std::unique_ptr<juce::NetworkServiceDiscovery::AvailableServiceList>    m_availableServices;
+    std::unique_ptr<InterprocessConnectionImpl>                             m_networkConnection;
+
     std::unique_ptr<MenuBarMatrixMonitorComponent>                          m_monitorComponent;
     std::unique_ptr<MenuBarMatrixDiscoverComponent>                         m_discoverComponent;
+
+    Status m_currentStatus = Status::Discovering;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

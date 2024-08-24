@@ -27,10 +27,38 @@
 MainComponent::MainComponent()
     : juce::Component()
 {
+    m_networkConnection = std::make_unique<InterprocessConnectionImpl>();
+    m_networkConnection->onConnectionMade = [=]() {
+        if (m_monitorComponent)
+            m_monitorComponent->setRunning(true);
+
+        m_currentStatus = Status::Monitoring;
+        resized();
+    };
+    m_networkConnection->onConnectionLost = [=]() {
+        if (m_monitorComponent)
+            m_monitorComponent->setRunning(false);
+
+        m_currentStatus = Status::Discovering;
+        resized();
+    };
+    m_networkConnection->onMessageReceived = [=](const juce::MemoryBlock& message) {
+        
+        // process incoming to forwarding
+        
+        if (m_monitorComponent)
+            m_monitorComponent->handleMessage(juce::Message());
+    };
+
     m_monitorComponent = std::make_unique<MenuBarMatrixMonitorComponent>();
+    m_monitorComponent->setRunning(false);
     addAndMakeVisible(m_monitorComponent.get());
 
     m_discoverComponent = std::make_unique<MenuBarMatrixDiscoverComponent>();
+    m_discoverComponent->onServiceSelected = [=](const juce::NetworkServiceDiscovery::Service& selectedService) {
+        if (m_networkConnection)
+            m_networkConnection->connectToSocket(selectedService.address.toString(), selectedService.port, 100);
+    };
     addAndMakeVisible(m_discoverComponent.get());
 
     m_availableServices = std::make_unique<juce::NetworkServiceDiscovery::AvailableServiceList>(
@@ -49,6 +77,14 @@ MainComponent::~MainComponent()
 
 void MainComponent::resized()
 {
-    m_discoverComponent->setBounds(getLocalBounds());
+    switch (m_currentStatus)
+    {
+        case Status::Monitoring:
+            m_monitorComponent->setBounds(getLocalBounds());
+        case Status::Discovering:
+        default:
+            m_discoverComponent->setBounds(getLocalBounds());
+            break;
+    }
 }
 

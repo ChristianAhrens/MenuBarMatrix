@@ -36,3 +36,12 @@ void MenuBarMatrixMonitorComponent::resized()
 
 }
 
+void MenuBarMatrixMonitorComponent::handleMessage(const Message& message)
+{
+    DBG(__FUNCTION__);
+}
+
+void MenuBarMatrixMonitorComponent::setRunning(bool running)
+{
+    m_isRunning = running;
+}

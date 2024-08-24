@@ -21,7 +21,7 @@
 #include <JuceHeader.h>
 
 
-class MenuBarMatrixMonitorComponent :   public juce::Component
+class MenuBarMatrixMonitorComponent :   public juce::Component, juce::MessageListener
 {
 public:
     MenuBarMatrixMonitorComponent();
@@ -31,8 +31,14 @@ public:
     void paint(Graphics&) override;
     void resized() override;
 
-private:
+    //========================================================================*
+    void handleMessage(const Message& message) override;
 
+    //========================================================================*
+    void setRunning(bool running);
+
+private:
+    bool m_isRunning = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuBarMatrixMonitorComponent)
 };
