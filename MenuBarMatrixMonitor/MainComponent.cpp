@@ -56,6 +56,9 @@ MainComponent::MainComponent()
 
     m_discoverComponent = std::make_unique<MenuBarMatrixDiscoverComponent>();
     m_discoverComponent->onServiceSelected = [=](const juce::NetworkServiceDiscovery::Service& selectedService) {
+        m_currentStatus = Status::Monitoring;
+        resized();
+
         if (m_networkConnection)
             m_networkConnection->connectToSocket(selectedService.address.toString(), selectedService.port, 100);
     };
@@ -80,9 +83,14 @@ void MainComponent::resized()
     switch (m_currentStatus)
     {
         case Status::Monitoring:
+            m_discoverComponent->setVisible(false);
+            m_monitorComponent->setVisible(true);
             m_monitorComponent->setBounds(getLocalBounds());
+            break;
         case Status::Discovering:
         default:
+            m_monitorComponent->setVisible(false);
+            m_discoverComponent->setVisible(true);
             m_discoverComponent->setBounds(getLocalBounds());
             break;
     }
