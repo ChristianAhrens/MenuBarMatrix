@@ -216,6 +216,15 @@ MenuBarMatrixProcessor::MenuBarMatrixProcessor() :
 
 	m_networkServer = std::make_unique<InterprocessConnectionServerImpl>();
 	m_networkServer->beginWaitingForSocket(MenuBarMatrix::ServiceData::getConnectionPort());
+    m_networkServer->onConnectionCreated = [=]() {
+        auto connection = dynamic_cast<InterprocessConnectionImpl*>(m_networkServer->getActiveConnection().get());
+        if (connection)
+        {
+            connection->onConnectionLost = [=]() {};
+            connection->onConnectionMade = [=]() {};
+            connection->onMessageReceived = [=](const juce::MemoryBlock& data) {};
+        }
+    };
 }
 
 MenuBarMatrixProcessor::~MenuBarMatrixProcessor()
