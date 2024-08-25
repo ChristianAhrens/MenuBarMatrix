@@ -158,11 +158,15 @@ private:
         InterprocessConnectionImpl() : juce::InterprocessConnection() {};
         virtual ~InterprocessConnectionImpl() {};
 
-        void connectionMade() override {};
+        void connectionMade() override { if (onConnectionMade) onConnectionMade(); };
 
-        void connectionLost() override {};
+        void connectionLost() override { if (onConnectionLost) onConnectionLost(); };
 
-        void messageReceived(const MemoryBlock& message) override {};
+        void messageReceived(const MemoryBlock& message) override { if (onMessageReceived) onMessageReceived(message); };
+
+        std::function<void()>                   onConnectionMade;
+        std::function<void()>                   onConnectionLost;
+        std::function<void(const MemoryBlock&)> onMessageReceived;
 
     private:
 

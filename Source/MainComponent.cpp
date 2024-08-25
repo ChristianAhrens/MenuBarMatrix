@@ -74,7 +74,15 @@ MainComponent::MainComponent()
     : juce::Component()
 {
     m_mbm = std::make_unique<MenuBarMatrix::MenuBarMatrix>();
-    m_mbm->onSizeChangeRequested = [=](juce::Rectangle<int> requestedSize) { setSize(requestedSize.getWidth(), requestedSize.getHeight() + 26); };
+    m_mbm->onSizeChangeRequested = [=](juce::Rectangle<int> requestedSize) {
+        auto width = requestedSize.getWidth();
+        auto height = requestedSize.getHeight() + sc_buttonSize;
+        
+        if (width < (sc_loadWidth + 5 * sc_buttonSize))
+            width = sc_loadWidth + 5 * sc_buttonSize;
+        
+        setSize(width, height);
+    };
     addAndMakeVisible(m_mbm->getUIComponent());
 
     m_setupToggleButton = std::make_unique<juce::DrawableButton>("Audio Device Setup", juce::DrawableButton::ButtonStyle::ImageFitted);
@@ -92,7 +100,7 @@ MainComponent::MainComponent()
             {
                 setupComponent->setVisible(true);
                 setupComponent->addToDesktop(juce::ComponentPeer::StyleFlags::windowHasDropShadow | juce::ComponentPeer::StyleFlags::windowHasCloseButton);
-                setupComponent->setBounds(getScreenBounds().translated(0, 27));
+                setupComponent->setBounds(getScreenBounds().translated(0, sc_buttonSize + 1));
             }
 
             resized();
@@ -134,7 +142,7 @@ void MainComponent::resized()
     auto safeBounds = getLocalBounds();
 
     auto margin = 1;
-    auto setupElementArea = safeBounds.removeFromTop(26);
+    auto setupElementArea = safeBounds.removeFromTop(sc_buttonSize);
     auto contentAreaBounds = safeBounds;
     contentAreaBounds.removeFromTop(1);
 
@@ -145,7 +153,7 @@ void MainComponent::resized()
         m_setupToggleButton->setBounds(setupElementArea.removeFromRight(setupElementArea.getHeight()));
     setupElementArea.removeFromRight(margin);
     if (m_sysLoadBar)
-        m_sysLoadBar->setBounds(setupElementArea.removeFromLeft(100));
+        m_sysLoadBar->setBounds(setupElementArea.removeFromLeft(sc_loadWidth));
     setupElementArea.removeFromLeft(margin);
     if (m_emptySpace)
         m_emptySpace->setBounds(setupElementArea);

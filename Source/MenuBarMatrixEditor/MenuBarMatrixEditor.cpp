@@ -107,8 +107,11 @@ void MenuBarMatrixEditor::paint (Graphics& g)
 
 void MenuBarMatrixEditor::resized()
 {
-    m_gridLayout.templateRows = { juce::Grid::TrackInfo(juce::Grid::Px(m_inputCtrl->getRequiredSize().getHeight())), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
-    m_gridLayout.templateColumns = { juce::Grid::TrackInfo(juce::Grid::Px(m_outputCtrl->getRequiredSize().getWidth())), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
+    auto requiredInputsHeight = m_inputCtrl->getRequiredSize().getHeight();
+    auto requiredOutputsWidth = m_outputCtrl->getRequiredSize().getWidth();
+    
+    m_gridLayout.templateRows = { juce::Grid::TrackInfo(juce::Grid::Px(requiredInputsHeight)), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
+    m_gridLayout.templateColumns = { juce::Grid::TrackInfo(juce::Grid::Px(requiredOutputsWidth)), juce::Grid::TrackInfo(juce::Grid::Fr(1)) };
     m_gridLayout.performLayout(getLocalBounds());
 }
 
