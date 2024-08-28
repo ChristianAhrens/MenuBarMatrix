@@ -29,8 +29,12 @@ MenuBarMatrixMonitorComponent::~MenuBarMatrixMonitorComponent()
 
 void MenuBarMatrixMonitorComponent::paint(Graphics &g)
 {
+    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::ColourIds::backgroundColourId));
     if (RunningStatus::Active != m_runningStatus)
+    {
+        g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOnId));
         m_startRunningIndicator.paint(g);
+    }
     else
     {
 
@@ -39,6 +43,15 @@ void MenuBarMatrixMonitorComponent::paint(Graphics &g)
 
 void MenuBarMatrixMonitorComponent::resized()
 {
+    m_startRunningIndicator.setBounds(getLocalBounds());
+}
+
+void MenuBarMatrixMonitorComponent::mouseUp(const juce::MouseEvent& e)
+{
+    if (getLocalBounds().contains(e.getPosition()) && e.mouseWasClicked() && m_startRunningIndicator.progress == -1 && onExitClick)
+        onExitClick();
+
+    juce::Component::mouseUp(e);
 }
 
 void MenuBarMatrixMonitorComponent::handleMessage(const Message& message)

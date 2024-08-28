@@ -29,13 +29,15 @@ MainComponent::MainComponent()
 {
     m_networkConnection = std::make_unique<InterprocessConnectionImpl>();
     m_networkConnection->onConnectionMade = [=]() {
-        if (m_monitorComponent)
-            m_monitorComponent->setRunning(true);
-
-        m_currentStatus = Status::Monitoring;
-        resized();
+        DBG(__FUNCTION__);
+        //if (m_monitorComponent)
+        //    m_monitorComponent->setRunning(true);
+        //
+        //m_currentStatus = Status::Monitoring;
+        //resized();
     };
     m_networkConnection->onConnectionLost = [=]() {
+        DBG(__FUNCTION__);
         if (m_monitorComponent)
             m_monitorComponent->setRunning(false);
 
@@ -43,7 +45,7 @@ MainComponent::MainComponent()
         resized();
     };
     m_networkConnection->onMessageReceived = [=](const juce::MemoryBlock& message) {
-        
+        DBG(__FUNCTION__);
         // process incoming to forwarding
         
         if (m_monitorComponent)
@@ -51,6 +53,15 @@ MainComponent::MainComponent()
     };
 
     m_monitorComponent = std::make_unique<MenuBarMatrixMonitorComponent>();
+    m_monitorComponent->onExitClick = [=]() {
+        m_discoverComponent->setDiscoveredServices(m_availableServices->getServices());
+
+        if (m_monitorComponent)
+            m_monitorComponent->setRunning(false);
+
+        m_currentStatus = Status::Discovering;
+        resized();
+    };
     m_monitorComponent->setRunning(false);
     addAndMakeVisible(m_monitorComponent.get());
 
@@ -58,6 +69,9 @@ MainComponent::MainComponent()
     m_discoverComponent->onServiceSelected = [=](const juce::NetworkServiceDiscovery::Service& selectedService) {
         m_currentStatus = Status::Monitoring;
         resized();
+
+        if (m_monitorComponent)
+            m_monitorComponent->setRunning(true);
 
         if (m_networkConnection)
             m_networkConnection->connectToSocket(selectedService.address.toString(), selectedService.port, 100);
