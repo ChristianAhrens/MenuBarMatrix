@@ -45,7 +45,7 @@ private:
     {
     public:
         InterprocessConnectionImpl() : juce::InterprocessConnection() {};
-        virtual ~InterprocessConnectionImpl() {};
+        virtual ~InterprocessConnectionImpl() { disconnect(); };
 
         void connectionMade() override { if (onConnectionMade) onConnectionMade(); };
 
