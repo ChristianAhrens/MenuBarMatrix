@@ -94,7 +94,7 @@ void MeterbridgeComponent::paint(Graphics& g)
             g.drawLine(juce::Line<float>(meterLeft, visuAreaOrigY - holdMeterLength, meterLeft + meterThickness, visuAreaOrigY - holdMeterLength));
             // channel # label
             g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
-            g.drawText(juce::String(i), juce::Rectangle<float>(meterLeft - (0.5f * meterSpacing), visuAreaOrigY - float(margin), meterThickness + meterSpacing, float(margin)), juce::Justification::centred);
+            g.drawText(juce::String(i), juce::Rectangle<float>(meterLeft - (0.5f * meterSpacing), visuAreaOrigY - float(margin + 2), meterThickness + meterSpacing, float(margin)), juce::Justification::centred);
 
             meterLeft += meterThickness + meterSpacing;
         }
@@ -156,7 +156,7 @@ void MeterbridgeComponent::paint(Graphics& g)
             g.drawLine(juce::Line<float>(visuAreaOrigX + holdMeterLength, meterTop, visuAreaOrigX + holdMeterLength, meterTop + meterThickness));
             // channel # label
             g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
-            g.drawText(juce::String(i), juce::Rectangle<float>(visuAreaOrigX, meterTop - (0.5f * meterSpacing), float(0.5f * meterMaxLength), meterThickness), juce::Justification::centred);
+            g.drawText(juce::String(i), juce::Rectangle<float>(visuAreaOrigX, meterTop, float(0.5f * meterMaxLength), meterThickness), juce::Justification::centred);
 
             meterTop += meterThickness + meterSpacing;
         }
