@@ -61,6 +61,8 @@ public:
         // (Our component is opaque, so we must completely fill the background with a solid colour)
         g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
 
+        g.setColour(getLookAndFeel().findColour(juce::LookAndFeel_V4::ColourScheme::defaultFill));
+
         float dashValues[2] = {4, 4};
         g.drawDashedLine(juce::Line<float>(getLocalBounds().getTopLeft().toFloat(), getLocalBounds().getBottomRight().toFloat()), dashValues, 2);
 
