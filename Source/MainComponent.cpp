@@ -34,7 +34,7 @@ public:
     {
         auto bounds = getLocalBounds().toFloat();
 
-        g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        g.setColour(getLookAndFeel().findColour(juce::LookAndFeel_V4::ColourScheme::windowBackground));
         g.fillRect(bounds);
 
         g.setColour(getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
@@ -134,7 +134,7 @@ MainComponent::~MainComponent()
 
 void MainComponent::paint(Graphics &g)
 {
-    g.fillAll(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
+    g.fillAll(getLookAndFeel().findColour(juce::LookAndFeel_V4::ColourScheme::defaultFill));
 }
 
 void MainComponent::resized()
