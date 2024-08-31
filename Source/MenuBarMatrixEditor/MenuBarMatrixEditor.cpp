@@ -148,14 +148,14 @@ std::unique_ptr<XmlElement> MenuBarMatrixEditor::createStateXml()
     //
     //return std::make_unique<XmlElement>(*activeVisualizersElement);
 
-    return nullptr;
+    return std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::EDITORCONFIG));
 }
 
-bool MenuBarMatrixEditor::setStateXml(XmlElement* /*stateXml*/)
+bool MenuBarMatrixEditor::setStateXml(XmlElement* stateXml)
 {
-    //if (!stateXml || (stateXml->getTagName() != AppConfiguration::getTagName(AppConfiguration::TagID::VISU)))
-    //    return false;
-    //
+    if (!stateXml || (stateXml->getTagName() != AppConfiguration::getTagName(AppConfiguration::TagID::EDITORCONFIG)))
+        return false;
+    
     //std::set<AbstractAudioVisualizer::VisuType> visualizerTypes = {};
     //std::map< AbstractAudioVisualizer::VisuType, XmlElement*> visualizerXmlElements;
     //for (auto visualizerChildElement : stateXml->getChildIterator())

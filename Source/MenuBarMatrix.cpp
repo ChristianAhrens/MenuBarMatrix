@@ -28,7 +28,20 @@ namespace MenuBarMatrix
 MenuBarMatrix::MenuBarMatrix() :
     juce::Component(), juce::Timer()
 {
-    m_menuBarMatrixProcessor = std::make_unique<MenuBarMatrixProcessor>();
+    // create the configuration object (is being initialized from disk automatically)
+    m_config = std::make_unique<AppConfiguration>(JUCEAppBasics::AppConfigurationBase::getDefaultConfigFilePath());
+    m_config->addDumper(this);
+
+    // check if config creation was able to read a valid config from disk...
+    if (!m_config->isValid())
+    {
+        m_config->ResetToDefault();
+    }
+
+    // add this main component to watchers
+    m_config->addWatcher(this, true); // this initial update cannot yet reach all parts of the app, esp. settings page that relies on fully initialized pagecomponentmanager, therefor a manual watcher update is triggered below
+
+    m_menuBarMatrixProcessor = std::make_unique<MenuBarMatrixProcessor>(m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORCONFIG)).get());
 
     m_audioDeviceSelectComponent = std::make_unique<AudioSelectComponent>(m_menuBarMatrixProcessor->getDeviceManager(),
                                                                           MenuBarMatrixProcessor::s_minInputsCount,
@@ -36,6 +49,9 @@ MenuBarMatrix::MenuBarMatrix() :
                                                                           MenuBarMatrixProcessor::s_minOutputsCount,
                                                                           MenuBarMatrixProcessor::s_maxChannelCount,
                                                                           false, false, false, false);
+
+    // do the initial update for the whole application with config contents
+    m_config->triggerWatcherUpdate();
 
     startTimer(500);
 }
@@ -79,6 +95,50 @@ juce::Component* MenuBarMatrix::getDeviceSetupComponent()
         return m_audioDeviceSelectComponent.get();
     else
         return nullptr;
+}
+
+void MenuBarMatrix::performConfigurationDump()
+{
+    if (m_config)
+    {
+        auto stateXml = m_config->getConfigState();
+
+        if (m_menuBarMatrixProcessor)
+        {
+            auto processorStateXml = m_menuBarMatrixProcessor->createStateXml();
+            if (!stateXml->replaceChildElement(stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORCONFIG)), processorStateXml.get()))
+                stateXml->addChildElement(processorStateXml.get());
+            processorStateXml.release();
+
+            if (auto editor = dynamic_cast<MenuBarMatrixEditor*>(m_menuBarMatrixProcessor->getActiveEditor()))
+            {
+                auto editorStateXml = editor->createStateXml();
+                if (!stateXml->replaceChildElement(stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::EDITORCONFIG)), editorStateXml.get()))
+                    stateXml->addChildElement(editorStateXml.get());
+                editorStateXml.release();
+            }
+        }
+
+        m_config->setConfigState(std::move(stateXml));
+    }
+}
+
+void MenuBarMatrix::onConfigUpdated()
+{
+    auto processorConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORCONFIG));
+    if (processorConfigState && m_menuBarMatrixProcessor)
+    {
+        m_menuBarMatrixProcessor->setStateXml(processorConfigState.get());
+    }
+        
+    auto editorConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::EDITORCONFIG));
+    if (editorConfigState && m_menuBarMatrixProcessor && m_menuBarMatrixProcessor->getActiveEditor())
+    {
+        if (auto editor = dynamic_cast<MenuBarMatrixEditor*>(m_menuBarMatrixProcessor->getActiveEditor()))
+        {
+            editor->setStateXml(editorConfigState.get());
+        }
+    }
 }
 
 

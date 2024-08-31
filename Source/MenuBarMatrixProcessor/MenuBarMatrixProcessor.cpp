@@ -19,6 +19,7 @@
 #include "MenuBarMatrixProcessor.h"
 
 #include "MenuBarMatrixServiceData.h"
+#include "../AppConfiguration.h"
 
 namespace MenuBarMatrix
 {
@@ -170,7 +171,7 @@ void MenuBarMatrixProcessor::CrosspointCommander::crosspointEnabledPoll(int inpu
 
 
 //==============================================================================
-MenuBarMatrixProcessor::MenuBarMatrixProcessor() :
+MenuBarMatrixProcessor::MenuBarMatrixProcessor(XmlElement* stateXml) :
 	juce::AudioProcessor()
 {
 	// prepare max sized processing data buffer
@@ -189,23 +190,28 @@ MenuBarMatrixProcessor::MenuBarMatrixProcessor() :
 
 	m_deviceManager = std::make_unique<AudioDeviceManager>();
 	m_deviceManager->addAudioCallback(this);
-
-	// Hacky bit of device manager initialization:
-	// We first intialize it to be able to get a valid device setup,
-	// then initialize with a dummy xml config to trigger the internal xml structure being reset
-	// and finally apply the original initialized device setup again to have the audio running correctly.
-	// If we did not do so, either the internal xml would not be present as long as the first configuration change was made
-	// and therefor no valid config file could be written by Auvi or the audio would not be running
-	// on first start and manual config would be required.
-	m_deviceManager->initialiseWithDefaultDevices(s_maxChannelCount, s_maxChannelCount);
-	m_deviceManager->addChangeListener(this);
-	auto audioDeviceSetup = m_deviceManager->getAudioDeviceSetup();
-	m_deviceManager->initialise(s_maxChannelCount, s_maxChannelCount, nullptr/*std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::DEVCFG)).get()*/, true, {}, &audioDeviceSetup);
+	
+	if (!setStateXml(stateXml))
+	{
+		// Hacky bit of device manager initialization:
+		// We first intialize it to be able to get a valid device setup,
+		// then initialize with a dummy xml config to trigger the internal xml structure being reset
+		// and finally apply the original initialized device setup again to have the audio running correctly.
+		// If we did not do so, either the internal xml would not be present as long as the first configuration change was made
+		// and therefor no valid config file could be written by Auvi or the audio would not be running
+		// on first start and manual config would be required.
+		m_deviceManager->initialiseWithDefaultDevices(s_maxChannelCount, s_maxChannelCount);
+		m_deviceManager->addChangeListener(this);
+		auto audioDeviceSetup = m_deviceManager->getAudioDeviceSetup();
+		m_deviceManager->initialise(s_maxChannelCount, s_maxChannelCount, std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::DEVCONFIG)).get(), true, {}, &audioDeviceSetup);
 #if JUCE_IOS
-	if (audioDeviceSetup.bufferSize < 512)
-		audioDeviceSetup.bufferSize = 512; // temp. workaround for iOS where buffersizes <512 lead to no sample data being delivered?
+		if (audioDeviceSetup.bufferSize < 512)
+			audioDeviceSetup.bufferSize = 512; // temp. workaround for iOS where buffersizes <512 lead to no sample data being delivered?
 #endif
-	m_deviceManager->setAudioDeviceSetup(audioDeviceSetup, true);
+		m_deviceManager->setAudioDeviceSetup(audioDeviceSetup, true);
+
+		triggerConfigurationUpdate(false);
+	}
 
 	// init the announcement of this app instance as discoverable service
 	m_serviceAdvertiser = std::make_unique<juce::NetworkServiceDiscovery::Advertiser>(
@@ -237,6 +243,36 @@ MenuBarMatrixProcessor::~MenuBarMatrixProcessor()
 	for (auto i = 0; i < s_maxChannelCount; i++)
 		delete[] m_processorChannels[i];
 	delete[] m_processorChannels;
+}
+
+std::unique_ptr<XmlElement> MenuBarMatrixProcessor::createStateXml()
+{
+	auto stateXml = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORCONFIG));
+	if (m_deviceManager)
+	{
+		auto devConfElm = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::DEVCONFIG));
+		devConfElm->addChildElement(m_deviceManager->createStateXml().release());
+		stateXml->addChildElement(devConfElm.release());
+	}
+	else
+		return nullptr;
+
+	return std::move(stateXml);
+}
+
+bool MenuBarMatrixProcessor::setStateXml(XmlElement* stateXml)
+{
+	if (nullptr == stateXml || stateXml->getTagName() != AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORCONFIG))
+		return false;
+
+	auto devConfElm = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::DEVCONFIG));
+	if (devConfElm && m_deviceManager)
+	{
+		m_deviceManager->initialise(s_maxChannelCount, s_maxChannelCount, devConfElm->getChildByName("DEVICESETUP"), true);
+		return true;
+	}
+	else
+		return false;
 }
 
 void MenuBarMatrixProcessor::addInputListener(ProcessorDataAnalyzer::Listener* listener)
@@ -493,7 +529,7 @@ void MenuBarMatrixProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffer
 	postMessage(new AudioInputBufferMessage(buffer));
 
 	// process data in buffer to be what shall be used as output
-	AudioBuffer<float> processedBuffer;
+	juce::AudioBuffer<float> processedBuffer;
 	processedBuffer.setSize(m_outputChannelCount, buffer.getNumSamples(), false, true, true);
 	for (auto inputIdx = 0; inputIdx < m_inputChannelCount; inputIdx++)
 	{

@@ -20,6 +20,8 @@
 
 #include <JuceHeader.h>
 
+#include "AppConfiguration.h"
+
 
 namespace MenuBarMatrix
 {
@@ -36,7 +38,10 @@ class MenuBarMatrixRemoteWrapper;
 /*
  *
  */
-class MenuBarMatrix   :    public juce::Component, public juce::Timer
+class MenuBarMatrix   : public juce::Component,
+                        public juce::Timer,
+                        public AppConfiguration::Dumper,
+                        public AppConfiguration::Watcher
 {
 public:
     MenuBarMatrix();
@@ -53,11 +58,17 @@ public:
     std::function<void(int)> onCpuUsageUpdate;
     std::function<void(juce::Rectangle<int>)> onSizeChangeRequested;
 
+    //==========================================================================
+    void performConfigurationDump() override;
+    void onConfigUpdated() override;
+
 private:
     std::unique_ptr<MenuBarMatrixProcessor>        m_menuBarMatrixProcessor;
 
     std::unique_ptr<MenuBarMatrixEditor>           m_audioVisuComponent;
     std::unique_ptr<AudioSelectComponent>          m_audioDeviceSelectComponent;
+
+    std::unique_ptr<AppConfiguration>               m_config;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuBarMatrix)
 };
