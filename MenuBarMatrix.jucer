@@ -27,6 +27,7 @@
               file="Resources/Images/power_settings_24dp.svg"/>
         <FILE id="xCV27q" name="tune_24dp.svg" compile="0" resource="1" file="Resources/Images/tune_24dp.svg"/>
       </GROUP>
+      <FILE id="pqcvEg" name="Default.config" compile="0" resource="1" file="Resources/Default.config"/>
     </GROUP>
     <GROUP id="{B4C42B10-6A29-1C3A-435D-5CB7A9DE671E}" name="Source">
       <GROUP id="{DCDB6122-F952-CB92-8481-8567B7B7F7C0}" name="MenuBarMatrixProcessor">
@@ -89,6 +90,10 @@
         <FILE id="VL9U7B" name="OutputControlComponent.h" compile="0" resource="0"
               file="Source/MenuBarMatrixEditor/OutputControlComponent.h"/>
       </GROUP>
+      <FILE id="NVRWpP" name="AppConfiguration.cpp" compile="1" resource="0"
+            file="Source/AppConfiguration.cpp"/>
+      <FILE id="LKp1G8" name="AppConfiguration.h" compile="0" resource="0"
+            file="Source/AppConfiguration.h"/>
       <FILE id="cIlQwP" name="MenuBarMatrix.cpp" compile="1" resource="0"
             file="Source/MenuBarMatrix.cpp"/>
       <FILE id="NIfaWb" name="MenuBarMatrix.h" compile="0" resource="0" file="Source/MenuBarMatrix.h"/>

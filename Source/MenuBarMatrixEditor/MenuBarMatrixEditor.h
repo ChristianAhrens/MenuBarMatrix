@@ -109,8 +109,8 @@ public:
     void lookAndFeelChanged() override;
 
     //==========================================================================
-    std::unique_ptr<XmlElement> createStateXml() override;
-    bool setStateXml(XmlElement* stateXml) override;
+    std::unique_ptr<juce::XmlElement> createStateXml() override;
+    bool setStateXml(juce::XmlElement* stateXml) override;
 
     //==========================================================================
     std::function<void(juce::Rectangle<int>)> onSizeChangeRequested;

@@ -22,6 +22,7 @@
 
 #include "ProcessorDataAnalyzer.h"
 #include "../MenuBarMatrixEditor/MenuBarMatrixEditor.h"
+#include "../AppConfiguration.h"
 
 
 namespace MenuBarMatrix
@@ -34,7 +35,8 @@ namespace MenuBarMatrix
 class MenuBarMatrixProcessor :  public juce::AudioProcessor,
 					            public juce::AudioIODeviceCallback,
                                 public juce::MessageListener,
-                                public juce::ChangeListener
+                                public juce::ChangeListener,
+                                public AppConfiguration::XmlConfigurableElement
 {
 public:
     class ChannelCommander
@@ -198,7 +200,7 @@ private:
     };
 
 public:
-    MenuBarMatrixProcessor();
+    MenuBarMatrixProcessor(XmlElement* stateXml);
     ~MenuBarMatrixProcessor();
 
     //==============================================================================
@@ -272,6 +274,10 @@ public:
 
     //==============================================================================
     void handleMessage(const Message& message) override;
+
+    //==============================================================================
+    std::unique_ptr<XmlElement> createStateXml() override;
+    bool setStateXml(XmlElement* stateXml) override;
 
     //==============================================================================
     enum dBRange
