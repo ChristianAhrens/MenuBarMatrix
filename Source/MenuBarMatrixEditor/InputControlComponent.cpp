@@ -99,7 +99,6 @@ void InputControlComponent::processingDataChanged(AbstractProcessorData *data)
 
 void InputControlComponent::processChanges()
 {
-
     if (m_inputLevels)
         m_inputLevels->processingDataChanged(&m_levelData);
 
