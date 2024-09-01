@@ -268,8 +268,14 @@ bool MenuBarMatrixProcessor::setStateXml(XmlElement* stateXml)
 	auto devConfElm = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::DEVCONFIG));
 	if (devConfElm && m_deviceManager)
 	{
-		m_deviceManager->initialise(s_maxChannelCount, s_maxChannelCount, devConfElm->getChildByName("DEVICESETUP"), true);
-		return true;
+		auto result = m_deviceManager->initialise(s_maxChannelCount, s_maxChannelCount, devConfElm->getChildByName("DEVICESETUP"), true);
+        if (result.isNotEmpty())
+        {
+            juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, juce::JUCEApplication::getInstance()->getApplicationName() + " device init failed", result);
+            return false;
+        }
+        else
+            return true;
 	}
 	else
 		return false;
