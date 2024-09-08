@@ -111,13 +111,15 @@ void CrosspointsControlComponent::setIOCount(int inputCount, int outputCount)
 
         if (onBoundsRequirementChange)
             onBoundsRequirementChange();
+        
+        resized();
     }
 }
 
 juce::Rectangle<int> CrosspointsControlComponent::getRequiredSize()
 {
     if (m_crosspointComponent.size() > 0 && m_crosspointComponent.count(1) != 0 && m_crosspointComponent.at(1).size() > 0)
-        return { int(m_crosspointComponent.at(1).size() * (s_nodeGap + s_nodeSize)), int(m_crosspointComponent.size() * (s_nodeGap + s_nodeSize)) };
+        return { int(m_crosspointComponent.size() * (s_nodeGap + s_nodeSize)), int(m_crosspointComponent.at(1).size() * (s_nodeGap + s_nodeSize)) };
     else
         return {};
 }
