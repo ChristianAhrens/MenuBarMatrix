@@ -203,7 +203,7 @@ MenuBarMatrixProcessor::MenuBarMatrixProcessor(XmlElement* stateXml) :
 		m_deviceManager->initialiseWithDefaultDevices(s_maxChannelCount, s_maxChannelCount);
 		m_deviceManager->addChangeListener(this);
 		auto audioDeviceSetup = m_deviceManager->getAudioDeviceSetup();
-		m_deviceManager->initialise(s_maxChannelCount, s_maxChannelCount, std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::DEVCONFIG)).get(), true, {}, &audioDeviceSetup);
+		m_deviceManager->initialise(s_maxChannelCount, s_maxChannelCount, nullptr, true, {}, &audioDeviceSetup);
 #if JUCE_IOS
 		if (audioDeviceSetup.bufferSize < 512)
 			audioDeviceSetup.bufferSize = 512; // temp. workaround for iOS where buffersizes <512 lead to no sample data being delivered?
