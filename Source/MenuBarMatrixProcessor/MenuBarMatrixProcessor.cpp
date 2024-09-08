@@ -478,6 +478,23 @@ void MenuBarMatrixProcessor::setOutputMuteState(int outputChannelNumber, bool mu
 	m_outputMuteStates[outputChannelNumber] = muted;
 }
 
+void MenuBarMatrixProcessor::setChannelCounts(int inputChannelCount, int outputChannelCount)
+{
+    auto reinitRequired = false;
+    if (m_inputChannelCount != inputChannelCount)
+    {
+        m_inputChannelCount = inputChannelCount;
+        reinitRequired = true;
+    }
+    if (m_outputChannelCount != outputChannelCount)
+    {
+        m_outputChannelCount = outputChannelCount;
+        reinitRequired = true;
+    }
+    if (reinitRequired)
+        postMessage(new ReinitIOCountMessage(m_inputChannelCount, m_outputChannelCount));
+}
+
 AudioDeviceManager* MenuBarMatrixProcessor::getDeviceManager()
 {
 	if (m_deviceManager)
@@ -677,19 +694,8 @@ void MenuBarMatrixProcessor::audioDeviceIOCallbackWithContext(const float* const
     
 	const ScopedLock sl(m_readLock);
 
-	auto reinitRequired = false;
-	if (m_inputChannelCount != numInputChannels)
-	{
-		m_inputChannelCount = numInputChannels;
-		reinitRequired = true;
-	}
-	if (m_outputChannelCount != numOutputChannels)
-	{
-		m_outputChannelCount = numOutputChannels;
-		reinitRequired = true;
-	}
-	if (reinitRequired)
-		postMessage(new ReinitIOCountMessage(m_inputChannelCount, m_outputChannelCount));
+    jassert(m_inputChannelCount == numInputChannels);
+    jassert(m_outputChannelCount == numOutputChannels);
 
 	auto maxActiveChannels = std::max(numInputChannels, numOutputChannels);
 
@@ -725,7 +731,20 @@ void MenuBarMatrixProcessor::audioDeviceIOCallbackWithContext(const float* const
 void MenuBarMatrixProcessor::audioDeviceAboutToStart(AudioIODevice* device)
 {
 	if (device)
-		prepareToPlay(device->getCurrentSampleRate(), device->getCurrentBufferSizeSamples());
+    {
+        auto activeInputs = device->getActiveInputChannels();
+        auto inputChannelCnt  = activeInputs.getHighestBit() + 1; // from JUCE documentation
+        auto activeOutputs = device->getActiveOutputChannels();
+        auto outputChannelCnt = activeOutputs.getHighestBit() + 1; // from JUCE documentation
+        auto currentSampleRate = device->getCurrentSampleRate();
+        auto currentBufferSize = device->getCurrentBufferSizeSamples();
+        //auto currentBitDepth = device->getCurrentBitDepth();
+        
+        //DBG(juce::String(__FUNCTION__) << " " << device->getName() << " i:" << device->getInputChannelNames().joinIntoString(",") << "(" << inputChannelCnt << ") o:" << device->getOutputChannelNames().joinIntoString(",") << "(" << outputChannelCnt << ")");
+        
+        setChannelCounts(inputChannelCnt, outputChannelCnt);
+        prepareToPlay(currentSampleRate, currentBufferSize);
+    }
 }
 
 void MenuBarMatrixProcessor::audioDeviceStopped()

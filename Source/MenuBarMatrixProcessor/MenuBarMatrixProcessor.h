@@ -232,6 +232,7 @@ public:
     bool getOutputMuteState(int channelNumber);
     void setOutputMuteState(int channelNumber, bool muted, ChannelCommander* sender = nullptr);
 
+    void setChannelCounts(int inputChannelCount, int outputChannelCount);
 
     //==============================================================================
     AudioDeviceManager* getDeviceManager();
