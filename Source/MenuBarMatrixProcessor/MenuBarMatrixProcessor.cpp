@@ -190,26 +190,11 @@ MenuBarMatrixProcessor::MenuBarMatrixProcessor(XmlElement* stateXml) :
 
 	m_deviceManager = std::make_unique<AudioDeviceManager>();
 	m_deviceManager->addAudioCallback(this);
+    m_deviceManager->addChangeListener(this);
 	
 	if (!setStateXml(stateXml))
 	{
-		// Hacky bit of device manager initialization:
-		// We first intialize it to be able to get a valid device setup,
-		// then initialize with a dummy xml config to trigger the internal xml structure being reset
-		// and finally apply the original initialized device setup again to have the audio running correctly.
-		// If we did not do so, either the internal xml would not be present as long as the first configuration change was made
-		// and therefor no valid config file could be written by Auvi or the audio would not be running
-		// on first start and manual config would be required.
-		m_deviceManager->initialiseWithDefaultDevices(s_maxChannelCount, s_maxChannelCount);
-		m_deviceManager->addChangeListener(this);
-		auto audioDeviceSetup = m_deviceManager->getAudioDeviceSetup();
-		m_deviceManager->initialise(s_maxChannelCount, s_maxChannelCount, nullptr, true, {}, &audioDeviceSetup);
-#if JUCE_IOS
-		if (audioDeviceSetup.bufferSize < 512)
-			audioDeviceSetup.bufferSize = 512; // temp. workaround for iOS where buffersizes <512 lead to no sample data being delivered?
-#endif
-		m_deviceManager->setAudioDeviceSetup(audioDeviceSetup, true);
-
+        setStateXml(nullptr); // call without actual xml config causes default init
 		triggerConfigurationUpdate(false);
 	}
 
@@ -262,20 +247,41 @@ std::unique_ptr<XmlElement> MenuBarMatrixProcessor::createStateXml()
 
 bool MenuBarMatrixProcessor::setStateXml(XmlElement* stateXml)
 {
-	if (nullptr == stateXml || stateXml->getTagName() != AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORCONFIG))
-		return false;
-
-	auto devConfElm = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::DEVCONFIG));
-	if (devConfElm && m_deviceManager)
+    juce::XmlElement* deviceSetupXml = nullptr;
+    
+	if (nullptr != stateXml && stateXml->getTagName() == AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORCONFIG))
+    {
+        auto devConfElm = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::DEVCONFIG));
+        if (nullptr != devConfElm)
+            deviceSetupXml = devConfElm->getChildByName("DEVICESETUP");
+    }
+    
+	if (m_deviceManager)
 	{
-		auto result = m_deviceManager->initialise(s_maxChannelCount, s_maxChannelCount, devConfElm->getChildByName("DEVICESETUP"), true);
+        // Hacky bit of device manager initialization:
+        // We first intialize it to be able to get a valid device setup,
+        // then initialize with a dummy xml config to trigger the internal xml structure being reset
+        // and finally apply the original initialized device setup again to have the audio running correctly.
+        // If we did not do so, either the internal xml would not be present as long as the first configuration change was made
+        // and therefor no valid config file could be written by the application or the audio would not be running
+        // on first start and manual config would be required.
+        m_deviceManager->initialiseWithDefaultDevices(s_maxChannelCount, s_maxChannelCount);
+        auto audioDeviceSetup = m_deviceManager->getAudioDeviceSetup();
+		auto result = m_deviceManager->initialise(s_maxChannelCount, s_maxChannelCount, deviceSetupXml, true, {}, &audioDeviceSetup);
         if (result.isNotEmpty())
         {
             juce::AlertWindow::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, juce::JUCEApplication::getInstance()->getApplicationName() + " device init failed", result);
             return false;
         }
         else
+        {
+#if JUCE_IOS
+            if (audioDeviceSetup.bufferSize < 512)
+                audioDeviceSetup.bufferSize = 512; // temp. workaround for iOS where buffersizes <512 lead to no sample data being delivered?
+#endif
+            m_deviceManager->setAudioDeviceSetup(audioDeviceSetup, true);
             return true;
+        }
 	}
 	else
 		return false;
@@ -692,7 +698,7 @@ void MenuBarMatrixProcessor::audioDeviceIOCallbackWithContext(const float* const
 {
     ignoreUnused(context);
     
-	const ScopedLock sl(m_readLock);
+	const juce::ScopedLock sl(m_readLock);
 
     jassert(m_inputChannelCount == numInputChannels);
     jassert(m_outputChannelCount == numOutputChannels);
@@ -712,8 +718,8 @@ void MenuBarMatrixProcessor::audioDeviceIOCallbackWithContext(const float* const
 	}
 
 	// from juce doxygen: buffer must be the size of max(inCh, outCh) and feeds the input data into the method and is returned with output data
-	AudioBuffer<float> audioBufferToProcess(m_processorChannels, maxActiveChannels, numSamples);
-	MidiBuffer midiBufferToProcess;
+	juce::AudioBuffer<float> audioBufferToProcess(m_processorChannels, maxActiveChannels, numSamples);
+    juce::MidiBuffer midiBufferToProcess;
 	processBlock(audioBufferToProcess, midiBufferToProcess);
 
 	// copy the processed data buffer data to outgoing data
