@@ -760,7 +760,12 @@ void MenuBarMatrixProcessor::audioDeviceStopped()
 
 void MenuBarMatrixProcessor::changeListenerCallback(ChangeBroadcaster* source)
 {
-	ignoreUnused(source);
+	if (source == m_deviceManager.get())
+	{
+		auto config = JUCEAppBasics::AppConfigurationBase::getInstance();
+		if (config != nullptr)
+			config->triggerConfigurationDump(false);
+	}
 }
 
 void MenuBarMatrixProcessor::initializeCtrlValues(int inputCount, int outputCount)

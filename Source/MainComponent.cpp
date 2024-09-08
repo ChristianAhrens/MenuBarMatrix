@@ -96,10 +96,6 @@ MainComponent::MainComponent()
             {
                 setupComponent->setVisible(false);
                 setupComponent->removeFromDesktop();
-
-                auto config = JUCEAppBasics::AppConfigurationBase::getInstance();
-                if (config != nullptr)
-                    config->triggerConfigurationDump(true);
             }
             else
             {
