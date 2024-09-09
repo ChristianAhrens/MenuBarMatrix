@@ -21,7 +21,7 @@
 #include <JuceHeader.h>
 
 #include "AbstractAudioVisualizer.h"
-#include "../MenuBarMatrixProcessor/MenuBarMatrixProcessor.h"
+#include "../MenuBarMatrixProcessor/MenuBarMatrixCommanders.h"
 
 
 namespace MenuBarMatrix
@@ -36,7 +36,7 @@ class MeterbridgeComponent;
 /*
 */
 class InputControlComponent :   public AbstractAudioVisualizer,
-                                public MenuBarMatrixProcessor::InputCommander,
+                                public MenuBarMatrixInputCommander,
                                 public juce::TextButton::Listener
 {
 public:

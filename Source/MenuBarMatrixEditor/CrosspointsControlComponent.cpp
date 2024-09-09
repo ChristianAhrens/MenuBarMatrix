@@ -24,7 +24,7 @@ namespace MenuBarMatrix
 
 //==============================================================================
 CrosspointsControlComponent::CrosspointsControlComponent()
-    : MenuBarMatrixProcessor::CrosspointCommander()
+    : MenuBarMatrixCrosspointCommander()
 {
     m_matrixGrid.rowGap.pixels = s_nodeGap;
     m_matrixGrid.columnGap.pixels = s_nodeGap;

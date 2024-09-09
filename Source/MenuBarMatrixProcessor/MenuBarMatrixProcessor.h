@@ -28,6 +28,11 @@
 namespace MenuBarMatrix
 {
 
+class MenuBarMatrixChannelCommander;
+class MenuBarMatrixInputCommander;
+class MenuBarMatrixOutputCommander;
+class MenuBarMatrixCrosspointCommander;
+
 
 //==============================================================================
 /*
@@ -38,100 +43,6 @@ class MenuBarMatrixProcessor :  public juce::AudioProcessor,
                                 public juce::ChangeListener,
                                 public AppConfiguration::XmlConfigurableElement
 {
-public:
-    class ChannelCommander
-    {
-    public:
-        ChannelCommander();
-        virtual ~ChannelCommander();
-
-        virtual void setChannelCount(int channelCount) = 0;
-
-    protected:
-
-    private:
-    };
-
-    class InputCommander : public ChannelCommander
-    {
-    public:
-        InputCommander();
-        virtual ~InputCommander() override;
-
-        void setInputMuteChangeCallback(const std::function<void(InputCommander* sender, int, bool)>& callback);
-        void setInputLevelChangeCallback(const std::function<void(InputCommander* sender, int, float)>& callback);
-        void setInputMutePollCallback(const std::function<void(InputCommander* sender, int)>& callback);
-        void setInputLevelPollCallback(const std::function<void(InputCommander* sender, int)>& callback);
-
-        virtual void setInputMute(unsigned int channel, bool muteState) = 0;
-        virtual void setInputLevel(unsigned int channel, float levelValue) { ignoreUnused(channel); ignoreUnused(levelValue); };
-
-    protected:
-        void inputMuteChange(int channel, bool muteState);
-        void inputLevelChange(int channel, float levelValue);
-        
-        void inputMutePoll(int channel);
-        void inputLevelPoll(int channel);
-
-    private:
-        std::function<void(InputCommander* sender, int, float)> m_inputLevelChangeCallback{ nullptr };
-        std::function<void(InputCommander* sender, int)>        m_inputLevelPollCallback{ nullptr };
-        std::function<void(InputCommander* sender, int, bool)>  m_inputMuteChangeCallback{ nullptr };
-        std::function<void(InputCommander* sender, int)>        m_inputMutePollCallback{ nullptr };
-    };
-
-    class OutputCommander : public ChannelCommander
-    {
-    public:
-        OutputCommander();
-        virtual ~OutputCommander() override;
-
-        void setOutputMuteChangeCallback(const std::function<void(OutputCommander* sender, int, bool)>& callback);
-        void setOutputLevelChangeCallback(const std::function<void(OutputCommander* sender, int, float)>& callback);
-        void setOutputMutePollCallback(const std::function<void(OutputCommander* sender, int)>& callback);
-        void setOutputLevelPollCallback(const std::function<void(OutputCommander* sender, int)>& callback);
-
-        virtual void setOutputMute(unsigned int channel, bool muteState) = 0;
-        virtual void setOutputLevel(unsigned int channel, float levelValue) { ignoreUnused(channel); ignoreUnused(levelValue); };
-
-    protected:
-        void outputMuteChange(int channel, bool muteState);
-        void outputLevelChange(int channel, float levelValue);
-        
-        void outputMutePoll(int channel);
-        void outputLevelPoll(int channel);
-
-    private:
-        std::function<void(OutputCommander* sender, int, float)>    m_outputLevelChangeCallback{ nullptr };
-        std::function<void(OutputCommander* sender, int)>           m_outputLevelPollCallback{ nullptr };
-        std::function<void(OutputCommander* sender, int, bool)>     m_outputMuteChangeCallback{ nullptr };
-        std::function<void(OutputCommander* sender, int)>           m_outputMutePollCallback{ nullptr };
-    };
-    
-    class CrosspointCommander : public ChannelCommander
-    {
-    public:
-        CrosspointCommander();
-        virtual ~CrosspointCommander() override;
-
-        void setCrosspointEnabledChangeCallback(const std::function<void(CrosspointCommander* sender, int, int, bool)>& callback);
-        void setCrosspointEnabledPollCallback(const std::function<void(CrosspointCommander* sender, int, int)>& callback);
-
-        virtual void setCrosspointEnabledValue(int input, int output, bool enabledState) = 0;
-
-        virtual void setIOCount(int inputCount, int outputCount) = 0;
-
-    protected:
-        void crosspointEnabledChange(int input, int output, bool enabledState);
-        void crosspointEnabledPoll(int input, int output);
-
-    private:
-        void setChannelCount(int channelCount) override { ignoreUnused(channelCount); };
-
-        std::function<void(CrosspointCommander* sender, int, int, bool)> m_crosspointEnabledChangeCallback{ nullptr };
-        std::function<void(CrosspointCommander* sender, int, int)>       m_crosspointEnabledPollCallback{ nullptr };
-    };
-
 private:
     class InterprocessConnectionImpl : public juce::InterprocessConnection
     {
@@ -189,27 +100,27 @@ public:
     void removeOutputListener(ProcessorDataAnalyzer::Listener* listener);
 
     //==============================================================================
-    void addInputCommander(InputCommander* commander);
-    void initializeInputCommander(InputCommander* commander);
-    void removeInputCommander(InputCommander* commander);
+    void addInputCommander(MenuBarMatrixInputCommander* commander);
+    void initializeInputCommander(MenuBarMatrixInputCommander* commander);
+    void removeInputCommander(MenuBarMatrixInputCommander* commander);
 
-    void addOutputCommander(OutputCommander* commander);
-    void initializeOutputCommander(OutputCommander* commander);
-    void removeOutputCommander(OutputCommander* comander);
+    void addOutputCommander(MenuBarMatrixOutputCommander* commander);
+    void initializeOutputCommander(MenuBarMatrixOutputCommander* commander);
+    void removeOutputCommander(MenuBarMatrixOutputCommander* comander);
 
-    void addCrosspointCommander(CrosspointCommander* commander);
-    void initializeCrosspointCommander(CrosspointCommander* commander);
-    void removeCrosspointCommander(CrosspointCommander* comander);
+    void addCrosspointCommander(MenuBarMatrixCrosspointCommander* commander);
+    void initializeCrosspointCommander(MenuBarMatrixCrosspointCommander* commander);
+    void removeCrosspointCommander(MenuBarMatrixCrosspointCommander* comander);
 
     //==============================================================================
     bool getInputMuteState(int channelNumber);
-    void setInputMuteState(int channelNumber, bool muted, ChannelCommander* sender = nullptr);
+    void setInputMuteState(int channelNumber, bool muted, MenuBarMatrixChannelCommander* sender = nullptr);
     
     bool getMatrixCrosspointEnabledValue(int inputNumber, int outputNumber);
-    void setMatrixCrosspointEnabledValue(int inputNumber, int outputNumber, bool enabled, ChannelCommander* sender = nullptr);
+    void setMatrixCrosspointEnabledValue(int inputNumber, int outputNumber, bool enabled, MenuBarMatrixChannelCommander* sender = nullptr);
 
     bool getOutputMuteState(int channelNumber);
-    void setOutputMuteState(int channelNumber, bool muted, ChannelCommander* sender = nullptr);
+    void setOutputMuteState(int channelNumber, bool muted, MenuBarMatrixChannelCommander* sender = nullptr);
 
     void setChannelCounts(int inputChannelCount, int outputChannelCount);
 
@@ -303,9 +214,9 @@ private:
     std::unique_ptr<ProcessorDataAnalyzer>  m_outputDataAnalyzer;
 
     //==============================================================================
-    std::vector<InputCommander*>    m_inputCommanders;
-    std::vector<OutputCommander*>   m_outputCommanders;
-    std::vector<CrosspointCommander*>   m_crosspointCommanders;
+    std::vector<MenuBarMatrixInputCommander*>    m_inputCommanders;
+    std::vector<MenuBarMatrixOutputCommander*>   m_outputCommanders;
+    std::vector<MenuBarMatrixCrosspointCommander*>   m_crosspointCommanders;
 
     //==============================================================================
     std::map<int, bool> m_inputMuteStates;

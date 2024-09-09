@@ -20,6 +20,11 @@
 
 #include <JuceHeader.h>
 
+namespace MenuBarMatrix
+{
+    class ProcessorDataAnalyzer;
+    class MeterbridgeComponent;
+}
 
 class MenuBarMatrixMonitorComponent :   public juce::Component, juce::MessageListener, juce::Timer
 {
@@ -103,6 +108,13 @@ private:
     //========================================================================*
     void updateStartupAnimation();
     void showStartupTimeout();
+
+    //==============================================================================
+    std::unique_ptr<MenuBarMatrix::ProcessorDataAnalyzer>  m_inputDataAnalyzer;
+    std::unique_ptr<MenuBarMatrix::ProcessorDataAnalyzer>  m_outputDataAnalyzer;
+
+    std::unique_ptr<MenuBarMatrix::MeterbridgeComponent> m_inputMeteringComponent;
+    std::unique_ptr<MenuBarMatrix::MeterbridgeComponent> m_outputMeteringComponent;
 
     //========================================================================*
     RunningStatus m_runningStatus = RunningStatus::Inactive;

@@ -26,7 +26,7 @@ namespace MenuBarMatrix
 
 //==============================================================================
 InputControlComponent::InputControlComponent()
-    : AbstractAudioVisualizer(), MenuBarMatrixProcessor::InputCommander()
+    : AbstractAudioVisualizer(), MenuBarMatrixInputCommander()
 {
     setUsesValuesInDB(true);
 
