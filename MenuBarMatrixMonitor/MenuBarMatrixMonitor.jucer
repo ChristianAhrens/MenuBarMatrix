@@ -32,6 +32,8 @@
             resource="0" file="MenuBarMatrixDiscoverComponent.cpp"/>
       <FILE id="GyjlFi" name="MenuBarMatrixDiscoverComponent.h" compile="0"
             resource="0" file="MenuBarMatrixDiscoverComponent.h"/>
+      <FILE id="ISs1AS" name="MenuBarMatrixMessages.h" compile="0" resource="0"
+            file="../Source/MenuBarMatrixMessages.h"/>
       <FILE id="cFC35K" name="MenuBarMatrixMonitorComponent.cpp" compile="1"
             resource="0" file="MenuBarMatrixMonitorComponent.cpp"/>
       <FILE id="NrmWuX" name="MenuBarMatrixMonitorComponent.h" compile="0"

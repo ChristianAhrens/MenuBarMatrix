@@ -133,27 +133,6 @@ public:
     };
 
 private:
-    class ReinitIOCountMessage : public juce::Message
-    {
-    public:
-        ReinitIOCountMessage(int inputs, int outputs) { m_inputCount = inputs; m_outputCount = outputs; }
-
-        juce::MemoryBlock getSerializedMessage() const
-        {
-            juce::MemoryBlock data;
-            data.append(&m_inputCount, sizeof(int));
-            data.append(&m_outputCount, sizeof(int));
-            return data;
-        };
-
-        int getInputCount() const { return m_inputCount; };
-        int getOutputCount() const { return m_outputCount; };
-
-    private:
-        int m_inputCount = 0;
-        int m_outputCount = 0;
-    };
-
     class InterprocessConnectionImpl : public juce::InterprocessConnection
     {
     public:
