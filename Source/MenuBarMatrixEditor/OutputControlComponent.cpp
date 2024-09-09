@@ -26,7 +26,7 @@ namespace MenuBarMatrix
 
 //==============================================================================
 OutputControlComponent::OutputControlComponent()
-    : AbstractAudioVisualizer(), MenuBarMatrixProcessor::OutputCommander()
+    : AbstractAudioVisualizer(), MenuBarMatrixOutputCommander()
 {
     setUsesValuesInDB(true);
 

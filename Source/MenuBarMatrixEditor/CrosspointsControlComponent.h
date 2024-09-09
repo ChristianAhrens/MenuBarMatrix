@@ -20,7 +20,7 @@
 
 #include <JuceHeader.h>
 
-#include "../MenuBarMatrixProcessor/MenuBarMatrixProcessor.h"
+#include "../MenuBarMatrixProcessor/MenuBarMatrixCommanders.h"
 
 
 namespace MenuBarMatrix
@@ -78,7 +78,7 @@ private:
 
 //==============================================================================
 class CrosspointsControlComponent : public juce::Component, 
-    public MenuBarMatrixProcessor::CrosspointCommander
+    public MenuBarMatrixCrosspointCommander
 {
 public:
     CrosspointsControlComponent();

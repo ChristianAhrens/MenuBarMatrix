@@ -22,6 +22,7 @@
 #include "MenuBarMatrixDiscoverComponent.h"
 
 #include <CustomLookAndFeel.h>
+#include "MenuBarMatrixProcessor/MenuBarMatrixMessages.h"
 #include "MenuBarMatrixProcessor/MenuBarMatrixServiceData.h"
 
 MainComponent::MainComponent()
@@ -45,11 +46,9 @@ MainComponent::MainComponent()
         resized();
     };
     m_networkConnection->onMessageReceived = [=](const juce::MemoryBlock& message) {
-        DBG(__FUNCTION__);
-        // process incoming to forwarding
-        
-        if (m_monitorComponent)
-            m_monitorComponent->handleMessage(juce::Message());
+        auto knownMessage = MenuBarMatrix::SerializableMessage::initFromMemoryBlock(message);
+        if (m_monitorComponent && nullptr != knownMessage)
+            m_monitorComponent->handleMessage(*knownMessage);
     };
 
     m_monitorComponent = std::make_unique<MenuBarMatrixMonitorComponent>();

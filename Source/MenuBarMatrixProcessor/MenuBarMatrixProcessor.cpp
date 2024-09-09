@@ -18,157 +18,13 @@
 
 #include "MenuBarMatrixProcessor.h"
 
+#include "MenuBarMatrixCommanders.h"
 #include "MenuBarMatrixServiceData.h"
 #include "MenuBarMatrixMessages.h"
 #include "../AppConfiguration.h"
 
 namespace MenuBarMatrix
 {
-
-
-MenuBarMatrixProcessor::ChannelCommander::ChannelCommander()
-{
-}
-
-MenuBarMatrixProcessor::ChannelCommander::~ChannelCommander()
-{
-}
-
-MenuBarMatrixProcessor::InputCommander::InputCommander()
-{
-}
-
-MenuBarMatrixProcessor::InputCommander::~InputCommander()
-{
-}
-
-void MenuBarMatrixProcessor::InputCommander::setInputMuteChangeCallback(const std::function<void(InputCommander* sender, int, bool)>& callback)
-{
-	m_inputMuteChangeCallback = callback;
-}
-
-
-void MenuBarMatrixProcessor::InputCommander::setInputLevelChangeCallback(const std::function<void(InputCommander* sender, int, float)>& callback)
-{
-	m_inputLevelChangeCallback = callback;
-}
-void MenuBarMatrixProcessor::InputCommander::setInputMutePollCallback(const std::function<void(InputCommander* sender, int)>& callback)
-{
-	m_inputMutePollCallback = callback;
-}
-
-
-void MenuBarMatrixProcessor::InputCommander::setInputLevelPollCallback(const std::function<void(InputCommander* sender, int)>& callback)
-{
-	m_inputLevelPollCallback = callback;
-}
-void MenuBarMatrixProcessor::InputCommander::inputMuteChange(int channel, bool muteState)
-{
-	if (m_inputMuteChangeCallback)
-		m_inputMuteChangeCallback(this, channel, muteState);
-}
-
-
-void MenuBarMatrixProcessor::InputCommander::inputLevelChange(int channel, float levelValue)
-{
-	if (m_inputLevelChangeCallback)
-		m_inputLevelChangeCallback(this, channel, levelValue);
-}
-void MenuBarMatrixProcessor::InputCommander::inputMutePoll(int channel)
-{
-	if (m_inputMutePollCallback)
-		m_inputMutePollCallback(this, channel);
-}
-
-
-void MenuBarMatrixProcessor::InputCommander::inputLevelPoll(int channel)
-{
-	if (m_inputLevelPollCallback)
-		m_inputLevelPollCallback(this, channel);
-}
-
-
-MenuBarMatrixProcessor::OutputCommander::OutputCommander()
-{
-}
-
-MenuBarMatrixProcessor::OutputCommander::~OutputCommander()
-{
-}
-
-void MenuBarMatrixProcessor::OutputCommander::setOutputMuteChangeCallback(const std::function<void(OutputCommander* sender, int, bool)>& callback)
-{
-	m_outputMuteChangeCallback = callback;
-}
-
-void MenuBarMatrixProcessor::OutputCommander::setOutputLevelChangeCallback(const std::function<void(OutputCommander* sender, int, float)>& callback)
-{
-	m_outputLevelChangeCallback = callback;
-}
-void MenuBarMatrixProcessor::OutputCommander::setOutputMutePollCallback(const std::function<void(OutputCommander* sender, int)>& callback)
-{
-	m_outputMutePollCallback = callback;
-}
-
-void MenuBarMatrixProcessor::OutputCommander::setOutputLevelPollCallback(const std::function<void(OutputCommander* sender, int)>& callback)
-{
-	m_outputLevelPollCallback = callback;
-}
-
-void MenuBarMatrixProcessor::OutputCommander::outputMuteChange(int channel, bool muteState)
-{
-	if (m_outputMuteChangeCallback)
-		m_outputMuteChangeCallback(nullptr, channel, muteState);
-}
-
-void MenuBarMatrixProcessor::OutputCommander::outputLevelChange(int channel, float levelValue)
-{
-	if (m_outputLevelChangeCallback)
-		m_outputLevelChangeCallback(nullptr, channel, levelValue);
-}
-
-void MenuBarMatrixProcessor::OutputCommander::outputMutePoll(int channel)
-{
-	if (m_outputMutePollCallback)
-		m_outputMutePollCallback(nullptr, channel);
-}
-
-void MenuBarMatrixProcessor::OutputCommander::outputLevelPoll(int channel)
-{
-	if (m_outputLevelPollCallback)
-		m_outputLevelPollCallback(nullptr, channel);
-}
-
-
-MenuBarMatrixProcessor::CrosspointCommander::CrosspointCommander()
-{
-}
-
-MenuBarMatrixProcessor::CrosspointCommander::~CrosspointCommander()
-{
-}
-
-void MenuBarMatrixProcessor::CrosspointCommander::setCrosspointEnabledChangeCallback(const std::function<void(CrosspointCommander* sender, int, int, bool)>& callback)
-{
-	m_crosspointEnabledChangeCallback = callback;
-}
-
-void MenuBarMatrixProcessor::CrosspointCommander::setCrosspointEnabledPollCallback(const std::function<void(CrosspointCommander* sender, int, int)>& callback)
-{
-	m_crosspointEnabledPollCallback = callback;
-}
-
-void MenuBarMatrixProcessor::CrosspointCommander::crosspointEnabledChange(int input, int output, bool enabledState)
-{
-	if (m_crosspointEnabledChangeCallback)
-		m_crosspointEnabledChangeCallback(nullptr, input, output, enabledState);
-}
-
-void MenuBarMatrixProcessor::CrosspointCommander::crosspointEnabledPoll(int input, int output)
-{
-	if (m_crosspointEnabledPollCallback)
-		m_crosspointEnabledPollCallback(nullptr, input, output);
-}
 
 
 //==============================================================================
@@ -312,7 +168,7 @@ void MenuBarMatrixProcessor::removeOutputListener(ProcessorDataAnalyzer::Listene
 		m_outputDataAnalyzer->removeListener(listener);
 }
 
-void MenuBarMatrixProcessor::addInputCommander(InputCommander* commander)
+void MenuBarMatrixProcessor::addInputCommander(MenuBarMatrixInputCommander* commander)
 {
 	if (commander == nullptr)
 		return;
@@ -322,11 +178,11 @@ void MenuBarMatrixProcessor::addInputCommander(InputCommander* commander)
 		initializeInputCommander(commander);
 
 		m_inputCommanders.push_back(commander);
-		commander->setInputMuteChangeCallback([=](ChannelCommander* sender, int channel, bool state) { return setInputMuteState(channel, state, sender); } );
+		commander->setInputMuteChangeCallback([=](MenuBarMatrixChannelCommander* sender, int channel, bool state) { return setInputMuteState(channel, state, sender); } );
 	}
 }
 
-void MenuBarMatrixProcessor::initializeInputCommander(InputCommander* commander)
+void MenuBarMatrixProcessor::initializeInputCommander(MenuBarMatrixInputCommander* commander)
 {
 	if (nullptr != commander)
 	{
@@ -336,7 +192,7 @@ void MenuBarMatrixProcessor::initializeInputCommander(InputCommander* commander)
 	}
 }
 
-void MenuBarMatrixProcessor::removeInputCommander(InputCommander* commander)
+void MenuBarMatrixProcessor::removeInputCommander(MenuBarMatrixInputCommander* commander)
 {
 	if (commander == nullptr)
 		return;
@@ -346,7 +202,7 @@ void MenuBarMatrixProcessor::removeInputCommander(InputCommander* commander)
 		m_inputCommanders.erase(existingInputCommander);
 }
 
-void MenuBarMatrixProcessor::addOutputCommander(OutputCommander* commander)
+void MenuBarMatrixProcessor::addOutputCommander(MenuBarMatrixOutputCommander* commander)
 {
 	if (commander == nullptr)
 		return;
@@ -356,11 +212,11 @@ void MenuBarMatrixProcessor::addOutputCommander(OutputCommander* commander)
 		initializeOutputCommander(commander);
 
 		m_outputCommanders.push_back(commander);
-		commander->setOutputMuteChangeCallback([=](ChannelCommander* sender, int channel, bool state) { return setOutputMuteState(channel, state, sender); });
+		commander->setOutputMuteChangeCallback([=](MenuBarMatrixChannelCommander* sender, int channel, bool state) { return setOutputMuteState(channel, state, sender); });
 	}
 }
 
-void MenuBarMatrixProcessor::initializeOutputCommander(OutputCommander* commander)
+void MenuBarMatrixProcessor::initializeOutputCommander(MenuBarMatrixOutputCommander* commander)
 {
 	if (nullptr != commander)
 	{
@@ -370,7 +226,7 @@ void MenuBarMatrixProcessor::initializeOutputCommander(OutputCommander* commande
 	}
 }
 
-void MenuBarMatrixProcessor::removeOutputCommander(OutputCommander* commander)
+void MenuBarMatrixProcessor::removeOutputCommander(MenuBarMatrixOutputCommander* commander)
 {
 	if (commander == nullptr)
 		return;
@@ -380,7 +236,7 @@ void MenuBarMatrixProcessor::removeOutputCommander(OutputCommander* commander)
 		m_outputCommanders.erase(existingOutputCommander);
 }
 
-void MenuBarMatrixProcessor::addCrosspointCommander(CrosspointCommander* commander)
+void MenuBarMatrixProcessor::addCrosspointCommander(MenuBarMatrixCrosspointCommander* commander)
 {
 	if (commander == nullptr)
 		return;
@@ -390,11 +246,11 @@ void MenuBarMatrixProcessor::addCrosspointCommander(CrosspointCommander* command
 		initializeCrosspointCommander(commander);
 
 		m_crosspointCommanders.push_back(commander);
-		commander->setCrosspointEnabledChangeCallback([=](ChannelCommander* sender, int input, int output, bool state) { return setMatrixCrosspointEnabledValue(input, output, state, sender); });
+		commander->setCrosspointEnabledChangeCallback([=](MenuBarMatrixChannelCommander* sender, int input, int output, bool state) { return setMatrixCrosspointEnabledValue(input, output, state, sender); });
 	}
 }
 
-void MenuBarMatrixProcessor::initializeCrosspointCommander(CrosspointCommander* commander)
+void MenuBarMatrixProcessor::initializeCrosspointCommander(MenuBarMatrixCrosspointCommander* commander)
 {
 	if (nullptr != commander)
 	{
@@ -412,7 +268,7 @@ void MenuBarMatrixProcessor::initializeCrosspointCommander(CrosspointCommander* 
 	}
 }
 
-void MenuBarMatrixProcessor::removeCrosspointCommander(CrosspointCommander* commander)
+void MenuBarMatrixProcessor::removeCrosspointCommander(MenuBarMatrixCrosspointCommander* commander)
 {
 	if (commander == nullptr)
 		return;
@@ -429,13 +285,13 @@ bool MenuBarMatrixProcessor::getInputMuteState(int inputChannelNumber)
 	return m_inputMuteStates[inputChannelNumber];
 }
 
-void MenuBarMatrixProcessor::setInputMuteState(int inputChannelNumber, bool muted, ChannelCommander* sender)
+void MenuBarMatrixProcessor::setInputMuteState(int inputChannelNumber, bool muted, MenuBarMatrixChannelCommander* sender)
 {
 	jassert(inputChannelNumber > 0);
 
 	for (auto const& inputCommander : m_inputCommanders)
 	{
-		if (inputCommander != reinterpret_cast<InputCommander*>(sender))
+		if (inputCommander != reinterpret_cast<MenuBarMatrixInputCommander*>(sender))
 			inputCommander->setInputMute(inputChannelNumber, muted);
 	}
 
@@ -450,13 +306,13 @@ bool MenuBarMatrixProcessor::getMatrixCrosspointEnabledValue(int inputNumber, in
     return m_matrixCrosspointEnabledValues[inputNumber][outputNumber];
 }
 
-void MenuBarMatrixProcessor::setMatrixCrosspointEnabledValue(int inputNumber, int outputNumber, bool enabled, ChannelCommander* sender)
+void MenuBarMatrixProcessor::setMatrixCrosspointEnabledValue(int inputNumber, int outputNumber, bool enabled, MenuBarMatrixChannelCommander* sender)
 {
     jassert(inputNumber > 0 && outputNumber > 0);
 
     for (auto const& crosspointCommander : m_crosspointCommanders)
     {
-        if (crosspointCommander != reinterpret_cast<CrosspointCommander*>(sender))
+        if (crosspointCommander != reinterpret_cast<MenuBarMatrixCrosspointCommander*>(sender))
             crosspointCommander->setCrosspointEnabledValue(inputNumber, outputNumber, enabled);
     }
 
@@ -471,13 +327,13 @@ bool MenuBarMatrixProcessor::getOutputMuteState(int outputChannelNumber)
 	return m_outputMuteStates[outputChannelNumber];
 }
 
-void MenuBarMatrixProcessor::setOutputMuteState(int outputChannelNumber, bool muted, ChannelCommander* sender)
+void MenuBarMatrixProcessor::setOutputMuteState(int outputChannelNumber, bool muted, MenuBarMatrixChannelCommander* sender)
 {
 	jassert(outputChannelNumber > 0);
 
 	for (auto const& outputCommander : m_outputCommanders)
 	{
-		if (outputCommander != reinterpret_cast<OutputCommander*>(sender))
+		if (outputCommander != reinterpret_cast<MenuBarMatrixOutputCommander*>(sender))
 			outputCommander->setOutputMute(outputChannelNumber, muted);
 	}
 
@@ -522,6 +378,8 @@ void MenuBarMatrixProcessor::prepareToPlay(double sampleRate, int maximumExpecte
 		m_inputDataAnalyzer->initializeParameters(sampleRate, maximumExpectedSamplesPerBlock);
 	if (m_outputDataAnalyzer)
 		m_outputDataAnalyzer->initializeParameters(sampleRate, maximumExpectedSamplesPerBlock);
+
+	postMessage(std::make_unique<AnalyzerParametersMessage>(sampleRate, maximumExpectedSamplesPerBlock).release());
 }
 
 void MenuBarMatrixProcessor::releaseResources()
@@ -556,7 +414,7 @@ void MenuBarMatrixProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffer
 		}
 	}
 
-	postMessage(new AudioInputBufferMessage(buffer));
+	postMessage(std::make_unique<AudioInputBufferMessage>(buffer).release());
 
 	// process data in buffer to be what shall be used as output
 	juce::AudioBuffer<float> processedBuffer;
@@ -583,15 +441,20 @@ void MenuBarMatrixProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffer
 		}
 	}
 
-	postMessage(new AudioOutputBufferMessage(buffer));
+	postMessage(std::make_unique<AudioOutputBufferMessage>(buffer).release());
 
 	if (reinitRequired)
-		postMessage(new ReinitIOCountMessage(m_inputChannelCount, m_outputChannelCount));
+		postMessage(std::make_unique<ReinitIOCountMessage>(m_inputChannelCount, m_outputChannelCount).release());
 }
 
 void MenuBarMatrixProcessor::handleMessage(const Message& message)
 {
-	if (auto const iom = dynamic_cast<const ReinitIOCountMessage*> (&message))
+	if (auto const apm = dynamic_cast<const AnalyzerParametersMessage*>(&message))
+	{
+		if (m_networkServer && m_networkServer->hasActiveConnection())
+			m_networkServer->getActiveConnection()->sendMessage(apm->getSerializedMessage());
+	}
+	else if (auto const iom = dynamic_cast<const ReinitIOCountMessage*> (&message))
 	{
 		auto inputCount = iom->getInputCount();
 		jassert(inputCount > 0);

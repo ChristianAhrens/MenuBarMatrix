@@ -38,6 +38,7 @@ public:
     enum SerializableMessageType
     {
         None = 0,
+        AnalyzerParameters,
         ReinitIOCount,
         AudioInputBuffer,
         AudioOutputBuffer
@@ -96,6 +97,44 @@ protected:
 
     //==============================================================================
     SerializableMessageType m_type = SerializableMessageType::None;
+};
+
+//==============================================================================
+/*
+ *
+ */
+class AnalyzerParametersMessage : public SerializableMessage
+{
+public:
+    AnalyzerParametersMessage() = default;
+    AnalyzerParametersMessage(int sampleRate, int maximumExpectedSamplesPerBlock) { m_type = SerializableMessageType::AnalyzerParameters; m_sampleRate = std::uint16_t(sampleRate); m_maximumExpectedSamplesPerBlock = std::uint16_t(maximumExpectedSamplesPerBlock); };
+    AnalyzerParametersMessage(const juce::MemoryBlock& blob)
+    {
+        jassert(SerializableMessageType::AnalyzerParameters == static_cast<SerializableMessageType>(blob[0]));
+
+        m_type = SerializableMessageType::AnalyzerParameters;
+        m_sampleRate = ReadUint16(blob.begin() + sizeof(SerializableMessageType));
+        m_maximumExpectedSamplesPerBlock = ReadUint16(blob.begin() + sizeof(SerializableMessageType) + sizeof(int));
+
+    };
+    ~AnalyzerParametersMessage() = default;
+
+    int getSampleRate() const { return m_sampleRate; };
+    int getMaximumExpectedSamplesPerBlock() const { return m_maximumExpectedSamplesPerBlock; };
+
+protected:
+    juce::MemoryBlock createSerializedContent(size_t& contentSize) const override
+    {
+        juce::MemoryBlock blob;
+        blob.append(&m_sampleRate, sizeof(std::uint16_t));
+        blob.append(&m_maximumExpectedSamplesPerBlock, sizeof(std::uint16_t));
+        contentSize = blob.getSize();
+        return blob;
+    };
+
+private:
+    std::uint16_t m_sampleRate = 0;
+    std::uint16_t m_maximumExpectedSamplesPerBlock = 0;
 };
 
 //==============================================================================

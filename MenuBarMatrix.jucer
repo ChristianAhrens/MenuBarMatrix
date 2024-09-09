@@ -35,6 +35,10 @@
               file="Source/MenuBarMatrixProcessor/AbstractProcessorData.cpp"/>
         <FILE id="x81X07" name="AbstractProcessorData.h" compile="0" resource="0"
               file="Source/MenuBarMatrixProcessor/AbstractProcessorData.h"/>
+        <FILE id="DsrX3U" name="MenuBarMatrixCommanders.cpp" compile="1" resource="0"
+              file="Source/MenuBarMatrixProcessor/MenuBarMatrixCommanders.cpp"/>
+        <FILE id="H7SdxY" name="MenuBarMatrixCommanders.h" compile="0" resource="0"
+              file="Source/MenuBarMatrixProcessor/MenuBarMatrixCommanders.h"/>
         <FILE id="aP6MDJ" name="MenuBarMatrixMessages.h" compile="0" resource="0"
               file="Source/MenuBarMatrixProcessor/MenuBarMatrixMessages.h"/>
         <FILE id="D69Vl0" name="MenuBarMatrixProcessor.cpp" compile="1" resource="0"
