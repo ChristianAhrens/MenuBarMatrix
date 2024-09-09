@@ -19,6 +19,7 @@
 #include "MenuBarMatrixProcessor.h"
 
 #include "MenuBarMatrixServiceData.h"
+#include "MenuBarMatrixMessages.h"
 #include "../AppConfiguration.h"
 
 namespace MenuBarMatrix
@@ -211,9 +212,9 @@ MenuBarMatrixProcessor::MenuBarMatrixProcessor(XmlElement* stateXml) :
         auto connection = dynamic_cast<InterprocessConnectionImpl*>(m_networkServer->getActiveConnection().get());
         if (connection)
         {
-            connection->onConnectionLost = [=]() {};
-            connection->onConnectionMade = [=]() {};
-            connection->onMessageReceived = [=](const juce::MemoryBlock& data) {};
+			connection->onConnectionLost = [=]() { DBG(__FUNCTION__); };
+			connection->onConnectionMade = [=]() { DBG(__FUNCTION__); };
+			connection->onMessageReceived = [=](const juce::MemoryBlock& /*data*/) { DBG(__FUNCTION__); };
         }
     };
 }
@@ -742,14 +743,14 @@ void MenuBarMatrixProcessor::audioDeviceAboutToStart(AudioIODevice* device)
         auto inputChannelCnt  = activeInputs.getHighestBit() + 1; // from JUCE documentation
         auto activeOutputs = device->getActiveOutputChannels();
         auto outputChannelCnt = activeOutputs.getHighestBit() + 1; // from JUCE documentation
-        auto currentSampleRate = device->getCurrentSampleRate();
-        auto currentBufferSize = device->getCurrentBufferSizeSamples();
-        //auto currentBitDepth = device->getCurrentBitDepth();
+        auto sampleRate = device->getCurrentSampleRate();
+        auto bufferSize = device->getCurrentBufferSizeSamples();
+        //auto bitDepth = device->getCurrentBitDepth();
         
         //DBG(juce::String(__FUNCTION__) << " " << device->getName() << " i:" << device->getInputChannelNames().joinIntoString(",") << "(" << inputChannelCnt << ") o:" << device->getOutputChannelNames().joinIntoString(",") << "(" << outputChannelCnt << ")");
         
         setChannelCounts(inputChannelCnt, outputChannelCnt);
-        prepareToPlay(currentSampleRate, currentBufferSize);
+        prepareToPlay(sampleRate, bufferSize);
     }
 }
 

@@ -31,48 +31,6 @@ namespace MenuBarMatrix
 //==============================================================================
 /*
 */
-class AudioBufferMessage : public juce::Message
-{
-public:
-    enum FlowDirection
-    {
-        Invalid,
-        Input, 
-        Output,
-    };
-
-public:
-    AudioBufferMessage(AudioBuffer<float>& buffer);
-    ~AudioBufferMessage();
-
-    juce::MemoryBlock getSerializedMessage() const;
-
-    const AudioBuffer<float>& getAudioBuffer() const;
-    const FlowDirection getFlowDirection() const { return m_direction; };
-
-protected:
-    FlowDirection m_direction{ FlowDirection::Invalid };
-
-private:
-    AudioBuffer<float> m_buffer;
-
-};
-
-class AudioInputBufferMessage : public AudioBufferMessage
-{
-public:
-    AudioInputBufferMessage(AudioBuffer<float>& buffer) : AudioBufferMessage(buffer) { m_direction = FlowDirection::Input; }
-};
-
-class AudioOutputBufferMessage : public AudioBufferMessage
-{
-public:
-    AudioOutputBufferMessage(AudioBuffer<float>& buffer) : AudioBufferMessage(buffer) { m_direction = FlowDirection::Output; }
-};
-
-//==============================================================================
-/*
-*/
 class ProcessorDataAnalyzer :    public Timer
 {
 public:
