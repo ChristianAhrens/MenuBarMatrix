@@ -32,6 +32,7 @@ namespace MenuBarMatrix
 class ReinitIOCountMessage;
 class AudioInputBufferMessage;
 class AudioOutputBufferMessage;
+
 class SerializableMessage : public juce::Message
 {
 public:
@@ -52,8 +53,10 @@ public:
     {
         size_t contentSize = 0;
         juce::MemoryBlock blob;
+        auto size = sizeof(SerializableMessageType);
         blob.append(&m_type, sizeof(SerializableMessageType));
-        blob.append(createSerializedContent(contentSize).getData(), contentSize);
+        auto sc = createSerializedContent(contentSize);
+        blob.append(sc.getData(), contentSize);
         return blob;
     };
     static SerializableMessage* initFromMemoryBlock(const juce::MemoryBlock& blob)
@@ -113,8 +116,8 @@ public:
         jassert(SerializableMessageType::AnalyzerParameters == static_cast<SerializableMessageType>(blob[0]));
 
         m_type = SerializableMessageType::AnalyzerParameters;
-        m_sampleRate = ReadUint16(blob.begin() + sizeof(SerializableMessageType));
-        m_maximumExpectedSamplesPerBlock = ReadUint16(blob.begin() + sizeof(SerializableMessageType) + sizeof(int));
+        blob.copyTo(&m_sampleRate, sizeof(SerializableMessageType), sizeof(std::uint16_t));
+        blob.copyTo(&m_maximumExpectedSamplesPerBlock, sizeof(SerializableMessageType) + sizeof(std::uint16_t), sizeof(std::uint16_t));
 
     };
     ~AnalyzerParametersMessage() = default;
@@ -151,8 +154,8 @@ public:
         jassert(SerializableMessageType::ReinitIOCount == static_cast<SerializableMessageType>(blob[0]));
 
         m_type = SerializableMessageType::ReinitIOCount;
-        m_inputCount = ReadUint16(blob.begin() + sizeof(SerializableMessageType));
-        m_outputCount = ReadUint16(blob.begin() + sizeof(SerializableMessageType) + sizeof(int));
+        blob.copyTo(&m_inputCount, sizeof(SerializableMessageType), 2);
+        blob.copyTo(&m_outputCount, sizeof(SerializableMessageType) + sizeof(std::uint16_t), 2);
 
     };
     ~ReinitIOCountMessage() = default;
@@ -205,7 +208,7 @@ protected:
         blob.append(&m_direction, sizeof(FlowDirection));
         blob.append(&numChannels, sizeof(std::uint16_t));
         blob.append(&numSamples, sizeof(std::uint16_t));
-        blob.append(m_buffer.getReadPointer(1), sizeof(float) * m_buffer.getNumChannels() * m_buffer.getNumSamples());
+        blob.append(m_buffer.getReadPointer(1), sizeof(float) * m_buffer.getNumSamples());
         contentSize = blob.getSize();
         return blob;
     };
@@ -230,19 +233,21 @@ public:
 
         m_type = SerializableMessageType::AudioInputBuffer;
 
-        auto readPos = blob.begin() + sizeof(SerializableMessageType);
-        m_direction = FlowDirection(ReadUint32(readPos));
+        auto readPos = sizeof(SerializableMessageType);
+        blob.copyTo(&m_direction, readPos, sizeof(FlowDirection));
         jassert(FlowDirection::Input == m_direction);
 
         readPos += sizeof(FlowDirection);
-        auto numChannels = ReadUint16(readPos);
+        auto numChannels = std::uint16_t(0);
+        blob.copyTo(&numChannels, readPos, sizeof(std::uint16_t));
         readPos += sizeof(std::uint16_t);
-        auto numSamples = ReadUint16(readPos);
+        auto numSamples = std::uint16_t(0);
+        blob.copyTo(&numSamples, readPos, sizeof(std::uint16_t));
         readPos += sizeof(std::uint16_t);
-        auto data = reinterpret_cast<const float*>(readPos);
+        auto data = reinterpret_cast<const float*>(blob.begin() + readPos);
 
         m_buffer = juce::AudioBuffer<float>(numChannels, numSamples);
-        m_buffer.copyFrom(1, 1, data, numChannels * numSamples);
+        m_buffer.copyFrom(1, 0, data, numSamples);
     };
     ~AudioInputBufferMessage() = default;
 };
@@ -258,23 +263,23 @@ public:
     AudioOutputBufferMessage(juce::AudioBuffer<float>& buffer) : AudioBufferMessage(buffer) { m_type = SerializableMessageType::AudioOutputBuffer; m_direction = FlowDirection::Output; };
     AudioOutputBufferMessage(const juce::MemoryBlock& blob)
     {
-        jassert(SerializableMessageType::AudioOutputBuffer == static_cast<SerializableMessageType>(blob[0]));
-
         m_type = SerializableMessageType::AudioOutputBuffer;
 
-        auto readPos = blob.begin() + sizeof(SerializableMessageType);
-        m_direction = FlowDirection(ReadUint32(readPos));
+        auto readPos = sizeof(SerializableMessageType);
+        blob.copyTo(&m_direction, readPos, sizeof(FlowDirection));
         jassert(FlowDirection::Output == m_direction);
 
         readPos += sizeof(FlowDirection);
-        auto numChannels = ReadUint16(readPos);
+        auto numChannels = std::uint16_t(0);
+        blob.copyTo(&numChannels, readPos, sizeof(std::uint16_t));
         readPos += sizeof(std::uint16_t);
-        auto numSamples = ReadUint16(readPos);
+        auto numSamples = std::uint16_t(0);
+        blob.copyTo(&numSamples, readPos, sizeof(std::uint16_t));
         readPos += sizeof(std::uint16_t);
-        auto data = reinterpret_cast<const float*>(readPos);
+        auto data = reinterpret_cast<const float*>(blob.begin() + readPos);
 
         m_buffer = juce::AudioBuffer<float>(numChannels, numSamples);
-        m_buffer.copyFrom(1, 1, data, numChannels * numSamples);
+        m_buffer.copyFrom(1, 0, data, numSamples);
     };
     ~AudioOutputBufferMessage() = default;
 };
