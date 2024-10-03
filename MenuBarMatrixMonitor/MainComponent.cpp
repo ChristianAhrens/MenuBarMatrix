@@ -84,6 +84,45 @@ MainComponent::MainComponent()
         m_discoverComponent->setDiscoveredServices(m_availableServices->getServices());
     };
 
+#ifdef DEBUG
+    auto inputs = 11;
+    auto outputs = 12;
+    auto buffer = juce::AudioBuffer<float>();
+    auto refSample = 11.11f;
+    auto sr = 48000;
+    auto mespb = 256;
+
+    auto apm = std::make_unique<MenuBarMatrix::AnalyzerParametersMessage>(sr, mespb);
+    auto apmb = apm->getSerializedMessage();
+    auto apmcpy = MenuBarMatrix::AnalyzerParametersMessage(apmb);
+
+    auto rcm = std::make_unique<MenuBarMatrix::ReinitIOCountMessage>(inputs, outputs);
+    auto rcmb = rcm->getSerializedMessage();
+    auto rcmcpy = MenuBarMatrix::ReinitIOCountMessage(rcmb);
+
+    buffer.setSize(2, 12, false, true, false);
+    buffer.setSample(0, 2, refSample);
+    buffer.setSample(1, 3, refSample + 1.0f);
+    auto aibm = std::make_unique<MenuBarMatrix::AudioInputBufferMessage>(buffer);
+    auto aibmb = aibm->getSerializedMessage();
+    auto aibmcpy = MenuBarMatrix::AudioInputBufferMessage(aibmb);
+    auto test1 = aibmcpy.getAudioBuffer().getSample(0, 2);
+    auto test2 = aibmcpy.getAudioBuffer().getSample(1, 3);
+    jassert(test1 == refSample);
+    jassert(test2 == refSample + 1.0f);
+
+    buffer.setSize(4, 12, false, true, false);
+    buffer.setSample(1, 1, refSample);
+    buffer.setSample(3, 3, refSample + 1.0f);
+    auto aobm = std::make_unique<MenuBarMatrix::AudioOutputBufferMessage>(buffer);
+    auto aobmb = aobm->getSerializedMessage();
+    auto aobmcpy = MenuBarMatrix::AudioOutputBufferMessage(aobmb);
+    auto test3 = aobmcpy.getAudioBuffer().getSample(1, 1);
+    auto test4 = aobmcpy.getAudioBuffer().getSample(3, 3);
+    jassert(test3 == refSample);
+    jassert(test4 == refSample + 1.0f);
+#endif
+
     setSize(400, 350);
 }
 
