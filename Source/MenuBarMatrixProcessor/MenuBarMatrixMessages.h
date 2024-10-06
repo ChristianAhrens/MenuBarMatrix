@@ -53,7 +53,6 @@ public:
     {
         size_t contentSize = 0;
         juce::MemoryBlock blob;
-        auto size = sizeof(SerializableMessageType);
         blob.append(&m_type, sizeof(SerializableMessageType));
         auto sc = createSerializedContent(contentSize);
         blob.append(sc.getData(), contentSize);
@@ -233,7 +232,7 @@ public:
 
         m_type = SerializableMessageType::AudioInputBuffer;
 
-        auto readPos = sizeof(SerializableMessageType);
+        auto readPos = int(sizeof(SerializableMessageType));
         blob.copyTo(&m_direction, readPos, sizeof(FlowDirection));
         jassert(FlowDirection::Input == m_direction);
 
@@ -265,7 +264,7 @@ public:
     {
         m_type = SerializableMessageType::AudioOutputBuffer;
 
-        auto readPos = sizeof(SerializableMessageType);
+        auto readPos = int(sizeof(SerializableMessageType));
         blob.copyTo(&m_direction, readPos, sizeof(FlowDirection));
         jassert(FlowDirection::Output == m_direction);
 
