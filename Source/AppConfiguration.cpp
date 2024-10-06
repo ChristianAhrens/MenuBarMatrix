@@ -58,7 +58,7 @@ bool AppConfiguration::isValid(const std::unique_ptr<juce::XmlElement>& xmlConfi
 			// validate
 		}
 		else
-			false;
+			return false;
 	}
 	else
 		return false;

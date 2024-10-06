@@ -94,7 +94,7 @@ public:
             juce::JUCEApplication::getInstance()->systemRequestedQuit();
         }
 
-        void darkModeSettingChanged()
+        void darkModeSettingChanged() override
         {
             if (juce::Desktop::getInstance().isDarkModeActive())
             {
