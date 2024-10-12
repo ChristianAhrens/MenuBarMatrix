@@ -103,23 +103,15 @@ void MenuBarMatrix::performConfigurationDump()
     {
         auto stateXml = m_config->getConfigState();
 
-        if (m_menuBarMatrixProcessor)
+        if (stateXml && m_menuBarMatrixProcessor)
         {
-            auto processorStateXml = m_menuBarMatrixProcessor->createStateXml();
-            if (!stateXml->replaceChildElement(stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORCONFIG)), processorStateXml.get()))
-                stateXml->addChildElement(processorStateXml.get());
-            processorStateXml.release();
+            m_config->setConfigState(m_menuBarMatrixProcessor->createStateXml(), AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORCONFIG));
 
             if (auto editor = dynamic_cast<MenuBarMatrixEditor*>(m_menuBarMatrixProcessor->getActiveEditor()))
             {
-                auto editorStateXml = editor->createStateXml();
-                if (!stateXml->replaceChildElement(stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::EDITORCONFIG)), editorStateXml.get()))
-                    stateXml->addChildElement(editorStateXml.get());
-                editorStateXml.release();
+                m_config->setConfigState(editor->createStateXml(), AppConfiguration::getTagName(AppConfiguration::TagID::EDITORCONFIG));
             }
         }
-
-        m_config->setConfigState(std::move(stateXml));
     }
 }
 
