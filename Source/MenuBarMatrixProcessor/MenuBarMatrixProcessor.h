@@ -205,6 +205,8 @@ private:
     juce::CriticalSection   m_readLock;
 
     float** m_processorChannels;
+    double m_sampleRate = 0.0;
+    int m_bufferSize = 0;
 
     //==============================================================================
     std::unique_ptr<AudioDeviceManager> m_deviceManager;
