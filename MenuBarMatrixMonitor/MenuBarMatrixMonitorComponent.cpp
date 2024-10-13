@@ -44,7 +44,7 @@ MenuBarMatrixMonitorComponent::~MenuBarMatrixMonitorComponent()
 
 void MenuBarMatrixMonitorComponent::paint(Graphics &g)
 {
-    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::ColourIds::backgroundColourId));
+    g.fillAll(getLookAndFeel().findColour(juce::LookAndFeel_V4::ColourScheme::widgetBackground));
     if (RunningStatus::Active != m_runningStatus)
     {
         g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOnId));
@@ -52,20 +52,45 @@ void MenuBarMatrixMonitorComponent::paint(Graphics &g)
     }
     else
     {
+        auto margin = 6;
+        auto bounds = getLocalBounds().reduced(margin, margin);
+        auto inputsBounds = bounds.removeFromLeft(int(bounds.getWidth() * m_ioRatio));
+        inputsBounds.removeFromRight(margin / 2);
+        auto outputsBounds = bounds;
+        outputsBounds.removeFromLeft(margin / 2);
 
+        g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::ColourIds::backgroundColourId));
+        g.fillRect(inputsBounds);
+        g.fillRect(outputsBounds);
     }
 }
 
 void MenuBarMatrixMonitorComponent::resized()
 {
     if (RunningStatus::Active != m_runningStatus)
+    {
         m_startRunningIndicator.setBounds(getLocalBounds());
+    }
     else if (m_inputMeteringComponent && m_outputMeteringComponent)
     {
-        auto bounds = getLocalBounds();
-        auto margin = 3;
-        m_inputMeteringComponent->setBounds(bounds.removeFromLeft(bounds.getWidth() / 2).removeFromRight(margin / 2));
-        m_outputMeteringComponent->setBounds(bounds.removeFromLeft(margin / 2));
+        if (m_inputMeteringComponent && m_outputMeteringComponent)
+        {
+            auto ic = float(m_inputMeteringComponent->getChannelCount());
+            auto oc = float(m_outputMeteringComponent->getChannelCount());
+
+            if (0.0f != ic && 0.0f != oc)
+                m_ioRatio = ic / (ic + oc);
+        }
+
+        auto margin = 12;
+        auto bounds = getLocalBounds().reduced(margin, margin);
+        auto inputsBounds = bounds.removeFromLeft(int(bounds.getWidth() * m_ioRatio));
+        inputsBounds.removeFromRight(margin / 2);
+        auto outputsBounds = bounds;
+        outputsBounds.removeFromLeft(margin / 2);
+
+        m_inputMeteringComponent->setBounds(inputsBounds);
+        m_outputMeteringComponent->setBounds(outputsBounds);
     }
 }
 

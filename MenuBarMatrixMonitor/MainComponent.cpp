@@ -85,7 +85,7 @@ MainComponent::MainComponent()
         m_discoverComponent->setDiscoveredServices(m_availableServices->getServices());
     };
 
-#ifdef DEBUG
+#ifdef NIX//DEBUG
     auto inputs = 11;
     auto outputs = 12;
     auto buffer = juce::AudioBuffer<float>();
