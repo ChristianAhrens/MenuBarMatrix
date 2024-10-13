@@ -49,6 +49,7 @@ MainComponent::MainComponent()
         auto knownMessage = MenuBarMatrix::SerializableMessage::initFromMemoryBlock(message);
         if (m_monitorComponent && nullptr != knownMessage)
             m_monitorComponent->handleMessage(*knownMessage);
+        MenuBarMatrix::SerializableMessage::freeMessageData(knownMessage);
     };
 
     m_monitorComponent = std::make_unique<MenuBarMatrixMonitorComponent>();

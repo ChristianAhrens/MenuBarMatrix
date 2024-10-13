@@ -29,6 +29,7 @@ namespace MenuBarMatrix
 /*
  *
  */
+class AnalyzerParametersMessage;
 class ReinitIOCountMessage;
 class AudioInputBufferMessage;
 class AudioOutputBufferMessage;
@@ -48,6 +49,8 @@ public:
 public:
     SerializableMessage() = default;
     virtual ~SerializableMessage() = default;
+
+    const SerializableMessageType getType() const { return m_type; };
 
     juce::MemoryBlock getSerializedMessage() const
     {
@@ -79,6 +82,38 @@ public:
         case None:
         default:
             return nullptr;
+        }
+    };
+    static void freeMessageData(SerializableMessage* message)
+    {
+        if (nullptr != message)
+        {
+            switch (message->getType())
+            {
+            case AnalyzerParameters:
+                {
+                    auto apm = std::unique_ptr<AnalyzerParametersMessage>(reinterpret_cast<AnalyzerParametersMessage*>(message));
+                }
+                break;
+            case ReinitIOCount:
+                {
+                    auto riocm = std::unique_ptr<ReinitIOCountMessage>(reinterpret_cast<ReinitIOCountMessage*>(message));
+                }
+                break;
+            case AudioInputBuffer:
+                {
+                    auto aibm = std::unique_ptr<AudioInputBufferMessage>(reinterpret_cast<AudioInputBufferMessage*>(message));
+                }
+                break;
+            case AudioOutputBuffer:
+                {
+                    auto aobm = std::unique_ptr<AudioOutputBufferMessage>(reinterpret_cast<AudioOutputBufferMessage*>(message));
+                }
+                break;
+            case None:
+            default:
+                break;
+            }
         }
     };
 
