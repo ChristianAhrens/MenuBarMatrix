@@ -60,13 +60,16 @@ public:
     };
     static SerializableMessage* initFromMemoryBlock(const juce::MemoryBlock& blob)
     {
-        jassert(blob.getSize() >= sizeof(SerializableMessage));
-        if (blob.getSize() < sizeof(SerializableMessage))
+        auto minSize = sizeof(SerializableMessageType);
+        jassert(blob.getSize() >= minSize);
+        if (blob.getSize() < minSize)
             return nullptr;
 
         auto type = static_cast<SerializableMessageType>(blob[0]);
         switch (type)
         {
+        case AnalyzerParameters:
+            return reinterpret_cast<SerializableMessage*>(std::make_unique<AnalyzerParametersMessage>(blob).release());
         case ReinitIOCount:
             return reinterpret_cast<SerializableMessage*>(std::make_unique<ReinitIOCountMessage>(blob).release());
         case AudioInputBuffer:
