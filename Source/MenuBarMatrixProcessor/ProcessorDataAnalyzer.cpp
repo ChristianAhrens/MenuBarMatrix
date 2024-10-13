@@ -79,6 +79,9 @@ void ProcessorDataAnalyzer::removeListener(Listener* listener)
 
 void ProcessorDataAnalyzer::analyzeData(const AudioBuffer<float>& buffer)
 {
+	if (!IsInitialized())
+		return;
+
 	int numChannels = buffer.getNumChannels();
 
 	if (numChannels != m_centiSecondBuffer.getNumChannels())

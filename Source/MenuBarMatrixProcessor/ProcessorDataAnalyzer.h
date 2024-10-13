@@ -57,6 +57,8 @@ public:
     ProcessorSpectrumData& GetSpectrum() { return m_spectrum; };
     String& GetName() { return m_Name; };
 
+    bool IsInitialized() { return (m_bufferSize != 0 && m_sampleRate != 0); };
+
     //==============================================================================
     void addListener(Listener* listener);
     void removeListener(Listener* listener);
@@ -106,7 +108,7 @@ private:
     unsigned long       m_sampleRate = 0;
     int                 m_samplesPerCentiSecond = 0;
     int                 m_bufferSize = 0;
-    int                 m_missingSamplesForCentiSecond;
+    int                 m_missingSamplesForCentiSecond = 0;
 
     //==============================================================================
     enum
