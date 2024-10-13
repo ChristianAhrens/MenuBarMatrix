@@ -564,8 +564,12 @@ void MenuBarMatrixProcessor::audioDeviceIOCallbackWithContext(const float* const
     
 	const juce::ScopedLock sl(m_readLock);
 
-    jassert(m_inputChannelCount == numInputChannels);
-    jassert(m_outputChannelCount == numOutputChannels);
+	if (m_inputChannelCount != numInputChannels || m_outputChannelCount != numOutputChannels)
+	{
+		m_inputChannelCount = numInputChannels;
+		m_outputChannelCount = numOutputChannels;
+		postMessage(std::make_unique<ReinitIOCountMessage>(m_inputChannelCount, m_outputChannelCount).release());
+	}
 
 	auto maxActiveChannels = std::max(numInputChannels, numOutputChannels);
 
