@@ -80,7 +80,10 @@ void MenuBarMatrixMonitorComponent::mouseUp(const juce::MouseEvent& e)
 void MenuBarMatrixMonitorComponent::handleMessage(const Message& message)
 {
     if (RunningStatus::Inactive != m_runningStatus)
+    {
         m_runningStatus = RunningStatus::Active;
+        resized();
+    }
     
     if (auto const apm = dynamic_cast<const MenuBarMatrix::AnalyzerParametersMessage*>(&message))
     {
@@ -98,8 +101,10 @@ void MenuBarMatrixMonitorComponent::handleMessage(const Message& message)
     {
         auto inputCount = iom->getInputCount();
         jassert(inputCount > 0);
+        m_inputMeteringComponent->setChannelCount(inputCount);
         auto outputCount = iom->getOutputCount();
         jassert(outputCount > 0);
+        m_outputMeteringComponent->setChannelCount(outputCount);
     }
     else if (auto m = dynamic_cast<const MenuBarMatrix::AudioBufferMessage*>(&message))
     {
