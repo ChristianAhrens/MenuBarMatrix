@@ -124,6 +124,8 @@ private:
 
     StartupRunningIndicator m_startRunningIndicator;
 
+    float m_ioRatio = 0.5f;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuBarMatrixMonitorComponent)
 };
 

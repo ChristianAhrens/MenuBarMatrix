@@ -209,5 +209,10 @@ void MeterbridgeComponent::setChannelCount(int channelCount)
     m_channelCount = channelCount;
 }
 
+int MeterbridgeComponent::getChannelCount()
+{
+    return m_channelCount;
+}
+
 
 }

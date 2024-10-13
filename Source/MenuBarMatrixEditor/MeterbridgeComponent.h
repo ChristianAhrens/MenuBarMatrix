@@ -52,6 +52,7 @@ public:
     //==============================================================================
     void setDirection(Direction direction);
     void setChannelCount(int channelCount);
+    int getChannelCount();
 
 private:
     ProcessorLevelData  m_levelData;
