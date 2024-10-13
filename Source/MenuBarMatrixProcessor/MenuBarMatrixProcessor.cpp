@@ -69,7 +69,7 @@ MenuBarMatrixProcessor::MenuBarMatrixProcessor(XmlElement* stateXml) :
         if (connection)
         {
 			connection->onConnectionLost = [=]() { DBG(__FUNCTION__); };
-			connection->onConnectionMade = [=]() { DBG(__FUNCTION__); };
+			connection->onConnectionMade = [=]() { DBG(__FUNCTION__); postMessage(std::make_unique<AnalyzerParametersMessage>(m_sampleRate, m_bufferSize).release()); };
 			connection->onMessageReceived = [=](const juce::MemoryBlock& /*data*/) { DBG(__FUNCTION__); };
         }
     };
@@ -374,6 +374,9 @@ const String MenuBarMatrixProcessor::getName() const
 
 void MenuBarMatrixProcessor::prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock)
 {
+	m_sampleRate = sampleRate;
+	m_bufferSize = maximumExpectedSamplesPerBlock;
+
 	if (m_inputDataAnalyzer)
 		m_inputDataAnalyzer->initializeParameters(sampleRate, maximumExpectedSamplesPerBlock);
 	if (m_outputDataAnalyzer)
