@@ -245,7 +245,7 @@ protected:
         blob.append(&m_direction, sizeof(FlowDirection));
         blob.append(&numChannels, sizeof(std::uint16_t));
         blob.append(&numSamples, sizeof(std::uint16_t));
-        blob.append(m_buffer.getReadPointer(1), sizeof(float) * m_buffer.getNumSamples());
+        blob.append(m_buffer.getReadPointer(0), sizeof(float) * numChannels * numSamples);
         contentSize = blob.getSize();
         return blob;
     };
@@ -284,7 +284,12 @@ public:
         auto data = reinterpret_cast<const float*>(blob.begin() + readPos);
 
         m_buffer = juce::AudioBuffer<float>(numChannels, numSamples);
-        m_buffer.copyFrom(1, 0, data, numSamples);
+        auto samplePos = 0;
+        for (int i = 0; i < numChannels; i++)
+        {
+            m_buffer.copyFrom(i, 0, data + samplePos, numSamples);
+            samplePos += numSamples;
+        }
     };
     ~AudioInputBufferMessage() = default;
 };
@@ -316,7 +321,12 @@ public:
         auto data = reinterpret_cast<const float*>(blob.begin() + readPos);
 
         m_buffer = juce::AudioBuffer<float>(numChannels, numSamples);
-        m_buffer.copyFrom(1, 0, data, numSamples);
+        auto samplePos = 0;
+        for (int i = 0; i < numChannels; i++)
+        {
+            m_buffer.copyFrom(i, 0, data + samplePos, numSamples);
+            samplePos += numSamples;
+        }
     };
     ~AudioOutputBufferMessage() = default;
 };

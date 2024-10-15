@@ -96,32 +96,82 @@ MainComponent::MainComponent()
     auto apm = std::make_unique<MenuBarMatrix::AnalyzerParametersMessage>(sr, mespb);
     auto apmb = apm->getSerializedMessage();
     auto apmcpy = MenuBarMatrix::AnalyzerParametersMessage(apmb);
+    auto test5 = apmcpy.getSampleRate();
+    auto test6 = apmcpy.getMaximumExpectedSamplesPerBlock();
+    jassert(test5 == sr);
+    jassert(test6 == mespb);
 
     auto rcm = std::make_unique<MenuBarMatrix::ReinitIOCountMessage>(inputs, outputs);
     auto rcmb = rcm->getSerializedMessage();
     auto rcmcpy = MenuBarMatrix::ReinitIOCountMessage(rcmb);
+    auto test7 = rcmcpy.getInputCount();
+    auto test8 = rcmcpy.getOutputCount();
+    jassert(test7 == inputs);
+    jassert(test8 == outputs);
 
-    buffer.setSize(2, 12, false, true, false);
-    buffer.setSample(0, 2, refSample);
-    buffer.setSample(1, 3, refSample + 1.0f);
-    auto aibm = std::make_unique<MenuBarMatrix::AudioInputBufferMessage>(buffer);
-    auto aibmb = aibm->getSerializedMessage();
-    auto aibmcpy = MenuBarMatrix::AudioInputBufferMessage(aibmb);
-    auto test1 = aibmcpy.getAudioBuffer().getSample(0, 2);
-    auto test2 = aibmcpy.getAudioBuffer().getSample(1, 3);
-    jassert(test1 == refSample);
-    jassert(test2 == refSample + 1.0f);
+    auto channelCount = 2;
+    auto sampleCount = 6;
+    buffer.setSize(channelCount, sampleCount, false, true, false);
+    for (int i = 0; i < channelCount; i++)
+    {
+        for (int j = 0; j < sampleCount; j++)
+        {
+            buffer.setSample(i, j, ++refSample);
+        }
+    }
+    auto rrefSample1 = refSample;
+    auto aibm1 = std::make_unique<MenuBarMatrix::AudioInputBufferMessage>(buffer);
+    for (int i = channelCount - 1; i >= 0; i--)
+    {
+        for (int j = sampleCount - 1; j >= 0; j--)
+        {
+            auto test1 = aibm1->getAudioBuffer().getSample(i, j);
+            jassert(int(test1) == int(refSample));
+            refSample--;
+        }
+    }
+    auto aibmb1 = aibm1->getSerializedMessage();
+    auto aibmcpy1 = MenuBarMatrix::AudioInputBufferMessage(aibmb1);
+    for (int i = channelCount - 1; i >= 0; i--)
+    {
+        for (int j = sampleCount - 1; j >= 0; j--)
+        {
+            auto test1 = aibmcpy1.getAudioBuffer().getSample(i, j);
+            jassert(int(test1) == int(rrefSample1));
+            rrefSample1--;
+        }
+    }
 
-    buffer.setSize(4, 12, false, true, false);
-    buffer.setSample(1, 1, refSample);
-    buffer.setSample(3, 3, refSample + 1.0f);
-    auto aobm = std::make_unique<MenuBarMatrix::AudioOutputBufferMessage>(buffer);
-    auto aobmb = aobm->getSerializedMessage();
-    auto aobmcpy = MenuBarMatrix::AudioOutputBufferMessage(aobmb);
-    auto test3 = aobmcpy.getAudioBuffer().getSample(1, 1);
-    auto test4 = aobmcpy.getAudioBuffer().getSample(3, 3);
-    jassert(test3 == refSample);
-    jassert(test4 == refSample + 1.0f);
+    buffer.setSize(channelCount, sampleCount, false, true, false);
+    for (int i = 0; i < channelCount; i++)
+    {
+        for (int j = 0; j < sampleCount; j++)
+        {
+            buffer.setSample(i, j, ++refSample);
+        }
+    }
+    auto rrefSample2 = refSample;
+    auto aibm2 = std::make_unique<MenuBarMatrix::AudioOutputBufferMessage>(buffer);
+    for (int i = channelCount - 1; i >= 0; i--)
+    {
+        for (int j = sampleCount - 1; j >= 0; j--)
+        {
+            auto test2 = aibm2->getAudioBuffer().getSample(i, j);
+            jassert(int(test2) == int(rrefSample2));
+            rrefSample2--;
+        }
+    }
+    auto aibmb2 = aibm2->getSerializedMessage();
+    auto aibmcpy2 = MenuBarMatrix::AudioOutputBufferMessage(aibmb2);
+    for (int i = channelCount - 1; i >= 0; i--)
+    {
+        for (int j = sampleCount - 1; j >= 0; j--)
+        {
+            auto test2 = aibmcpy2.getAudioBuffer().getSample(i, j);
+            jassert(int(test2) == int(refSample));
+            refSample--;
+        }
+    }
 #endif
 
     setSize(400, 350);
