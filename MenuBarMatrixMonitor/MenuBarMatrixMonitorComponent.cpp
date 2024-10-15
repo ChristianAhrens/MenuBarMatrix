@@ -87,7 +87,7 @@ void MenuBarMatrixMonitorComponent::resized()
         auto inputsBounds = bounds.removeFromLeft(int(bounds.getWidth() * m_ioRatio));
         inputsBounds.removeFromRight(margin / 2);
         auto outputsBounds = bounds;
-        outputsBounds.removeFromLeft(margin / 2);
+        outputsBounds.removeFromLeft(margin);
 
         m_inputMeteringComponent->setBounds(inputsBounds);
         m_outputMeteringComponent->setBounds(outputsBounds);
@@ -104,7 +104,7 @@ void MenuBarMatrixMonitorComponent::mouseUp(const juce::MouseEvent& e)
 
 void MenuBarMatrixMonitorComponent::handleMessage(const Message& message)
 {
-    if (RunningStatus::Inactive != m_runningStatus)
+    if (RunningStatus::Active != m_runningStatus)
     {
         m_runningStatus = RunningStatus::Active;
         resized();
@@ -130,6 +130,8 @@ void MenuBarMatrixMonitorComponent::handleMessage(const Message& message)
         auto outputCount = iom->getOutputCount();
         jassert(outputCount > 0);
         m_outputMeteringComponent->setChannelCount(outputCount);
+
+        resized();
     }
     else if (auto m = dynamic_cast<const MenuBarMatrix::AudioBufferMessage*>(&message))
     {

@@ -100,7 +100,7 @@ void MeterbridgeComponent::paint(Graphics& g)
         }
 
         // draw a simple baseline
-        g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
+        g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
         g.drawLine(juce::Line<float>(0.0f, visuAreaOrigY, visuAreaWidth, visuAreaOrigY));
         // draw dBFS
         g.setFont(12.0f);
@@ -162,7 +162,7 @@ void MeterbridgeComponent::paint(Graphics& g)
         }
 
         // draw a simple baseline
-        g.setColour(getLookAndFeel().findColour(juce::AlertWindow::backgroundColourId));
+        g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
         g.drawLine(juce::Line<float>(0.0f, 0.0f, 0.0f, visuAreaHeight));
         // draw dBFS
         g.setFont(12.0f);
