@@ -163,7 +163,7 @@ public:
     };
     ~EnvironmentParametersMessage() = default;
 
-    int getPaletteStyle() const { return m_paletteStyle; };
+    JUCEAppBasics::CustomLookAndFeel::PaletteStyle getPaletteStyle() const { return m_paletteStyle; };
 
 protected:
     juce::MemoryBlock createSerializedContent(size_t& contentSize) const override
