@@ -47,7 +47,15 @@ MainComponent::MainComponent()
     };
     m_networkConnection->onMessageReceived = [=](const juce::MemoryBlock& message) {
         auto knownMessage = MenuBarMatrix::SerializableMessage::initFromMemoryBlock(message);
-        if (m_monitorComponent && nullptr != knownMessage)
+        if (auto const epm = dynamic_cast<const MenuBarMatrix::EnvironmentParametersMessage*>(knownMessage))
+        {
+            auto paletteStyle = epm->getPaletteStyle();
+            jassert(paletteStyle >= JUCEAppBasics::CustomLookAndFeel::PS_Dark && paletteStyle <= JUCEAppBasics::CustomLookAndFeel::PS_Light);
+
+            if (onPaletteStyleChange)
+                onPaletteStyleChange(paletteStyle, false/*do not follow local style any more if a message was received via net once*/);
+        }
+        else if (m_monitorComponent && nullptr != knownMessage)
             m_monitorComponent->handleMessage(*knownMessage);
         MenuBarMatrix::SerializableMessage::freeMessageData(knownMessage);
     };

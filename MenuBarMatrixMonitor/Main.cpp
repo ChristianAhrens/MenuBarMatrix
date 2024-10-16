@@ -72,7 +72,12 @@ public:
         {
 
             setUsingNativeTitleBar(true);
-            setContentOwned(std::make_unique<MainComponent>().release(), true);
+            auto mainComponent = std::make_unique<MainComponent>();
+            mainComponent->onPaletteStyleChange = [=](int paletteStyle, bool followLocalStyle) {
+                m_followLocalStyle = followLocalStyle;
+                applyPaletteStyle(static_cast<JUCEAppBasics::CustomLookAndFeel::PaletteStyle>(paletteStyle));
+            };
+            setContentOwned(mainComponent.release(), true);
 
 #if JUCE_IOS || JUCE_ANDROID
             setFullScreen(true);
@@ -96,24 +101,32 @@ public:
 
         void darkModeSettingChanged() override
         {
+            if (!m_followLocalStyle)
+                return;
+
             if (juce::Desktop::getInstance().isDarkModeActive())
             {
                 // go dark
-                m_lookAndFeel = std::make_unique<JUCEAppBasics::CustomLookAndFeel>(JUCEAppBasics::CustomLookAndFeel::PS_Dark);
-                juce::Desktop::getInstance().setDefaultLookAndFeel(m_lookAndFeel.get());
+                applyPaletteStyle(JUCEAppBasics::CustomLookAndFeel::PS_Dark);
             }
             else
             {
                 // go light
-                m_lookAndFeel = std::make_unique<JUCEAppBasics::CustomLookAndFeel>(JUCEAppBasics::CustomLookAndFeel::PS_Light);
-                juce::Desktop::getInstance().setDefaultLookAndFeel(m_lookAndFeel.get());
+                applyPaletteStyle(JUCEAppBasics::CustomLookAndFeel::PS_Light);
             }
 
             lookAndFeelChanged();
         }
 
+        void applyPaletteStyle(JUCEAppBasics::CustomLookAndFeel::PaletteStyle paletteStyle)
+        {
+            m_lookAndFeel = std::make_unique<JUCEAppBasics::CustomLookAndFeel>(paletteStyle);
+            juce::Desktop::getInstance().setDefaultLookAndFeel(m_lookAndFeel.get());
+        }
+
     private:
         std::unique_ptr<juce::LookAndFeel>  m_lookAndFeel;
+        bool m_followLocalStyle = true;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainWindow)
     };

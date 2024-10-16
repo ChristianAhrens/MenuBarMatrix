@@ -39,6 +39,9 @@ public:
     //========================================================================*
     void resized() override;
 
+    //========================================================================*
+    std::function<void(int, bool)> onPaletteStyleChange;
+
 private:
     //========================================================================*
     class InterprocessConnectionImpl : public juce::InterprocessConnection
