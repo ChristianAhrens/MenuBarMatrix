@@ -25,6 +25,8 @@
               file="Resources/Images/MenuBarMatrix.png"/>
         <FILE id="EwG2UG" name="power_settings_24dp.svg" compile="0" resource="1"
               file="Resources/Images/power_settings_24dp.svg"/>
+        <FILE id="kgvx8Y" name="question_mark_24dp.svg" compile="0" resource="1"
+              file="Resources/Images/question_mark_24dp.svg"/>
         <FILE id="xCV27q" name="tune_24dp.svg" compile="0" resource="1" file="Resources/Images/tune_24dp.svg"/>
       </GROUP>
       <FILE id="pqcvEg" name="Default.config" compile="0" resource="1" file="Resources/Default.config"/>
@@ -107,6 +109,10 @@
       <FILE id="svDZvt" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="F1bdYR" name="MainComponent.cpp" compile="1" resource="0"
             file="Source/MainComponent.cpp"/>
+      <FILE id="M0Uva0" name="AboutComponent.cpp" compile="1" resource="0"
+            file="Source/AboutComponent.cpp"/>
+      <FILE id="IZplXz" name="AboutComponent.h" compile="0" resource="0"
+            file="Source/AboutComponent.h"/>
     </GROUP>
   </MAINGROUP>
   <MODULES>

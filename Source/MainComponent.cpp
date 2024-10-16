@@ -18,6 +18,7 @@
 
 #include "MainComponent.h"
 
+#include "AboutComponent.h"
 #include "MenuBarMatrix.h"
 
 #include <CustomLookAndFeel.h>
@@ -74,6 +75,8 @@ public:
 MainComponent::MainComponent()
     : juce::Component()
 {
+    m_aboutComponent = std::make_unique<AboutComponent>();
+
     m_mbm = std::make_unique<MenuBarMatrix::MenuBarMatrix>();
     m_mbm->onSizeChangeRequested = [=](juce::Rectangle<int> requestedSize) {
         auto width = requestedSize.getWidth();
@@ -108,6 +111,28 @@ MainComponent::MainComponent()
         }
     };
     addAndMakeVisible(m_setupToggleButton.get());
+
+    m_aboutToggleButton = std::make_unique<juce::DrawableButton>("About", juce::DrawableButton::ButtonStyle::ImageFitted);
+    m_aboutToggleButton->setTooltip(juce::String("About") + juce::JUCEApplication::getInstance()->getApplicationName());
+    m_aboutToggleButton->onClick = [this] {
+        if (m_aboutComponent)
+        {
+            if (m_aboutComponent->isVisible())
+            {
+                m_aboutComponent->setVisible(false);
+                m_aboutComponent->removeFromDesktop();
+            }
+            else
+            {
+                m_aboutComponent->setVisible(true);
+                m_aboutComponent->addToDesktop(juce::ComponentPeer::StyleFlags::windowHasDropShadow | juce::ComponentPeer::StyleFlags::windowHasCloseButton);
+                m_aboutComponent->setBounds(getScreenBounds().translated(0, sc_buttonSize + 1));
+            }
+
+            resized();
+        }
+        };
+    addAndMakeVisible(m_aboutToggleButton.get());
 
     m_powerButton = std::make_unique<juce::DrawableButton>("Quit application", juce::DrawableButton::ButtonStyle::ImageFitted);
     m_powerButton->setTooltip("Quit application");
@@ -150,6 +175,9 @@ void MainComponent::resized()
     if (m_powerButton)
         m_powerButton->setBounds(setupElementArea.removeFromRight(setupElementArea.getHeight()));
     setupElementArea.removeFromRight(margin);
+    if (m_aboutToggleButton)
+        m_aboutToggleButton->setBounds(setupElementArea.removeFromRight(setupElementArea.getHeight()));
+    setupElementArea.removeFromRight(margin);
     if (m_setupToggleButton)
         m_setupToggleButton->setBounds(setupElementArea.removeFromRight(setupElementArea.getHeight()));
     setupElementArea.removeFromRight(margin);
@@ -191,6 +219,10 @@ void MainComponent::lookAndFeelChanged()
     auto setupToggleDrawable = juce::Drawable::createFromSVG(*juce::XmlDocument::parse(BinaryData::tune_24dp_svg).get());
     setupToggleDrawable->replaceColour(juce::Colours::black, getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
     m_setupToggleButton->setImages(setupToggleDrawable.get());
+
+    auto aboutToggleDrawable = juce::Drawable::createFromSVG(*juce::XmlDocument::parse(BinaryData::question_mark_24dp_svg).get());
+    aboutToggleDrawable->replaceColour(juce::Colours::black, getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
+    m_aboutToggleButton->setImages(aboutToggleDrawable.get());
 }
 
 void MainComponent::globalFocusChanged(Component* focusedComponent)
