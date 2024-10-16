@@ -62,6 +62,9 @@ public:
     void performConfigurationDump() override;
     void onConfigUpdated() override;
 
+    //==========================================================================
+    void lookAndFeelChanged() override;
+
 private:
     std::unique_ptr<MenuBarMatrixProcessor>        m_menuBarMatrixProcessor;
 

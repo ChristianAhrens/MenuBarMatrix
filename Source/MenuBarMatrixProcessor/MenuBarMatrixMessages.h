@@ -20,6 +20,7 @@
 
 #include <JuceHeader.h>
 
+#include <CustomLookAndFeel.h>
 
 namespace MenuBarMatrix
 {
@@ -29,6 +30,7 @@ namespace MenuBarMatrix
 /*
  *
  */
+class EnvironmentParametersMessage;
 class AnalyzerParametersMessage;
 class ReinitIOCountMessage;
 class AudioInputBufferMessage;
@@ -40,6 +42,7 @@ public:
     enum SerializableMessageType
     {
         None = 0,
+        EnvironmentParameters,
         AnalyzerParameters,
         ReinitIOCount,
         AudioInputBuffer,
@@ -71,6 +74,8 @@ public:
         auto type = static_cast<SerializableMessageType>(blob[0]);
         switch (type)
         {
+        case EnvironmentParameters:
+            return reinterpret_cast<SerializableMessage*>(std::make_unique<EnvironmentParametersMessage>(blob).release());
         case AnalyzerParameters:
             return reinterpret_cast<SerializableMessage*>(std::make_unique<AnalyzerParametersMessage>(blob).release());
         case ReinitIOCount:
@@ -137,6 +142,40 @@ protected:
 
     //==============================================================================
     SerializableMessageType m_type = SerializableMessageType::None;
+};
+
+//==============================================================================
+/*
+ *
+ */
+class EnvironmentParametersMessage : public SerializableMessage
+{
+public:
+    EnvironmentParametersMessage() = default;
+    EnvironmentParametersMessage(JUCEAppBasics::CustomLookAndFeel::PaletteStyle paletteStyle) { m_type = SerializableMessageType::EnvironmentParameters; m_paletteStyle = paletteStyle; };
+    EnvironmentParametersMessage(const juce::MemoryBlock& blob)
+    {
+        jassert(SerializableMessageType::EnvironmentParameters == static_cast<SerializableMessageType>(blob[0]));
+
+        m_type = SerializableMessageType::EnvironmentParameters;
+        blob.copyTo(&m_paletteStyle, sizeof(SerializableMessageType), sizeof(JUCEAppBasics::CustomLookAndFeel::PaletteStyle));
+
+    };
+    ~EnvironmentParametersMessage() = default;
+
+    int getPaletteStyle() const { return m_paletteStyle; };
+
+protected:
+    juce::MemoryBlock createSerializedContent(size_t& contentSize) const override
+    {
+        juce::MemoryBlock blob;
+        blob.append(&m_paletteStyle, sizeof(JUCEAppBasics::CustomLookAndFeel::PaletteStyle));
+        contentSize = blob.getSize();
+        return blob;
+    };
+
+private:
+    JUCEAppBasics::CustomLookAndFeel::PaletteStyle m_paletteStyle = JUCEAppBasics::CustomLookAndFeel::PS_Dark;
 };
 
 //==============================================================================

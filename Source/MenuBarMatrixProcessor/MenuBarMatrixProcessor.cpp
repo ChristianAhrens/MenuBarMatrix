@@ -23,6 +23,8 @@
 #include "MenuBarMatrixMessages.h"
 #include "../AppConfiguration.h"
 
+#include <CustomLookAndFeel.h>
+
 namespace MenuBarMatrix
 {
 
@@ -69,8 +71,11 @@ MenuBarMatrixProcessor::MenuBarMatrixProcessor(XmlElement* stateXml) :
         if (connection)
         {
 			connection->onConnectionLost = [=]() { DBG(__FUNCTION__); };
-			connection->onConnectionMade = [=]() { DBG(__FUNCTION__); postMessage(std::make_unique<AnalyzerParametersMessage>(m_sampleRate, m_bufferSize).release());
-                postMessage(std::make_unique<ReinitIOCountMessage>(m_inputChannelCount, m_outputChannelCount).release()); };
+			connection->onConnectionMade = [=]() { DBG(__FUNCTION__);
+			postMessage(std::make_unique<AnalyzerParametersMessage>(int(m_sampleRate), m_bufferSize).release());
+				postMessage(std::make_unique<ReinitIOCountMessage>(m_inputChannelCount, m_outputChannelCount).release());
+				postMessage(std::make_unique<EnvironmentParametersMessage>(juce::Desktop::getInstance().isDarkModeActive() ? JUCEAppBasics::CustomLookAndFeel::PS_Dark : JUCEAppBasics::CustomLookAndFeel::PS_Light).release());
+			};
 			connection->onMessageReceived = [=](const juce::MemoryBlock& /*data*/) { DBG(__FUNCTION__); };
         }
     };
@@ -143,6 +148,11 @@ bool MenuBarMatrixProcessor::setStateXml(XmlElement* stateXml)
 	}
 	else
 		return false;
+}
+
+void MenuBarMatrixProcessor::environmentChanged()
+{
+	postMessage(std::make_unique<EnvironmentParametersMessage>(juce::Desktop::getInstance().isDarkModeActive() ? JUCEAppBasics::CustomLookAndFeel::PS_Dark : JUCEAppBasics::CustomLookAndFeel::PS_Light).release());
 }
 
 void MenuBarMatrixProcessor::addInputListener(ProcessorDataAnalyzer::Listener* listener)
@@ -383,7 +393,7 @@ void MenuBarMatrixProcessor::prepareToPlay(double sampleRate, int maximumExpecte
 	if (m_outputDataAnalyzer)
 		m_outputDataAnalyzer->initializeParameters(sampleRate, maximumExpectedSamplesPerBlock);
 
-	postMessage(std::make_unique<AnalyzerParametersMessage>(sampleRate, maximumExpectedSamplesPerBlock).release());
+	postMessage(std::make_unique<AnalyzerParametersMessage>(int(sampleRate), maximumExpectedSamplesPerBlock).release());
 }
 
 void MenuBarMatrixProcessor::releaseResources()
@@ -453,7 +463,12 @@ void MenuBarMatrixProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffer
 
 void MenuBarMatrixProcessor::handleMessage(const Message& message)
 {
-	if (auto const apm = dynamic_cast<const AnalyzerParametersMessage*>(&message))
+	if (auto const epm = dynamic_cast<const EnvironmentParametersMessage*>(&message))
+	{
+		if (m_networkServer && m_networkServer->hasActiveConnection())
+			m_networkServer->getActiveConnection()->sendMessage(epm->getSerializedMessage());
+	}
+	else if (auto const apm = dynamic_cast<const AnalyzerParametersMessage*>(&message))
 	{
 		if (m_networkServer && m_networkServer->hasActiveConnection())
 			m_networkServer->getActiveConnection()->sendMessage(apm->getSerializedMessage());
