@@ -62,6 +62,7 @@ void CrosspointsControlComponent::setIOCount(int inputCount, int outputCount)
         DBG(__FUNCTION__ << " " << inputCount << " " << outputCount);
 
         std::function<void(int, int)> initCrosspoint = [=](int input, int output) {
+            DBG(__FUNCTION__ << " " << input << " " << output);
             m_crosspointEnabledValues[input][output] = false;
             m_crosspointComponent[input][output] = std::make_unique<CrosspointComponent>(std::make_pair(input, output));
             m_crosspointComponent[input][output]->onCheckedChanged = [=](bool checkedState, CrosspointComponent* sender) {
@@ -76,6 +77,11 @@ void CrosspointsControlComponent::setIOCount(int inputCount, int outputCount)
             for (int j = m_matrixGrid.templateRows.size(); j < output; j++)
                 m_matrixGrid.templateRows.add(juce::Grid::TrackInfo(juce::Grid::Px(s_nodeSize)));
             };
+
+        m_matrixGrid.items.clear();
+        m_matrixGrid.templateColumns.clear();
+        m_matrixGrid.templateRows.clear();
+        m_crosspointComponent.clear();
 
         for (int i = 1; i <= inputCount; i++)
         {
@@ -97,7 +103,6 @@ void CrosspointsControlComponent::setIOCount(int inputCount, int outputCount)
             }
         }
 
-        m_matrixGrid.items.clear();
         for (int o = 1; o <= outputCount; o++)
         {
             for (int i = 1; i <= inputCount; i++)
