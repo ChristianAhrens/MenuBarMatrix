@@ -22,6 +22,7 @@
 
 class MenuBarMatrixMonitorComponent;
 class MenuBarMatrixDiscoverComponent;
+class AboutComponent;
 
 class MainComponent :   public juce::Component
 {
@@ -38,6 +39,7 @@ public:
 
     //========================================================================*
     void resized() override;
+    void lookAndFeelChanged() override;
 
     //========================================================================*
     std::function<void(int, bool)> onPaletteStyleChange;
@@ -70,6 +72,9 @@ private:
 
     std::unique_ptr<MenuBarMatrixMonitorComponent>                          m_monitorComponent;
     std::unique_ptr<MenuBarMatrixDiscoverComponent>                         m_discoverComponent;
+
+    std::unique_ptr<juce::DrawableButton>                                   m_aboutToggleButton;
+    std::unique_ptr<AboutComponent>                                         m_aboutComponent;
 
     Status m_currentStatus = Status::Discovering;
 

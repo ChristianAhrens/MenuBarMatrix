@@ -21,9 +21,10 @@
 #include "MenuBarMatrixMonitorComponent.h"
 #include "MenuBarMatrixDiscoverComponent.h"
 
+#include <AboutComponent.h>
 #include <CustomLookAndFeel.h>
-#include "MenuBarMatrixProcessor/MenuBarMatrixMessages.h"
-#include "MenuBarMatrixProcessor/MenuBarMatrixServiceData.h"
+#include <MenuBarMatrixProcessor/MenuBarMatrixMessages.h>
+#include <MenuBarMatrixProcessor/MenuBarMatrixServiceData.h>
 
 MainComponent::MainComponent()
     : juce::Component()
@@ -85,6 +86,27 @@ MainComponent::MainComponent()
             m_networkConnection->connectToSocket(selectedService.address.toString(), selectedService.port, 100);
     };
     addAndMakeVisible(m_discoverComponent.get());
+
+    m_aboutComponent = std::make_unique<AboutComponent>();
+    addChildComponent(m_aboutComponent.get());
+
+    m_aboutToggleButton = std::make_unique<juce::DrawableButton>("About", juce::DrawableButton::ButtonStyle::ImageFitted);
+    m_aboutToggleButton->setTooltip(juce::String("About") + juce::JUCEApplication::getInstance()->getApplicationName());
+    m_aboutToggleButton->onClick = [this] {
+        if (m_aboutComponent)
+        {
+            if (m_aboutComponent->isVisible())
+                m_aboutComponent->setVisible(false);
+            else
+                m_aboutComponent->setVisible(true);
+
+            resized();
+        }
+    };
+    m_aboutToggleButton->setAlwaysOnTop(true);
+    m_aboutToggleButton->setColour(juce::DrawableButton::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
+    m_aboutToggleButton->setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, juce::Colours::transparentBlack);
+    addAndMakeVisible(m_aboutToggleButton.get());
 
     m_availableServices = std::make_unique<juce::NetworkServiceDiscovery::AvailableServiceList>(
         MenuBarMatrix::ServiceData::getServiceTypeUID(), 
@@ -205,5 +227,17 @@ void MainComponent::resized()
             m_discoverComponent->setBounds(getLocalBounds());
             break;
     }
+
+    if (m_aboutComponent && m_aboutComponent->isVisible())
+        m_aboutComponent->setBounds(getLocalBounds().reduced(1));
+
+    m_aboutToggleButton->setBounds(getLocalBounds().removeFromBottom(25).removeFromRight(25));
+}
+
+void MainComponent::lookAndFeelChanged()
+{
+    auto aboutToggleDrawable = juce::Drawable::createFromSVG(*juce::XmlDocument::parse(BinaryData::question_mark_24dp_svg).get());
+    aboutToggleDrawable->replaceColour(juce::Colours::black, getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
+    m_aboutToggleButton->setImages(aboutToggleDrawable.get());
 }
 
