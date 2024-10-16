@@ -133,5 +133,11 @@ void MenuBarMatrix::onConfigUpdated()
     }
 }
 
+void MenuBarMatrix::lookAndFeelChanged()
+{
+    if (m_menuBarMatrixProcessor)
+        m_menuBarMatrixProcessor->environmentChanged();
+}
+
 
 }
