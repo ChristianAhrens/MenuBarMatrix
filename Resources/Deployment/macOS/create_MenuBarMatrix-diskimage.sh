@@ -2,13 +2,13 @@
 cd ../../../
 
 # set convenience variables
-AppBundlePath=Builds/MacOSX/build/Release/SurroundFieldMixer.app
+AppBundlePath=Builds/MacOSX/build/Release/MenuBarMatrix.app
 ChangeLogPath=CHANGELOG.md
 CreateDmgPath=submodules/create-dmg/create-dmg
 LicensePath=LICENSE
-IconSetSourcePng=SurroundFieldMixer.png
+IconSetSourcePng=MenuBarMatrix.png
 VolIconPath=Resources/Images/Iconset.icns
-DmgTargetPath=SurroundFieldMixer.dmg
+DmgTargetPath=MenuBarMatrix.dmg
 DmgContentsCollectionPath=ContentsPath
 
 # create the icns from existing png
