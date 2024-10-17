@@ -5,8 +5,8 @@ cd ../../../
 JUCEDir=submodules/JUCE
 ProjucerPath="$JUCEDir"/extras/Projucer/Builds/MacOSX
 ProjucerBinPath="$ProjucerPath"/build/Release/Projucer.app/Contents/MacOS/Projucer
-JucerProjectPath=SurroundFieldMixer.jucer
-XCodeProjectPath=Builds/MacOSX/SurroundFieldMixer.xcodeproj
+JucerProjectPath=MenuBarMatrix.jucer
+XCodeProjectPath=Builds/MacOSX/MenuBarMatrix.xcodeproj
 
 # build projucer
 xcodebuild -project "$ProjucerPath"/Projucer.xcodeproj -configuration Release -jobs 8

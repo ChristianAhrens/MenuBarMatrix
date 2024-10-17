@@ -4,7 +4,7 @@ cd ../../../
 # set external variables
 CodeSignCertName=$1 # e.g. "Developer ID Application: SomeIdentifier"
 NotarizationUser=$2 # appleid to use for notarization
-AppBundleId=$3 # app bundle id like "com.SomeIdentifier.SurroundFieldMixer"
+AppBundleId=$3 # app bundle id like "com.SomeIdentifier.MenuBarMatrix"
 
 echo "Using certificate $CodeSignCertName for codesigning."
 echo "Using AppleId $NotarizationUser and bundle name $AppBundleId for notarization."
@@ -12,12 +12,12 @@ echo "Using AppleId $NotarizationUser and bundle name $AppBundleId for notarizat
 # set convenience variables
 AppBundlePath=Builds/MacOSX/build/Release
 CreateDmgPath=submodules/create-dmg/create-dmg
-DmgTargetPath=SurroundFieldMixer.dmg
+DmgTargetPath=MenuBarMatrix.dmg
 
 # build the project and create dmg
 cd Resources/Deployment/macOS
-./build_project.sh
-./create_diskimage.sh
+./build_MenuBarMatrix.sh
+./create_MenuBarMatrix-diskimage.sh
 cd ../../../
 
 # codesign the disk image
