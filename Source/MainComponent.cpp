@@ -223,6 +223,8 @@ void MainComponent::lookAndFeelChanged()
     auto aboutToggleDrawable = juce::Drawable::createFromSVG(*juce::XmlDocument::parse(BinaryData::question_mark_24dp_svg).get());
     aboutToggleDrawable->replaceColour(juce::Colours::black, getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
     m_aboutToggleButton->setImages(aboutToggleDrawable.get());
+    
+    m_mbm->lookAndFeelChanged();
 }
 
 void MainComponent::globalFocusChanged(Component* focusedComponent)
