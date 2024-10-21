@@ -4,16 +4,16 @@ cd ../../../
 # set convenience variables
 AppStoreUser=$1 # appleid to use for appstore access
 ProjectName=$2 # app name like "MenuBarMatrixMonitor"
-JUCEDir=../submodules/JUCE
+JUCEDir=submodules/JUCE
 ProjucerPath="$JUCEDir"/extras/Projucer/Builds/MacOSX
 ProjucerBinPath="$ProjucerPath"/build/Release/Projucer.app/Contents/MacOS/Projucer
-ProjectDir=Builds/iOS
-JucerProjectPath="$ProjectName".jucer
+ProjectDir="$ProjectName"/Builds/iOS
+JucerProjectPath="$ProjectName"/"$ProjectName".jucer
 XCodeProjectPath="$ProjectDir"/"$ProjectName".xcodeproj
 XCodeProjectScheme="$ProjectName"" - App"
 XCodeBuildPath="$ProjectDir"/build
-XCodeEntitlementsPath=../Resources/Deployment/iOS/App.entitlements
-XCodeExportOptionsPath=../Resources/Deployment/iOS/exportOptions.plist
+XCodeEntitlementsPath=Resources/Deployment/iOS/App.entitlements
+XCodeExportOptionsPath=Resources/Deployment/iOS/exportOptions.plist
 AppExportPath="$ProjectDir"/"$ProjectName"
 
 # build projucer
