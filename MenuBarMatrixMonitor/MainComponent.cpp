@@ -26,6 +26,8 @@
 #include <MenuBarMatrixProcessor/MenuBarMatrixMessages.h>
 #include <MenuBarMatrixProcessor/MenuBarMatrixServiceData.h>
 
+#include <iOS_utils.h>
+
 MainComponent::MainComponent()
     : juce::Component()
 {
@@ -213,25 +215,32 @@ MainComponent::~MainComponent()
 
 void MainComponent::resized()
 {
+    auto safety = JUCEAppBasics::iOS_utils::getDeviceSafetyMargins();
+    auto safeBounds = getLocalBounds();
+    safeBounds.removeFromTop(safety._top);
+    safeBounds.removeFromBottom(safety._bottom);
+    safeBounds.removeFromLeft(safety._left);
+    safeBounds.removeFromRight(safety._right);
+    
     switch (m_currentStatus)
     {
         case Status::Monitoring:
             m_discoverComponent->setVisible(false);
             m_monitorComponent->setVisible(true);
-            m_monitorComponent->setBounds(getLocalBounds());
+            m_monitorComponent->setBounds(safeBounds);
             break;
         case Status::Discovering:
         default:
             m_monitorComponent->setVisible(false);
             m_discoverComponent->setVisible(true);
-            m_discoverComponent->setBounds(getLocalBounds());
+            m_discoverComponent->setBounds(safeBounds);
             break;
     }
 
     if (m_aboutComponent && m_aboutComponent->isVisible())
-        m_aboutComponent->setBounds(getLocalBounds().reduced(1));
+        m_aboutComponent->setBounds(safeBounds.reduced(1));
 
-    m_aboutToggleButton->setBounds(getLocalBounds().removeFromBottom(25).removeFromRight(25));
+    m_aboutToggleButton->setBounds(safeBounds.removeFromBottom(25).removeFromRight(25));
 }
 
 void MainComponent::lookAndFeelChanged()
