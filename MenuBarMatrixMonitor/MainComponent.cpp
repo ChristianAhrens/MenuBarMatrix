@@ -243,6 +243,11 @@ void MainComponent::resized()
     m_aboutToggleButton->setBounds(safeBounds.removeFromBottom(25).removeFromRight(25));
 }
 
+void MainComponent::paint(juce::Graphics& g)
+{
+    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+}
+
 void MainComponent::lookAndFeelChanged()
 {
     auto aboutToggleDrawable = juce::Drawable::createFromSVG(*juce::XmlDocument::parse(BinaryData::question_mark_24dp_svg).get());
