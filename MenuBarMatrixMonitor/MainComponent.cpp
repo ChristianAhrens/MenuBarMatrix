@@ -89,7 +89,7 @@ MainComponent::MainComponent()
     };
     addAndMakeVisible(m_discoverComponent.get());
 
-    m_aboutComponent = std::make_unique<AboutComponent>();
+    m_aboutComponent = std::make_unique<AboutComponent>(BinaryData::MenuBarMatrixMonitorRect_png, BinaryData::MenuBarMatrixMonitorCanvas_pngSize);
     addChildComponent(m_aboutComponent.get());
 
     m_aboutToggleButton = std::make_unique<juce::DrawableButton>("About", juce::DrawableButton::ButtonStyle::ImageFitted);
