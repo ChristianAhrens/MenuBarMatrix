@@ -240,7 +240,7 @@ void MainComponent::resized()
     if (m_aboutComponent && m_aboutComponent->isVisible())
         m_aboutComponent->setBounds(safeBounds.reduced(1));
 
-    m_aboutToggleButton->setBounds(safeBounds.removeFromBottom(25).removeFromRight(25));
+    m_aboutToggleButton->setBounds(safeBounds.removeFromTop(35).removeFromLeft(30).removeFromBottom(30));
 }
 
 void MainComponent::paint(juce::Graphics& g)
