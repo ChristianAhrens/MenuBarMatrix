@@ -45,6 +45,9 @@ MainComponent::MainComponent()
         if (m_monitorComponent)
             m_monitorComponent->setRunning(false);
 
+        if (m_discoverComponent)
+            m_discoverComponent->setDiscoveredServices(m_availableServices->getServices());
+
         m_currentStatus = Status::Discovering;
         resized();
     };
@@ -65,7 +68,8 @@ MainComponent::MainComponent()
 
     m_monitorComponent = std::make_unique<MenuBarMatrixMonitorComponent>();
     m_monitorComponent->onExitClick = [=]() {
-        m_discoverComponent->setDiscoveredServices(m_availableServices->getServices());
+        if (m_discoverComponent)
+            m_discoverComponent->setDiscoveredServices(m_availableServices->getServices());
 
         if (m_monitorComponent)
             m_monitorComponent->setRunning(false);
@@ -114,7 +118,8 @@ MainComponent::MainComponent()
         MenuBarMatrix::ServiceData::getServiceTypeUID(), 
         MenuBarMatrix::ServiceData::getBroadcastPort());
     m_availableServices->onChange = [=]() { 
-        m_discoverComponent->setDiscoveredServices(m_availableServices->getServices());
+        if (m_discoverComponent)
+            m_discoverComponent->setDiscoveredServices(m_availableServices->getServices());
     };
 
 #ifdef NIX//DEBUG
