@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="ja98xe" name="MenuBarMatrixMonitor" projectType="guiapp"
-              useAppConfig="0" jucerFormatVersion="1" version="0.0.1" companyWebsite="github.com/ChristianAhrens/MenuBarMatrix"
+              useAppConfig="0" jucerFormatVersion="1" version="0.1.0" companyWebsite="github.com/ChristianAhrens/MenuBarMatrix"
               bundleIdentifier="com.ChristianAhrens.MenuBarMatrixMonitor" headerPath="../../../submodules/JUCE-AppBasics/Source&#10;../../../Source"
               defines="JUCE_USE_LAME_AUDIO_FORMAT=1,&#10;JUCE_USE_MP3AUDIOFORMAT=1,&#10;JUCE_DISPLAY_SPLASH_SCREEN=0">
   <MAINGROUP id="YIs3Nm" name="MenuBarMatrixMonitor">
@@ -11,6 +11,8 @@
               file="../submodules/JUCE-AppBasics/Source/CustomLookAndFeel.cpp"/>
         <FILE id="JS6zlP" name="CustomLookAndFeel.h" compile="0" resource="0"
               file="../submodules/JUCE-AppBasics/Source/CustomLookAndFeel.h"/>
+        <FILE id="iFIFTc" name="iOS_utils.cpp" compile="1" resource="0" file="../submodules/JUCE-AppBasics/Source/iOS_utils.cpp"/>
+        <FILE id="u9384n" name="iOS_utils.h" compile="0" resource="0" file="../submodules/JUCE-AppBasics/Source/iOS_utils.h"/>
       </GROUP>
     </GROUP>
     <GROUP id="{72AB56DC-8637-938F-3846-2BD91435687D}" name="Resources">
@@ -21,6 +23,10 @@
               file="../Resources/Images/MenuBarMatrix.png"/>
         <FILE id="JfPML3" name="MenuBarMatrixMonitor.png" compile="0" resource="1"
               file="../Resources/Images/MenuBarMatrixMonitor.png"/>
+        <FILE id="DH3pxS" name="MenuBarMatrixMonitorCanvas.png" compile="0"
+              resource="1" file="../Resources/Images/MenuBarMatrixMonitorCanvas.png"/>
+        <FILE id="N401Tr" name="MenuBarMatrixMonitorRect.png" compile="0" resource="1"
+              file="../Resources/Images/MenuBarMatrixMonitorRect.png"/>
         <FILE id="dEu5Q1" name="power_settings_24dp.svg" compile="0" resource="1"
               file="../Resources/Images/power_settings_24dp.svg"/>
         <FILE id="xXZ7lE" name="question_mark_24dp.svg" compile="0" resource="1"
@@ -97,7 +103,7 @@
   </MODULES>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" smallIcon="JfPML3" bigIcon="JfPML3">
+    <XCODE_MAC targetFolder="Builds/MacOSX" smallIcon="N401Tr" bigIcon="N401Tr">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug"/>
         <CONFIGURATION isDebug="0" name="Release"/>
@@ -137,5 +143,50 @@
         <MODULEPATH id="juce_dsp" path="..\submodules\JUCE\modules"/>
       </MODULEPATHS>
     </VS2022>
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" smallIcon="JfPML3" bigIcon="JfPML3">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../submodules/JUCE/modules"/>
+      </MODULEPATHS>
+    </LINUX_MAKE>
+    <XCODE_IPHONE targetFolder="Builds/iOS" smallIcon="DH3pxS" bigIcon="DH3pxS"
+                  customLaunchStoryboard="../Resources/Deployment/iOS/Launchscreen.storyboard"
+                  iosScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight"
+                  iPadScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight,UIInterfaceOrientationPortrait,UIInterfaceOrientationPortraitUpsideDown"
+                  UIStatusBarHidden="1" networkingMulticast="1" iosDevelopmentTeamID="SB7Q3PP4FQ"
+                  UIRequiresFullScreen="0" customPList="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&#10;&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;&#10;&lt;plist&gt;&#10;  &lt;dict&gt;&#10;    &lt;key&gt;NSLocalNetworkUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;MenuBarMatrixMonitor uses multicast to discover IP Addresses of MenuBarMatrix instances on the network.&lt;/string&gt;&#10;    &#9;&lt;key&gt;UIBackgroundModes&lt;/key&gt;&#10;    &#9;&lt;array&gt;&#10;&#9;      &#9;&lt;string&gt;processing&lt;/string&gt;&#10;    &#9;&lt;/array&gt;&#10;    &lt;key&gt;BGTaskSchedulerPermittedIdentifiers&lt;/key&gt;&#10;    &lt;array&gt;&#10;      &lt;string&gt;com.ChristianAhrens.MenuBarMatrixMonitor&lt;/string&gt;&#10;    &lt;/array&gt;&#10;&lt;/dict&gt;&#10;&lt;/plist&gt;">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" iosDeploymentTarget="15" iosCompatibility="15"/>
+        <CONFIGURATION isDebug="0" name="Release" iosDeploymentTarget="15" iosCompatibility="15"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../submodules/JUCE/modules"/>
+      </MODULEPATHS>
+    </XCODE_IPHONE>
   </EXPORTFORMATS>
 </JUCERPROJECT>

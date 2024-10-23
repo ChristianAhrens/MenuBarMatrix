@@ -75,7 +75,7 @@ public:
 MainComponent::MainComponent()
     : juce::Component()
 {
-    m_aboutComponent = std::make_unique<AboutComponent>();
+    m_aboutComponent = std::make_unique<AboutComponent>(BinaryData::MenuBarMatrixRect_png, BinaryData::MenuBarMatrixCanvas_pngSize);
 
     m_mbm = std::make_unique<MenuBarMatrix::MenuBarMatrix>();
     m_mbm->onSizeChangeRequested = [=](juce::Rectangle<int> requestedSize) {
@@ -223,6 +223,8 @@ void MainComponent::lookAndFeelChanged()
     auto aboutToggleDrawable = juce::Drawable::createFromSVG(*juce::XmlDocument::parse(BinaryData::question_mark_24dp_svg).get());
     aboutToggleDrawable->replaceColour(juce::Colours::black, getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
     m_aboutToggleButton->setImages(aboutToggleDrawable.get());
+    
+    m_mbm->lookAndFeelChanged();
 }
 
 void MainComponent::globalFocusChanged(Component* focusedComponent)
