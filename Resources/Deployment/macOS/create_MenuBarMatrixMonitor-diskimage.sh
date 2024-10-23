@@ -4,7 +4,7 @@ cd ../../../
 # set convenience variables
 AppBundlePath=Builds/MacOSX/build/Release/MenuBarMatrixMonitor.app
 ChangeLogPath=../CHANGELOG.md
-CreateDmgPath=submodules/create-dmg/create-dmg
+CreateDmgPath=../submodules/create-dmg/create-dmg
 LicensePath=../LICENSE
 IconSetSourcePng=MenuBarMatrixMonitor.png
 VolIconPath=../Resources/Images/Iconset.icns
