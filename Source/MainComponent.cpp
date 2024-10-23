@@ -75,7 +75,7 @@ public:
 MainComponent::MainComponent()
     : juce::Component()
 {
-    m_aboutComponent = std::make_unique<AboutComponent>();
+    m_aboutComponent = std::make_unique<AboutComponent>(BinaryData::MenuBarMatrixRect_png, BinaryData::MenuBarMatrixCanvas_pngSize);
 
     m_mbm = std::make_unique<MenuBarMatrix::MenuBarMatrix>();
     m_mbm->onSizeChangeRequested = [=](juce::Rectangle<int> requestedSize) {

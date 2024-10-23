@@ -18,9 +18,15 @@
 
 #include "AboutComponent.h"
 
-AboutComponent::AboutComponent()
+AboutComponent::AboutComponent(const char* imageData, int imageDataSize)
     : juce::Component()
 {
+	m_appIcon = std::make_unique<juce::DrawableButton>("App Icon", juce::DrawableButton::ButtonStyle::ImageFitted);
+	m_appIcon->setColour(juce::DrawableButton::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
+	m_appIcon->setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, juce::Colours::transparentBlack);
+	m_appIcon->setImages(juce::Drawable::createFromImageData(imageData, imageDataSize).get());
+	addAndMakeVisible(m_appIcon.get());
+
 	m_appInfoLabel = std::make_unique<juce::Label>("Version", juce::JUCEApplication::getInstance()->getApplicationName() + " " + juce::JUCEApplication::getInstance()->getApplicationVersion());
 	m_appInfoLabel->setJustificationType(juce::Justification::centredBottom);
 	m_appInfoLabel->setFont(juce::Font(16.0, juce::Font::plain));
@@ -48,8 +54,14 @@ void AboutComponent::paint(juce::Graphics &g)
 
 void AboutComponent::resized()
 {
-	auto bounds = getLocalBounds().reduced(2);
+	auto bounds = getLocalBounds();
+	auto margin = bounds.getHeight() / 8;
+	bounds.reduce(margin, margin);
+	auto iconBounds = bounds.removeFromTop(bounds.getHeight() / 2);
+	auto infoBounds = bounds.removeFromTop(bounds.getHeight() / 2);
+	auto& repoLinkBounds = bounds;
 
-	m_appInfoLabel->setBounds(bounds.removeFromTop(bounds.getHeight() / 2));
-	m_appRepoLink->setBounds(bounds);
+	m_appIcon->setBounds(iconBounds);
+	m_appInfoLabel->setBounds(infoBounds);
+	m_appRepoLink->setBounds(repoLinkBounds);
 }
