@@ -26,6 +26,8 @@
 #include <MenuBarMatrixProcessor/MenuBarMatrixMessages.h>
 #include <MenuBarMatrixProcessor/MenuBarMatrixServiceData.h>
 
+#include <iOS_utils.h>
+
 MainComponent::MainComponent()
     : juce::Component()
 {
@@ -42,6 +44,9 @@ MainComponent::MainComponent()
         DBG(__FUNCTION__);
         if (m_monitorComponent)
             m_monitorComponent->setRunning(false);
+
+        if (m_discoverComponent)
+            m_discoverComponent->setDiscoveredServices(m_availableServices->getServices());
 
         m_currentStatus = Status::Discovering;
         resized();
@@ -63,7 +68,8 @@ MainComponent::MainComponent()
 
     m_monitorComponent = std::make_unique<MenuBarMatrixMonitorComponent>();
     m_monitorComponent->onExitClick = [=]() {
-        m_discoverComponent->setDiscoveredServices(m_availableServices->getServices());
+        if (m_discoverComponent)
+            m_discoverComponent->setDiscoveredServices(m_availableServices->getServices());
 
         if (m_monitorComponent)
             m_monitorComponent->setRunning(false);
@@ -87,7 +93,7 @@ MainComponent::MainComponent()
     };
     addAndMakeVisible(m_discoverComponent.get());
 
-    m_aboutComponent = std::make_unique<AboutComponent>();
+    m_aboutComponent = std::make_unique<AboutComponent>(BinaryData::MenuBarMatrixMonitorRect_png, BinaryData::MenuBarMatrixMonitorCanvas_pngSize);
     addChildComponent(m_aboutComponent.get());
 
     m_aboutToggleButton = std::make_unique<juce::DrawableButton>("About", juce::DrawableButton::ButtonStyle::ImageFitted);
@@ -112,7 +118,8 @@ MainComponent::MainComponent()
         MenuBarMatrix::ServiceData::getServiceTypeUID(), 
         MenuBarMatrix::ServiceData::getBroadcastPort());
     m_availableServices->onChange = [=]() { 
-        m_discoverComponent->setDiscoveredServices(m_availableServices->getServices());
+        if (m_discoverComponent)
+            m_discoverComponent->setDiscoveredServices(m_availableServices->getServices());
     };
 
 #ifdef NIX//DEBUG
@@ -213,25 +220,37 @@ MainComponent::~MainComponent()
 
 void MainComponent::resized()
 {
+    auto safety = JUCEAppBasics::iOS_utils::getDeviceSafetyMargins();
+    auto safeBounds = getLocalBounds();
+    safeBounds.removeFromTop(safety._top);
+    safeBounds.removeFromBottom(safety._bottom);
+    safeBounds.removeFromLeft(safety._left);
+    safeBounds.removeFromRight(safety._right);
+    
     switch (m_currentStatus)
     {
         case Status::Monitoring:
             m_discoverComponent->setVisible(false);
             m_monitorComponent->setVisible(true);
-            m_monitorComponent->setBounds(getLocalBounds());
+            m_monitorComponent->setBounds(safeBounds);
             break;
         case Status::Discovering:
         default:
             m_monitorComponent->setVisible(false);
             m_discoverComponent->setVisible(true);
-            m_discoverComponent->setBounds(getLocalBounds());
+            m_discoverComponent->setBounds(safeBounds);
             break;
     }
 
     if (m_aboutComponent && m_aboutComponent->isVisible())
-        m_aboutComponent->setBounds(getLocalBounds().reduced(1));
+        m_aboutComponent->setBounds(safeBounds.reduced(1));
 
-    m_aboutToggleButton->setBounds(getLocalBounds().removeFromBottom(25).removeFromRight(25));
+    m_aboutToggleButton->setBounds(safeBounds.removeFromTop(35).removeFromLeft(30).removeFromBottom(30));
+}
+
+void MainComponent::paint(juce::Graphics& g)
+{
+    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 void MainComponent::lookAndFeelChanged()

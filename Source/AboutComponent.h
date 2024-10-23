@@ -24,7 +24,7 @@
 class AboutComponent :   public juce::Component
 {
 public:
-    AboutComponent();
+    AboutComponent(const char* imageData, int imageDataSize);
     ~AboutComponent() override;
 
     //========================================================================*
@@ -32,6 +32,7 @@ public:
     void resized() override;
 
 private:
+    std::unique_ptr<juce::DrawableButton>   m_appIcon;
     std::unique_ptr<juce::Label>            m_appInfoLabel;
     std::unique_ptr<juce::HyperlinkButton>  m_appRepoLink;
 
