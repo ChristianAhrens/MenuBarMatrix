@@ -10,3 +10,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 ### Fixed
+
+## [0.1.0] 2024-10-23
+### Added
+- Initially added MenuBarMatrix toolbar audio rooting tool, incl. TCP/IP remote monitoring interface
+- Initially added MenuBarMatrixMonitor Desktop-, Mobile- and Embedded-App to connect to MenuBarMatrix instances to provide level metering
+
+### Changed
+
+### Fixed
