@@ -8,7 +8,6 @@ echo "Using certificate $CodeSignCertName for codesigning."
 
 # set convenience variables
 AppBundlePath=Builds/MacOSX/build/Release
-CreateDmgPath=submodules/create-dmg/create-dmg
 DmgTargetPath=MenuBarMatrix.dmg
 
 # build the project and create dmg
