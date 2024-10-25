@@ -3,7 +3,7 @@
 <JUCERPROJECT id="ja98xe" name="MenuBarMatrixMonitor" projectType="guiapp"
               useAppConfig="0" jucerFormatVersion="1" version="0.1.1" companyWebsite="github.com/ChristianAhrens/MenuBarMatrix"
               bundleIdentifier="com.ChristianAhrens.MenuBarMatrixMonitor" headerPath="../../../submodules/JUCE-AppBasics/Source&#10;../../../Source"
-              defines="JUCE_USE_LAME_AUDIO_FORMAT=1,&#10;JUCE_USE_MP3AUDIOFORMAT=1,&#10;JUCE_DISPLAY_SPLASH_SCREEN=0">
+              defines="JUCE_USE_LAME_AUDIO_FORMAT=1,&#10;JUCE_USE_MP3AUDIOFORMAT=1,&#10;JUCE_DISPLAY_SPLASH_SCREEN=0,&#10;JUCE_MODAL_LOOPS_PERMITTED=1">
   <MAINGROUP id="YIs3Nm" name="MenuBarMatrixMonitor">
     <GROUP id="{60526C8C-38C9-8A62-4BE8-08FDFBF21423}" name="submodules">
       <GROUP id="{A748DC48-D24B-A4B1-772D-A48B7873F767}" name="JUCEAppBascics">
@@ -19,6 +19,8 @@
       <GROUP id="{5418C8BA-AFDC-83EF-A716-D3FB9CE9A772}" name="Images">
         <FILE id="D0LA6R" name="grid_4x4_24dp.svg" compile="0" resource="1"
               file="../Resources/Images/grid_4x4_24dp.svg"/>
+        <FILE id="RVy566" name="link_off_24dp.svg" compile="0" resource="1"
+              file="../Resources/Images/link_off_24dp.svg"/>
         <FILE id="BRhtKu" name="MenuBarMatrix.png" compile="0" resource="1"
               file="../Resources/Images/MenuBarMatrix.png"/>
         <FILE id="JfPML3" name="MenuBarMatrixMonitor.png" compile="0" resource="1"
@@ -27,10 +29,10 @@
               resource="1" file="../Resources/Images/MenuBarMatrixMonitorCanvas.png"/>
         <FILE id="N401Tr" name="MenuBarMatrixMonitorRect.png" compile="0" resource="1"
               file="../Resources/Images/MenuBarMatrixMonitorRect.png"/>
-        <FILE id="dEu5Q1" name="power_settings_24dp.svg" compile="0" resource="1"
-              file="../Resources/Images/power_settings_24dp.svg"/>
         <FILE id="xXZ7lE" name="question_mark_24dp.svg" compile="0" resource="1"
               file="../Resources/Images/question_mark_24dp.svg"/>
+        <FILE id="NKxkrT" name="settings_24dp.svg" compile="0" resource="1"
+              file="../Resources/Images/settings_24dp.svg"/>
         <FILE id="NDNqww" name="tune_24dp.svg" compile="0" resource="1" file="../Resources/Images/tune_24dp.svg"/>
       </GROUP>
     </GROUP>

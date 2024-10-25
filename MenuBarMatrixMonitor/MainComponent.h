@@ -20,6 +20,7 @@
 
 #include <JuceHeader.h>
 
+
 class MenuBarMatrixMonitorComponent;
 class MenuBarMatrixDiscoverComponent;
 class AboutComponent;
@@ -73,6 +74,12 @@ private:
 
     std::unique_ptr<MenuBarMatrixMonitorComponent>                          m_monitorComponent;
     std::unique_ptr<MenuBarMatrixDiscoverComponent>                         m_discoverComponent;
+
+    std::unique_ptr<juce::DrawableButton>                                   m_settingsButton;
+    std::map<int, std::pair<std::string, int>>                              m_settingsItems;
+    int                                                                     m_settingsHostLookAndFeelId = -1;
+
+    std::unique_ptr<juce::DrawableButton>                                   m_disconnectButton;
 
     std::unique_ptr<juce::DrawableButton>                                   m_aboutToggleButton;
     std::unique_ptr<AboutComponent>                                         m_aboutComponent;
