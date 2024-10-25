@@ -134,32 +134,34 @@ MainComponent::MainComponent()
             settingsMenu.addItem(item.first, item.second.first, true, item.second.second == 1);
         }
 
-        switch (settingsMenu.show())
-        {
-        case 1:
-            m_settingsItems[1].second = 1;
-            m_settingsItems[2].second = 0;
-            m_settingsItems[3].second = 0;
-            if (onPaletteStyleChange && m_settingsHostLookAndFeelId != -1)
-                onPaletteStyleChange(m_settingsHostLookAndFeelId, false);
-            break;
-        case 2:
-            m_settingsItems[1].second = 0;
-            m_settingsItems[2].second = 1;
-            m_settingsItems[3].second = 0;
-            if (onPaletteStyleChange)
-                onPaletteStyleChange(JUCEAppBasics::CustomLookAndFeel::PS_Dark, false);
-            break;
-        case 3:
-            m_settingsItems[1].second = 0;
-            m_settingsItems[2].second = 0;
-            m_settingsItems[3].second = 1;
-            if (onPaletteStyleChange)
-                onPaletteStyleChange(JUCEAppBasics::CustomLookAndFeel::PS_Light, false);
-            break;
-        default:
-            break;
-        }
+        settingsMenu.showMenuAsync(juce::PopupMenu::Options(), [=](int selectedId) {
+            switch (selectedId)
+            {
+            case 1:
+                m_settingsItems[1].second = 1;
+                m_settingsItems[2].second = 0;
+                m_settingsItems[3].second = 0;
+                if (onPaletteStyleChange && m_settingsHostLookAndFeelId != -1)
+                    onPaletteStyleChange(m_settingsHostLookAndFeelId, false);
+                break;
+            case 2:
+                m_settingsItems[1].second = 0;
+                m_settingsItems[2].second = 1;
+                m_settingsItems[3].second = 0;
+                if (onPaletteStyleChange)
+                    onPaletteStyleChange(JUCEAppBasics::CustomLookAndFeel::PS_Dark, false);
+                break;
+            case 3:
+                m_settingsItems[1].second = 0;
+                m_settingsItems[2].second = 0;
+                m_settingsItems[3].second = 1;
+                if (onPaletteStyleChange)
+                    onPaletteStyleChange(JUCEAppBasics::CustomLookAndFeel::PS_Light, false);
+                break;
+            default:
+                break;
+            }
+        });
     };
     m_settingsButton->setAlwaysOnTop(true);
     m_settingsButton->setColour(juce::DrawableButton::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
