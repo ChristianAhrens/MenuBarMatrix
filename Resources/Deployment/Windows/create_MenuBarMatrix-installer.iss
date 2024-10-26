@@ -6,7 +6,7 @@
 #define MyAppURL "https://www.github.com/ChristianAhrens/MenuBarMatrix"
 
 [Setup]
-AppId={{0973C12E-915A-4D77-92FA-187CB97B58A9}
+AppId={{0973C12E-915A-4D77-92FA-187CB97C73A9}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName} {#MyAppVersion}
