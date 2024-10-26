@@ -55,11 +55,14 @@ MainComponent::MainComponent()
         auto knownMessage = MenuBarMatrix::SerializableMessage::initFromMemoryBlock(message);
         if (auto const epm = dynamic_cast<const MenuBarMatrix::EnvironmentParametersMessage*>(knownMessage))
         {
-            auto paletteStyle = epm->getPaletteStyle();
-            jassert(paletteStyle >= JUCEAppBasics::CustomLookAndFeel::PS_Dark && paletteStyle <= JUCEAppBasics::CustomLookAndFeel::PS_Light);
+            m_settingsHostLookAndFeelId = epm->getPaletteStyle();
+            jassert(m_settingsHostLookAndFeelId >= JUCEAppBasics::CustomLookAndFeel::PS_Dark && m_settingsHostLookAndFeelId <= JUCEAppBasics::CustomLookAndFeel::PS_Light);
 
-            if (onPaletteStyleChange)
-                onPaletteStyleChange(paletteStyle, false/*do not follow local style any more if a message was received via net once*/);
+            if (onPaletteStyleChange && !m_settingsItems[2].second && !m_settingsItems[3].second) // callback must be set and neither 2 nor 3 setting set (manual dark or light)
+            {
+                m_settingsItems[1].second = 1; // set ticked for setting 1 (follow host)
+                onPaletteStyleChange(m_settingsHostLookAndFeelId, false/*do not follow local style any more if a message was received via net once*/);
+            }
         }
         else if (m_monitorComponent && nullptr != knownMessage)
             m_monitorComponent->handleMessage(*knownMessage);
@@ -113,6 +116,77 @@ MainComponent::MainComponent()
     m_aboutToggleButton->setColour(juce::DrawableButton::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
     m_aboutToggleButton->setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, juce::Colours::transparentBlack);
     addAndMakeVisible(m_aboutToggleButton.get());
+
+    //default lookandfeel is follow local, therefor none selected
+    m_settingsItems[1] = std::make_pair("Follow host", 0);
+    m_settingsItems[2] = std::make_pair("Dark", 0);
+    m_settingsItems[3] = std::make_pair("Light", 0);
+    m_settingsButton = std::make_unique<juce::DrawableButton>("Settings", juce::DrawableButton::ButtonStyle::ImageFitted);
+    m_settingsButton->setTooltip(juce::String("Settings for") + juce::JUCEApplication::getInstance()->getApplicationName());
+    m_settingsButton->onClick = [this] {
+        juce::PopupMenu settingsMenu;
+        settingsMenu.addSectionHeader("LookAndFeel");
+        
+        for(auto const& item : m_settingsItems)
+        {
+            juce::PopupMenu::Item followHostItem("Follow host");
+            followHostItem.setTicked();
+            settingsMenu.addItem(item.first, item.second.first, true, item.second.second == 1);
+        }
+
+        settingsMenu.showMenuAsync(juce::PopupMenu::Options(), [=](int selectedId) {
+            switch (selectedId)
+            {
+            case 1:
+                m_settingsItems[1].second = 1;
+                m_settingsItems[2].second = 0;
+                m_settingsItems[3].second = 0;
+                if (onPaletteStyleChange && m_settingsHostLookAndFeelId != -1)
+                    onPaletteStyleChange(m_settingsHostLookAndFeelId, false);
+                break;
+            case 2:
+                m_settingsItems[1].second = 0;
+                m_settingsItems[2].second = 1;
+                m_settingsItems[3].second = 0;
+                if (onPaletteStyleChange)
+                    onPaletteStyleChange(JUCEAppBasics::CustomLookAndFeel::PS_Dark, false);
+                break;
+            case 3:
+                m_settingsItems[1].second = 0;
+                m_settingsItems[2].second = 0;
+                m_settingsItems[3].second = 1;
+                if (onPaletteStyleChange)
+                    onPaletteStyleChange(JUCEAppBasics::CustomLookAndFeel::PS_Light, false);
+                break;
+            default:
+                break;
+            }
+        });
+    };
+    m_settingsButton->setAlwaysOnTop(true);
+    m_settingsButton->setColour(juce::DrawableButton::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
+    m_settingsButton->setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, juce::Colours::transparentBlack);
+    addAndMakeVisible(m_settingsButton.get());
+
+    m_disconnectButton = std::make_unique<juce::DrawableButton>("Disconnect", juce::DrawableButton::ButtonStyle::ImageFitted);
+    m_disconnectButton->setTooltip(juce::String("Disconnect ") + juce::JUCEApplication::getInstance()->getApplicationName());
+    m_disconnectButton->onClick = [this] {
+        if (m_networkConnection)
+            m_networkConnection->disconnect();
+
+        if (m_monitorComponent)
+            m_monitorComponent->setRunning(false);
+
+        if (m_discoverComponent)
+            m_discoverComponent->setDiscoveredServices(m_availableServices->getServices());
+
+        m_currentStatus = Status::Discovering;
+        resized();
+    };
+    m_disconnectButton->setAlwaysOnTop(true);
+    m_disconnectButton->setColour(juce::DrawableButton::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
+    m_disconnectButton->setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, juce::Colours::transparentBlack);
+    addAndMakeVisible(m_disconnectButton.get());
 
     m_availableServices = std::make_unique<juce::NetworkServiceDiscovery::AvailableServiceList>(
         MenuBarMatrix::ServiceData::getServiceTypeUID(), 
@@ -246,6 +320,8 @@ void MainComponent::resized()
         m_aboutComponent->setBounds(safeBounds.reduced(1));
 
     m_aboutToggleButton->setBounds(safeBounds.removeFromTop(35).removeFromLeft(30).removeFromBottom(30));
+    m_settingsButton->setBounds(safeBounds.removeFromTop(35).removeFromLeft(30).removeFromBottom(30));
+    m_disconnectButton->setBounds(safeBounds.removeFromTop(35).removeFromLeft(30).removeFromBottom(30));
 }
 
 void MainComponent::paint(juce::Graphics& g)
@@ -258,5 +334,13 @@ void MainComponent::lookAndFeelChanged()
     auto aboutToggleDrawable = juce::Drawable::createFromSVG(*juce::XmlDocument::parse(BinaryData::question_mark_24dp_svg).get());
     aboutToggleDrawable->replaceColour(juce::Colours::black, getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
     m_aboutToggleButton->setImages(aboutToggleDrawable.get());
+
+    auto settingsDrawable = juce::Drawable::createFromSVG(*juce::XmlDocument::parse(BinaryData::settings_24dp_svg).get());
+    settingsDrawable->replaceColour(juce::Colours::black, getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
+    m_settingsButton->setImages(settingsDrawable.get());
+
+    auto disconnectDrawable = juce::Drawable::createFromSVG(*juce::XmlDocument::parse(BinaryData::link_off_24dp_svg).get());
+    disconnectDrawable->replaceColour(juce::Colours::black, getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
+    m_disconnectButton->setImages(disconnectDrawable.get());
 }
 

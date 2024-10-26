@@ -1,7 +1,7 @@
 @echo off
 
-echo Build MenuBarMatrix
-CALL build_MenuBarMatrix.bat
+echo Create MenuBarMatrix Installer
+CALL create_MenuBarMatrix-installer.bat
 
-echo Build MenuBarMatrixMonitor
-CALL build_MenuBarMatrixMonitor.bat
+echo Create MenuBarMatrixMonitor Installer
+CALL create_MenuBarMatrixMonitor-installer.bat
