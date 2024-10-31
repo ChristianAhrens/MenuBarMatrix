@@ -21,7 +21,7 @@
 MenuBarMatrixDiscoverComponent::MenuBarMatrixDiscoverComponent()
     : juce::Component()
 {
-    m_discoveredServicesLabel = std::make_unique<juce::Label>("ServicesLabel", "Available " + juce::JUCEApplication::getInstance()->getApplicationName() + " instances:");
+    m_discoveredServicesLabel = std::make_unique<juce::Label>("ServicesLabel", "Available MenuBarMatrix instances:");
     addAndMakeVisible(m_discoveredServicesLabel.get());
 
     m_discoveredServicesSelection = std::make_unique<juce::ComboBox>("ServicesComboBox");
