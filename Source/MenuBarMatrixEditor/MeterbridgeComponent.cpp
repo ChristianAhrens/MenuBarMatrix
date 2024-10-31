@@ -26,6 +26,7 @@ MeterbridgeComponent::MeterbridgeComponent()
     : AbstractAudioVisualizer()
 {
     setUsesValuesInDB(true);
+    setRefreshFrequency(15);
 }
 
 MeterbridgeComponent::MeterbridgeComponent(Direction direction)
