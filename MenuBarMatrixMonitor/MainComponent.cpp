@@ -18,6 +18,7 @@
 
 #include "MainComponent.h"
 
+#include "CustomPopupMenuComponent.h"
 #include "MenuBarMatrixMonitorComponent.h"
 #include "MenuBarMatrixDiscoverComponent.h"
 
@@ -93,25 +94,17 @@ MainComponent::MainComponent()
     addAndMakeVisible(m_discoverComponent.get());
 
     m_aboutComponent = std::make_unique<AboutComponent>(BinaryData::MenuBarMatrixMonitorRect_png, BinaryData::MenuBarMatrixMonitorCanvas_pngSize);
-    addChildComponent(m_aboutComponent.get());
-
-    m_aboutToggleButton = std::make_unique<juce::DrawableButton>("About", juce::DrawableButton::ButtonStyle::ImageFitted);
-    m_aboutToggleButton->setTooltip(juce::String("About") + juce::JUCEApplication::getInstance()->getApplicationName());
-    m_aboutToggleButton->onClick = [this] {
-        if (m_aboutComponent)
-        {
-            if (m_aboutComponent->isVisible())
-                m_aboutComponent->setVisible(false);
-            else
-                m_aboutComponent->setVisible(true);
-
-            resized();
-        }
+    m_aboutButton = std::make_unique<juce::DrawableButton>("About", juce::DrawableButton::ButtonStyle::ImageFitted);
+    m_aboutButton->setTooltip(juce::String("About") + juce::JUCEApplication::getInstance()->getApplicationName());
+    m_aboutButton->onClick = [this] {
+        juce::PopupMenu aboutMenu;
+        aboutMenu.addCustomItem(1, std::make_unique<CustomAboutItem>(m_aboutComponent.get(), juce::Rectangle<int>(250, 250)), nullptr, juce::String("Info about") + juce::JUCEApplication::getInstance()->getApplicationName());
+        aboutMenu.showMenuAsync(juce::PopupMenu::Options());
     };
-    m_aboutToggleButton->setAlwaysOnTop(true);
-    m_aboutToggleButton->setColour(juce::DrawableButton::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
-    m_aboutToggleButton->setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, juce::Colours::transparentBlack);
-    addAndMakeVisible(m_aboutToggleButton.get());
+    m_aboutButton->setAlwaysOnTop(true);
+    m_aboutButton->setColour(juce::DrawableButton::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
+    m_aboutButton->setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, juce::Colours::transparentBlack);
+    addAndMakeVisible(m_aboutButton.get());
 
     //default lookandfeel is follow local, therefor none selected
     m_settingsItems[1] = std::make_pair("Follow host", 0);
@@ -312,10 +305,7 @@ void MainComponent::resized()
             break;
     }
 
-    if (m_aboutComponent && m_aboutComponent->isVisible())
-        m_aboutComponent->setBounds(safeBounds.reduced(1));
-
-    m_aboutToggleButton->setBounds(safeBounds.removeFromTop(35).removeFromLeft(30).removeFromBottom(30));
+    m_aboutButton->setBounds(safeBounds.removeFromTop(35).removeFromLeft(30).removeFromBottom(30));
     m_settingsButton->setBounds(safeBounds.removeFromTop(35).removeFromLeft(30).removeFromBottom(30));
     m_disconnectButton->setBounds(safeBounds.removeFromTop(35).removeFromLeft(30).removeFromBottom(30));
 }
@@ -327,9 +317,9 @@ void MainComponent::paint(juce::Graphics& g)
 
 void MainComponent::lookAndFeelChanged()
 {
-    auto aboutToggleDrawable = juce::Drawable::createFromSVG(*juce::XmlDocument::parse(BinaryData::question_mark_24dp_svg).get());
-    aboutToggleDrawable->replaceColour(juce::Colours::black, getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
-    m_aboutToggleButton->setImages(aboutToggleDrawable.get());
+    auto aboutButtonDrawable = juce::Drawable::createFromSVG(*juce::XmlDocument::parse(BinaryData::question_mark_24dp_svg).get());
+    aboutButtonDrawable->replaceColour(juce::Colours::black, getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
+    m_aboutButton->setImages(aboutButtonDrawable.get());
 
     auto settingsDrawable = juce::Drawable::createFromSVG(*juce::XmlDocument::parse(BinaryData::settings_24dp_svg).get());
     settingsDrawable->replaceColour(juce::Colours::black, getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));

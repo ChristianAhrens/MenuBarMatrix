@@ -41,6 +41,8 @@
             file="../Source/AboutComponent.cpp"/>
       <FILE id="vkneaH" name="AboutComponent.h" compile="0" resource="0"
             file="../Source/AboutComponent.h"/>
+      <FILE id="v69CCa" name="CustomPopupMenuComponent.h" compile="0" resource="0"
+            file="../Source/CustomPopupMenuComponent.h"/>
       <FILE id="o6DCXx" name="AbstractAudioVisualizer.cpp" compile="1" resource="0"
             file="../Source/MenuBarMatrixEditor/AbstractAudioVisualizer.cpp"/>
       <FILE id="dCTpw5" name="AbstractAudioVisualizer.h" compile="0" resource="0"

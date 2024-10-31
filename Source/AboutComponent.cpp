@@ -46,9 +46,6 @@ void AboutComponent::paint(juce::Graphics &g)
 {
 	g.fillAll(getLookAndFeel().findColour(juce::DrawableButton::backgroundColourId));
 
-	g.setColour(juce::Colours::grey);
-	g.drawRect(getLocalBounds(), 1);   // draw an outline around the component
-
 	juce::Component::paint(g);
 }
 

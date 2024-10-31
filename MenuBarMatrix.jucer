@@ -117,6 +117,8 @@
             file="Source/AboutComponent.cpp"/>
       <FILE id="IZplXz" name="AboutComponent.h" compile="0" resource="0"
             file="Source/AboutComponent.h"/>
+      <FILE id="Q8jLPX" name="CustomPopupMenuComponent.h" compile="0" resource="0"
+            file="Source/CustomPopupMenuComponent.h"/>
     </GROUP>
   </MAINGROUP>
   <MODULES>
