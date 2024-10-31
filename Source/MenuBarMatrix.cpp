@@ -48,7 +48,7 @@ MenuBarMatrix::MenuBarMatrix() :
                                                                           MenuBarMatrixProcessor::s_maxChannelCount,
                                                                           MenuBarMatrixProcessor::s_minOutputsCount,
                                                                           MenuBarMatrixProcessor::s_maxChannelCount,
-                                                                          false, false, false, true);
+                                                                          false, false, false, false);
 
     // do the initial update for the whole application with config contents
     m_config->triggerWatcherUpdate();

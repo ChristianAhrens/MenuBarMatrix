@@ -73,11 +73,12 @@ public:
 
     void resized() override
 	{
-		m_component->setBounds(getLocalBounds());
+		if (m_component)
+			m_component->setBounds(getLocalBounds());
 	}
 
 private:
-    juce::Component*        m_component;
+    juce::Component*        m_component = nullptr;
     juce::Rectangle<int>    m_minIdealSize;
 };
 

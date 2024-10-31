@@ -91,23 +91,9 @@ MainComponent::MainComponent()
     m_setupButton = std::make_unique<juce::DrawableButton>("Audio Device Setup", juce::DrawableButton::ButtonStyle::ImageFitted);
     m_setupButton->setTooltip("Audio Device Setup");
     m_setupButton->onClick = [this] {
-        auto setupComponent = m_mbm->getDeviceSetupComponent();
-        if (setupComponent)
-        {
-            if (setupComponent->isVisible())
-            {
-                setupComponent->setVisible(false);
-                setupComponent->removeFromDesktop();
-            }
-            else
-            {
-                setupComponent->setVisible(true);
-                setupComponent->addToDesktop(juce::ComponentPeer::StyleFlags::windowHasDropShadow | juce::ComponentPeer::StyleFlags::windowHasCloseButton);
-                setupComponent->setBounds(getScreenBounds().translated(0, sc_buttonSize + 1));
-            }
-
-            resized();
-        }
+        juce::PopupMenu setupMenu;
+        setupMenu.addCustomItem(1, std::make_unique<CustomAboutItem>(m_mbm->getDeviceSetupComponent(), juce::Rectangle<int>(300,350)), nullptr, juce::String("Info about") + juce::JUCEApplication::getInstance()->getApplicationName());
+        setupMenu.showMenuAsync(juce::PopupMenu::Options());
     };
     addAndMakeVisible(m_setupButton.get());
 
