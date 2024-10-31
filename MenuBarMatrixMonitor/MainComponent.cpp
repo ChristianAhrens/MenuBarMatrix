@@ -28,17 +28,13 @@
 
 #include <iOS_utils.h>
 
+
 MainComponent::MainComponent()
     : juce::Component()
 {
     m_networkConnection = std::make_unique<InterprocessConnectionImpl>();
     m_networkConnection->onConnectionMade = [=]() {
         DBG(__FUNCTION__);
-        //if (m_monitorComponent)
-        //    m_monitorComponent->setRunning(true);
-        //
-        //m_currentStatus = Status::Monitoring;
-        //resized();
     };
     m_networkConnection->onConnectionLost = [=]() {
         DBG(__FUNCTION__);

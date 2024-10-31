@@ -70,6 +70,7 @@ public:
             .findColour(juce::ResizableWindow::backgroundColourId),
             juce::DocumentWindow::allButtons)
         {
+            ignoreUnused(commandLine);
 
             setUsingNativeTitleBar(true);
             auto mainComponent = std::make_unique<MainComponent>();
