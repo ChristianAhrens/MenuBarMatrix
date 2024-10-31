@@ -108,7 +108,7 @@ private:
 
     std::pair<int, int> m_ioCount{ std::make_pair(-1, -1) };
 
-    static constexpr int s_nodeSize = 23;
+    static constexpr int s_nodeSize = 24;
     static constexpr double s_nodeGap = 1;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CrosspointsControlComponent)
