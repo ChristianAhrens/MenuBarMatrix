@@ -30,9 +30,9 @@ See [LATEST RELEASE](https://github.com/ChristianAhrens/MenuBarMatrix/releases/l
 
 ## Introduction
 
-MenuBarMatrix is a programming experiment to try out how a macOS menu bar tool can be made that provides audio matrix routing functionality using JUCE framework - e.g. to route BlackHole 16ch virtual device to system output to overcome AppleMusic behaviour on macOS to only play out higher order surround sound formats when exactly 16 output channels are presented by selected system audio output device.
+MenuBarMatrix is an project initially created to try out if a macOS menubar tool based on JUCE C++ framework can be created, that provides audio matrix routing functionality - e.g. to route [BlackHole](https://github.com/ExistentialAudio/BlackHole) 16ch virtual device to system output to overcome AppleMusic behaviour on macOS to only play out higher order surround sound formats when exactly 16 output channels are presented by selected system audio output device.
 
-It is accompanied by a separate tool MenuBarMatrixMonitor to monitor the incoming and outgoing audio via network. It connects to MenuBarMatrix through a TCP connection and supports discovering the available instances through a multicast service announcement done by ManuBarMatrix.
+It is accompanied by a separate tool MenuBarMatrixMonitor to monitor the audio IO as levelmeters via network. It connects to MenuBarMatrix through a TCP connection and supports discovering the available instances through a multicast service announcement done by ManuBarMatrix.
 
 Its sourcecode and prebuilt binaries are made publicly available to enable interested users to experiment, extend and create own adaptations.
 
