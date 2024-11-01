@@ -1,7 +1,7 @@
 ![Showreel.001.png](Resources/Documentation/Showreel/Showreel.001.png "MenuBarMatrix Headline Icons")
 ![Showreel.002.png](Resources/Documentation/Showreel/Showreel.002.png "MenuBarMatrix Headline Icons")
 
-See [LATEST RELEASE](../../releases/latest) for available binary packages or join iOS TestFlight Beta:
+See [LATEST RELEASE](https://github.com/ChristianAhrens/MenuBarMatrix/releases/latest) for available binary packages or join iOS TestFlight Beta:
 
 <img src="Resources/AppStore/TestFlightQRCode.png" alt="TestFlight QR Code" width="15%">
 
@@ -18,6 +18,9 @@ See [LATEST RELEASE](../../releases/latest) for available binary packages or joi
 ## Table of contents
 
 * [Introduction](#introduction)
+* [How to build the tools](#howtobuild)
+  * [MenuBarMatrix](#buildmenubarmatrix)
+  * [MenuBarMatrixMonitor](#buildmenubarmatrixmonitor)
 * [Usecase: Studio sidecar monitoring](#rackmonitoringusecase)
 * [Usecase: Mobile recording monitoring](#mobilerecordingusecase)
 * [App Architecture](#architectureoverview)
@@ -38,9 +41,46 @@ Use what is provided here at your own risk!
 ![Showreel.003.png](Resources/Documentation/Showreel/Showreel.003.png "MenuBarMatrix UI")
 
 
+<a name="howtobuild" />
+
+## How to build the tools
+
+MenuBarMatrix and MenuBarMatrixMonitor are based on JUCE C++ framework, which is a submodule of this repository.
+
+JUCE's Projucer tool can either be used from a local installation or from within the submodule (submodules/JUCE/extras/Projucer).
+
+<a name="buildmenubarmatrix" />
+
+### MenuBarMatrix
+
+[MenuBarMatrix Projucer project](MenuBarMatrix.jucer) file can be found in repository root directory.
+
+In [macOS buildscripts](Resources/Deployment/macOS), shellscripts for automated building of the app, dmg and notarization are kept. These require a properly prepared machine to run on (signing certificates, provisioning profiles, notarization cretentials).
+
+In [iOS buildscripts](Resources/Deployment/iOS), shellscripts for automated building of the app and updloading to the appstore are kept. These require a properly prepared machine to run on (appstore cretentials).
+
+In [Windows buildscripts](Resources/Deployment/Windows), bash scripts for automated building of the app and installer (Innosetup based) are kept. These require a properly prepared machine to run on (innosetup installation).
+
+In [Linux buildscripts](Resources/Deployment/Linux), shell scripts for automated building of the app are kept. These are aimed at building on Debian/Ubuntu/RaspberryPiOS and TRY to collect the required dev packages via apt packetmanager automatically.
+
+<a name="buildmenubarmatrixmonitor" />
+
+### MenuBarMatrixMonitor
+
+[MenuBarMatrixMonitor Projucer project](MenuBarMatrixMonitor/MenuBarMatrixMonitor.jucer) file can be found in /MenuBarMatrixMonitor subdirectory .
+
+In [macOS buildscripts](Resources/Deployment/macOS), shellscripts for automated building of the app, dmg and notarization are kept. These require a properly prepared machine to run on (signing certificates, provisioning profiles, notarization cretentials).
+
+In [iOS buildscripts](Resources/Deployment/iOS), shellscripts for automated building of the app and updloading to the appstore are kept. These require a properly prepared machine to run on (appstore cretentials).
+
+In [Windows buildscripts](Resources/Deployment/Windows), bash scripts for automated building of the app and installer (Innosetup based) are kept. These require a properly prepared machine to run on (innosetup installation).
+
+In [Linux buildscripts](Resources/Deployment/Linux), shell scripts for automated building of the app are kept. These are aimed at building on Debian/Ubuntu/RaspberryPiOS and TRY to collect the required dev packages via apt packetmanager automatically.
+
+
 <a name="rackmonitoringusecase" />
 
-## Usecase: Studio sidecar monitoring
+## Usecase: Studio rack monitoring
 
 ![UseCase-RackMonitoring.png](Resources/Documentation/UseCase-RackMonitoring.png "Homestudio setup")
 
@@ -49,4 +89,11 @@ Use what is provided here at your own risk!
 
 ## Usecase: Mobile recording monitoring
 
-![UseCase-RackMonitoring.png](Resources/Documentation/UseCase-RackMonitoring.png "Mobile rig")
+![UseCase-MobileMonitoring.png](Resources/Documentation/UseCase-MobileMonitoring.png "Mobile rig")
+
+
+<a name="architectureoverview" />
+
+## App Architecture
+
+_T.B.D._
