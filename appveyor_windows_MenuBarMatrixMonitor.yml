@@ -10,8 +10,7 @@ install:
 build_script:
 - cmd: >-
     cd Resources/Deployment/Windows
-    
-    create_installers.bat
+    create_MenuBarMatrixMonitor-Installer.bat
 artifacts:
 - path: MenuBarMatrix*.exe
   name: Installer Binary
