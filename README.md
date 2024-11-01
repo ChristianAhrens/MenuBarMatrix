@@ -84,12 +84,26 @@ In [Linux buildscripts](Resources/Deployment/Linux), shell scripts for automated
 
 ![UseCase-RackMonitoring.png](Resources/Documentation/UseCase-RackMonitoring.png "Homestudio setup")
 
+* MenuBarMatrix on macOS
+  * BlackHole 16ch used to route signal from LogicPro, Apple Music, etc. to MenuBarMatrix
+  * Output to Allen&Heath QU-16 22ch audio driver interface
+* MenuBarMatrixMonitor on DIY 19" rack display, based on RaspberryPi (32bit RaspberryPiOS, Bullseye)
+  * 16 audio input channel metering visible
+  * 22 audio output channel metering visible
+
 
 <a name="mobilerecordingusecase" />
 
 ## Usecase: Mobile recording monitoring
 
 ![UseCase-MobileMonitoring.png](Resources/Documentation/UseCase-MobileMonitoring.png "Mobile rig")
+
+* MenuBarMatrix on macOS
+  * BlackHole 16ch used to route signal from LogicPro, Apple Music, etc. to MenuBarMatrix
+  * Output to stereo audio driver interface
+* MenuBarMatrixMonitor on iPadOS in Stagemanager mode
+  * 16 audio input channel metering visible
+  * 2 audio output channel metering visible
 
 
 <a name="architectureoverview" />
