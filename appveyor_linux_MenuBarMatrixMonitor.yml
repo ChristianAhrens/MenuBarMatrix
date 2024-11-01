@@ -37,10 +37,6 @@ build_script:
 - sh: >-
     cd Resources/Deployment/Linux
 
-    sudo chmod +x build_MenuBarMatrix.sh
-
-    ./build_MenuBarMatrix.sh
-    
     sudo chmod +x build_MenuBarMatrixMonitor.sh
 
     ./build_MenuBarMatrixMonitor.sh

@@ -81,7 +81,7 @@ private:
 
     std::unique_ptr<juce::DrawableButton>                                   m_disconnectButton;
 
-    std::unique_ptr<juce::DrawableButton>                                   m_aboutToggleButton;
+    std::unique_ptr<juce::DrawableButton>                                   m_aboutButton;
     std::unique_ptr<AboutComponent>                                         m_aboutComponent;
 
     Status m_currentStatus = Status::Discovering;

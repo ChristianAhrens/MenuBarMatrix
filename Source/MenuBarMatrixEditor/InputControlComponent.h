@@ -73,7 +73,7 @@ private:
     std::map<int, std::unique_ptr<TextButton>>  m_inputMutes;
     int m_channelCount = 0;
 
-    static constexpr int s_channelSize = 23;
+    static constexpr int s_channelSize = 24;
     static constexpr double s_channelGap = 1;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputControlComponent)

@@ -55,8 +55,8 @@ public:
 
 private:
     std::unique_ptr<MenuBarMatrix::MenuBarMatrix>   m_mbm;
-    std::unique_ptr<juce::DrawableButton>           m_setupToggleButton;
-    std::unique_ptr<juce::DrawableButton>           m_aboutToggleButton;
+    std::unique_ptr<juce::DrawableButton>           m_setupButton;
+    std::unique_ptr<juce::DrawableButton>           m_aboutButton;
     std::unique_ptr<juce::DrawableButton>           m_powerButton;
     std::unique_ptr<EmptySpace>                     m_emptySpace;
     std::unique_ptr<LoadBar>                        m_sysLoadBar;
