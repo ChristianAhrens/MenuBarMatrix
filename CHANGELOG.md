@@ -11,6 +11,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.2.0] 2024-11-01
+### Added
+- Added improved README contents
+- Added AppVeyor CI for macOS/Windows/Linux
+
+### Changed
+- Changed macOS app Sandbox to on
+- Improved performance
+
+### Fixed
+- Fixed macOS, iOS provisioning
+- Fixed typo and UI sizing issues 
+
 ## [0.1.1] 2024-10-26
 ### Added
 - Added capability to manually select LookAndFeel to MenuBarMatrixMonitor
