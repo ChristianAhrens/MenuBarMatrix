@@ -4,12 +4,18 @@ All notable changes to MenuBarMatrix will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.0] 2024-11-01
 ### Added
+- Added improved README contents
+- Added AppVeyor CI for macOS/Windows/Linux
 
 ### Changed
+- Changed macOS app Sandbox to on
+- Improved performance
 
 ### Fixed
+- Fixed macOS, iOS provisioning
+- Fixed typo and UI sizing issues 
 
 ## [0.1.1] 2024-10-26
 ### Added
