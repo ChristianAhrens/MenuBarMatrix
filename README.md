@@ -8,9 +8,9 @@ See [LATEST RELEASE](https://github.com/ChristianAhrens/MenuBarMatrix/releases/l
 
 |Appveyor CI build status|MenuBarMatrix|MenuBarMatrixMonitor|
 |:----------------|:-----|:-----|
-|macOS Xcode| [![Build status](https://ci.appveyor.com/api/projects/status/m1jqb2d19wv9e74o/branch/main?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/menubarmatrix-06mmy) |
-|Windows Visual Studio| [![Build status](https://ci.appveyor.com/api/projects/status/2wi23e7i44xh1fye/branch/main?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/menubarmatrix) |
-|Linux makefile| [![Build status](https://ci.appveyor.com/api/projects/status/3lwra86k9i0233io/branch/main?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/menubarmatrix-y20bx) |
+|macOS Xcode| [![Build status](https://ci.appveyor.com/api/projects/status/m1jqb2d19wv9e74o?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/menubarmatrix-06mmy) | [![Build status](https://ci.appveyor.com/api/projects/status/va72we76lhlkxxs5?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/menubarmatrix-ubusx) |
+|Windows Visual Studio| [![Build status](https://ci.appveyor.com/api/projects/status/2wi23e7i44xh1fye?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/menubarmatrix) | [![Build status](https://ci.appveyor.com/api/projects/status/hp8ixwxa5ccumjcj?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/menubarmatrix-t97el) |
+|Linux makefile| [![Build status](https://ci.appveyor.com/api/projects/status/3lwra86k9i0233io?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/menubarmatrix-y20bx) | [![Build status](https://ci.appveyor.com/api/projects/status/j0qj6sqtaa5mq4dc?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/menubarmatrix-vhiu1) |
 
 
 <a name="toc" />
