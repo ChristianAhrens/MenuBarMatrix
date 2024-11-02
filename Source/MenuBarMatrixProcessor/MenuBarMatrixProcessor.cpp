@@ -66,13 +66,13 @@ MenuBarMatrixProcessor::MenuBarMatrixProcessor(XmlElement* stateXml) :
 
 	m_networkServer = std::make_unique<InterprocessConnectionServerImpl>();
 	m_networkServer->beginWaitingForSocket(MenuBarMatrix::ServiceData::getConnectionPort());
-    m_networkServer->onConnectionCreated = [=]() {
-        auto connection = dynamic_cast<InterprocessConnectionImpl*>(m_networkServer->getActiveConnection().get());
+    m_networkServer->onConnectionCreated = [=](int connectionId) {
+        auto connection = dynamic_cast<InterprocessConnectionImpl*>(m_networkServer->getActiveConnection(connectionId).get());
         if (connection)
         {
-			connection->onConnectionLost = [=]() { DBG(__FUNCTION__); };
-			connection->onConnectionMade = [=]() { DBG(__FUNCTION__);
-			postMessage(std::make_unique<AnalyzerParametersMessage>(int(m_sampleRate), m_bufferSize).release());
+			connection->onConnectionLost = [=](int /*connectionId*/) { DBG(__FUNCTION__); };
+			connection->onConnectionMade = [=](int /*connectionId*/ ) { DBG(__FUNCTION__);
+				postMessage(std::make_unique<AnalyzerParametersMessage>(int(m_sampleRate), m_bufferSize).release());
 				postMessage(std::make_unique<ReinitIOCountMessage>(m_inputChannelCount, m_outputChannelCount).release());
 				postMessage(std::make_unique<EnvironmentParametersMessage>(juce::Desktop::getInstance().isDarkModeActive() ? JUCEAppBasics::CustomLookAndFeel::PS_Dark : JUCEAppBasics::CustomLookAndFeel::PS_Light).release());
 			};
@@ -465,13 +465,13 @@ void MenuBarMatrixProcessor::handleMessage(const Message& message)
 {
 	if (auto const epm = dynamic_cast<const EnvironmentParametersMessage*>(&message))
 	{
-		if (m_networkServer && m_networkServer->hasActiveConnection())
-			m_networkServer->getActiveConnection()->sendMessage(epm->getSerializedMessage());
+		if (m_networkServer && m_networkServer->hasActiveConnections())
+			m_networkServer->sendMessage(epm->getSerializedMessage());
 	}
 	else if (auto const apm = dynamic_cast<const AnalyzerParametersMessage*>(&message))
 	{
-		if (m_networkServer && m_networkServer->hasActiveConnection())
-			m_networkServer->getActiveConnection()->sendMessage(apm->getSerializedMessage());
+		if (m_networkServer && m_networkServer->hasActiveConnections())
+			m_networkServer->sendMessage(apm->getSerializedMessage());
 	}
 	else if (auto const iom = dynamic_cast<const ReinitIOCountMessage*> (&message))
 	{
@@ -491,8 +491,8 @@ void MenuBarMatrixProcessor::handleMessage(const Message& message)
 
 		initializeCtrlValues(iom->getInputCount(), iom->getOutputCount());
 
-		if (m_networkServer && m_networkServer->hasActiveConnection())
-			m_networkServer->getActiveConnection()->sendMessage(iom->getSerializedMessage());
+		if (m_networkServer && m_networkServer->hasActiveConnections())
+			m_networkServer->sendMessage(iom->getSerializedMessage());
 	}
 	else if (auto m = dynamic_cast<const AudioBufferMessage*> (&message))
 	{
@@ -505,8 +505,8 @@ void MenuBarMatrixProcessor::handleMessage(const Message& message)
 			m_outputDataAnalyzer->analyzeData(m->getAudioBuffer());
 		}
 
-		if (m_networkServer && m_networkServer->hasActiveConnection())
-			m_networkServer->getActiveConnection()->sendMessage(m->getSerializedMessage());
+		if (m_networkServer && m_networkServer->hasActiveConnections())
+			m_networkServer->sendMessage(m->getSerializedMessage());
 	}
 }
 

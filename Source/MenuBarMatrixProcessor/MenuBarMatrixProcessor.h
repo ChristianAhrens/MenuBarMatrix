@@ -47,20 +47,23 @@ private:
     class InterprocessConnectionImpl : public juce::InterprocessConnection
     {
     public:
-        InterprocessConnectionImpl() : juce::InterprocessConnection() {};
+        InterprocessConnectionImpl(int id) : juce::InterprocessConnection() { m_id = id; };
         virtual ~InterprocessConnectionImpl() { disconnect(); };
 
-        void connectionMade() override { if (onConnectionMade) onConnectionMade(); };
+        void connectionMade() override { if (onConnectionMade) onConnectionMade(m_id); };
 
-        void connectionLost() override { if (onConnectionLost) onConnectionLost(); };
+        void connectionLost() override { if (onConnectionLost) onConnectionLost(m_id); };
 
         void messageReceived(const MemoryBlock& message) override { if (onMessageReceived) onMessageReceived(message); };
 
-        std::function<void()>                   onConnectionMade;
-        std::function<void()>                   onConnectionLost;
+        int getId() { return m_id; };
+
+        std::function<void(int)>                onConnectionMade;
+        std::function<void(int)>                onConnectionLost;
         std::function<void(const MemoryBlock&)> onMessageReceived;
 
     private:
+        int m_id;
 
     };
 
@@ -70,23 +73,46 @@ private:
         InterprocessConnectionServerImpl() : juce::InterprocessConnectionServer() {};
         virtual ~InterprocessConnectionServerImpl() {};
 
-        bool hasActiveConnection() { return m_connection && m_connection->isConnected(); };
+        bool hasActiveConnection(int id) { return m_connections[id] && m_connections[id]->isConnected(); };
+        bool hasActiveConnections()
+        {
+            for (auto const& connection : m_connections)
+            {
+                if (connection.second && connection.second->isConnected())
+                    return true;
+            }
+            return false;
+        };
+        const std::unique_ptr<InterprocessConnectionImpl>& getActiveConnection(int id) { return m_connections[id]; };
 
-        const std::unique_ptr<InterprocessConnectionImpl>& getActiveConnection() { return m_connection; };
+        bool sendMessage(const MemoryBlock& message)
+        {
+            auto success = true;
+            for (auto const& connection : m_connections)
+                success = success && connection.second->sendMessage(message);
+            return success;
+        };
 
-        std::function<void()>   onConnectionCreated;
+        std::function<void(int)>   onConnectionCreated;
+
+    protected:
 
     private:
         InterprocessConnection* createConnectionObject() {
-            m_connection = std::make_unique<InterprocessConnectionImpl>();
+            m_connections[++m_connectionIdIter] = std::make_unique<InterprocessConnectionImpl>(m_connectionIdIter);
+
+            m_connections[m_connectionIdIter]->onConnectionLost = [=](int connectionId) {
+                m_connections.erase(connectionId);
+            };
 
             if (onConnectionCreated)
-                onConnectionCreated();
+                onConnectionCreated(m_connectionIdIter);
 
-            return m_connection.get();
+            return m_connections[m_connectionIdIter].get();
         };
 
-        std::unique_ptr<InterprocessConnectionImpl> m_connection;
+        std::map<int, std::unique_ptr<InterprocessConnectionImpl>> m_connections;
+        int m_connectionIdIter = 0;
     };
 
 public:
