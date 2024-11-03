@@ -13,9 +13,9 @@ build_script:
 - sh: >-
     cd Resources/Deployment/macOS
 
-    chmod +rwx build_MenuBarMatrixMonitor.sh
+    chmod +rwx build_MenuBarMatrixMonitor_CI.sh
     
-    ./build_MenuBarMatrixMonitor.sh
+    ./build_MenuBarMatrixMonitor_CI.sh
 notifications:
 - provider: Email
   to:
