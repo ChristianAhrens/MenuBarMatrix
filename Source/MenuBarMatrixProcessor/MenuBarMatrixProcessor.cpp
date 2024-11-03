@@ -548,15 +548,14 @@ void MenuBarMatrixProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffer
 
 void MenuBarMatrixProcessor::handleMessage(const Message& message)
 {
+	juce::MemoryBlock serializedMessageMemoryBlock;
 	if (auto const epm = dynamic_cast<const EnvironmentParametersMessage*>(&message))
 	{
-		if (m_networkServer && m_networkServer->hasActiveConnections())
-			m_networkServer->sendMessage(epm->getSerializedMessage());
+		serializedMessageMemoryBlock = epm->getSerializedMessage();
 	}
 	else if (auto const apm = dynamic_cast<const AnalyzerParametersMessage*>(&message))
 	{
-		if (m_networkServer && m_networkServer->hasActiveConnections())
-			m_networkServer->sendMessage(apm->getSerializedMessage());
+		serializedMessageMemoryBlock = apm->getSerializedMessage();
 	}
 	else if (auto const iom = dynamic_cast<const ReinitIOCountMessage*> (&message))
 	{
@@ -576,8 +575,7 @@ void MenuBarMatrixProcessor::handleMessage(const Message& message)
 
 		initializeCtrlValues(iom->getInputCount(), iom->getOutputCount());
 
-		if (m_networkServer && m_networkServer->hasActiveConnections())
-			m_networkServer->sendMessage(iom->getSerializedMessage());
+		serializedMessageMemoryBlock = iom->getSerializedMessage();
 	}
 	else if (auto m = dynamic_cast<const AudioBufferMessage*> (&message))
 	{
@@ -590,9 +588,12 @@ void MenuBarMatrixProcessor::handleMessage(const Message& message)
 			m_outputDataAnalyzer->analyzeData(m->getAudioBuffer());
 		}
 
-		if (m_networkServer && m_networkServer->hasActiveConnections())
-			m_networkServer->sendMessage(m->getSerializedMessage());
+		serializedMessageMemoryBlock = m->getSerializedMessage();
 	}
+
+	if (m_networkServer && m_networkServer->hasActiveConnections())
+		if (!m_networkServer->sendMessage(serializedMessageMemoryBlock))
+			m_networkServer->cleanupDeadConnections();
 }
 
 double MenuBarMatrixProcessor::getTailLengthSeconds() const

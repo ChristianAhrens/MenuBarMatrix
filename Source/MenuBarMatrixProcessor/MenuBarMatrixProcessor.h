@@ -76,17 +76,40 @@ private:
         InterprocessConnectionServerImpl() : juce::InterprocessConnectionServer() {};
         virtual ~InterprocessConnectionServerImpl() {};
 
-        bool hasActiveConnection(int id) { return m_connections[id] && m_connections[id]->isConnected(); };
+        bool hasActiveConnection(int id)
+        {
+            if (m_connections.count(id) != 1)
+            {
+                return false;
+            }
+            else
+            {
+                if (m_connections.at(id) && m_connections.at(id)->isConnected())
+                    return true;
+            }
+
+            return m_connections.at(id) && m_connections.at(id)->isConnected();
+        };
         bool hasActiveConnections()
         {
             for (auto const& connection : m_connections)
             {
-                if (connection.second && connection.second->isConnected())
+                if (hasActiveConnection(connection.first))
                     return true;
             }
             return false;
         };
         const std::unique_ptr<InterprocessConnectionImpl>& getActiveConnection(int id) { return m_connections[id]; };
+        void cleanupDeadConnections()
+        {
+            auto idsToErase = std::vector<int>();
+            for (auto const& connection : m_connections)
+                if (connection.second && !connection.second->isConnected())
+                    idsToErase.push_back(connection.first);
+
+            for (auto const& id : idsToErase)
+                m_connections.erase(id);
+        };
 
         bool sendMessage(const MemoryBlock& message)
         {
@@ -104,8 +127,8 @@ private:
         InterprocessConnection* createConnectionObject() {
             m_connections[++m_connectionIdIter] = std::make_unique<InterprocessConnectionImpl>(m_connectionIdIter);
 
-            m_connections[m_connectionIdIter]->onConnectionLost = [=](int connectionId) {
-                m_connections.erase(connectionId);
+            m_connections[m_connectionIdIter]->onConnectionLost = [=](int /*connectionId*/) {
+                cleanupDeadConnections();
             };
 
             if (onConnectionCreated)
