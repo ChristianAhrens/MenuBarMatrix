@@ -32,6 +32,9 @@ class MenuBarMatrixChannelCommander;
 class MenuBarMatrixInputCommander;
 class MenuBarMatrixOutputCommander;
 class MenuBarMatrixCrosspointCommander;
+#if JUCE_WINDOWS
+struct ServiceAdvertiser;
+#endif
 
 
 //==============================================================================
@@ -264,7 +267,11 @@ private:
     std::unique_ptr<MenuBarMatrixEditor>  m_processorEditor;
 
     //==============================================================================
+#if JUCE_WINDOWS
+    std::unique_ptr<ServiceAdvertiser>  m_serviceAdvertiser;
+#else
     std::unique_ptr<juce::NetworkServiceDiscovery::Advertiser>  m_serviceAdvertiser;
+#endif
     std::unique_ptr<InterprocessConnectionServerImpl> m_networkServer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MenuBarMatrixProcessor)
