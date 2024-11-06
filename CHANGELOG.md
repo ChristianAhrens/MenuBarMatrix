@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.2.1] 2024-11-06
+### Added
+- Added support for multiple MenuBarMatrixMontor connections to single MenuBarMatrix instance
+- Added network decoupling from UI incl. dedicated network load monitoring per connection
+
+### Changed
+
+### Fixed
+- Fixed MenuBarMatrix service advertisement for Windows
+
 ## [0.2.0] 2024-11-01
 ### Added
 - Added improved README contents
