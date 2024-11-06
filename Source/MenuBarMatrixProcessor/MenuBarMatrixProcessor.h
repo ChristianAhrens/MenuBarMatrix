@@ -73,8 +73,51 @@ private:
     class InterprocessConnectionServerImpl : public juce::InterprocessConnectionServer
     {
     public:
-        InterprocessConnectionServerImpl() : juce::InterprocessConnectionServer() {};
-        virtual ~InterprocessConnectionServerImpl() {};
+        InterprocessConnectionServerImpl() : juce::InterprocessConnectionServer()
+        {
+            m_sendMessageResult.store(true);
+
+            m_sendMessageThreadActive.store(true);
+            m_sendMessageThread = std::make_unique<std::thread>([this]() {
+                std::unique_lock<std::mutex> sendMessageSignal(m_sendMessageCVMutex);
+                while (m_sendMessageThreadActive.load())
+                {
+                    m_sendMessageCV.wait(sendMessageSignal);
+
+                    std::unique_lock<std::mutex> l(m_sendMessageMutex);
+                    while (!m_sendMessageList.empty())
+                    {
+                        auto messageData = m_sendMessageList.front();
+                        m_sendMessageList.pop();
+                        l.unlock();
+                        if (!sendMessage(messageData))
+                            m_sendMessageResult.store(false);
+                        l.lock();
+                    }
+                }
+            });
+        };
+        virtual ~InterprocessConnectionServerImpl()
+        {
+            {
+                std::lock_guard<std::mutex> sendMessageSignal(m_sendMessageCVMutex);
+                m_sendMessageThreadActive.store(false);
+            }
+            m_sendMessageCV.notify_all();
+            if (m_sendMessageThread)
+                m_sendMessageThread->join();
+        };
+
+        double getListHealth()
+        {
+            auto listSize = size_t(0);
+            {
+                std::lock_guard<std::mutex> l(m_sendMessageMutex);
+                listSize = m_sendMessageList.size();
+            }
+
+            return double(listSize) / 35.0;
+        }
 
         bool hasActiveConnection(int id)
         {
@@ -111,6 +154,26 @@ private:
                 m_connections.erase(id);
         };
 
+        bool enqueueMessage(const MemoryBlock& message)
+        {
+            auto rVal = true;
+            {
+                std::lock_guard<std::mutex> l(m_sendMessageMutex);
+                m_sendMessageList.push(message);
+                if (!m_sendMessageResult.load())
+                {
+                    rVal = false;
+                    m_sendMessageResult.store(true);
+                }
+            }
+            m_sendMessageCV.notify_all();
+
+            return rVal;
+        };
+
+        std::function<void(int)>   onConnectionCreated;
+
+    protected:
         bool sendMessage(const MemoryBlock& message)
         {
             auto success = true;
@@ -118,10 +181,6 @@ private:
                 success = success && connection.second->sendMessage(message);
             return success;
         };
-
-        std::function<void(int)>   onConnectionCreated;
-
-    protected:
 
     private:
         InterprocessConnection* createConnectionObject() {
@@ -136,6 +195,15 @@ private:
 
             return m_connections[m_connectionIdIter].get();
         };
+
+        std::mutex                      m_sendMessageMutex;
+        std::queue<juce::MemoryBlock>   m_sendMessageList;
+        std::atomic<bool>               m_sendMessageResult;
+
+        std::atomic<bool>               m_sendMessageThreadActive;
+        std::unique_ptr<std::thread>    m_sendMessageThread;
+        std::condition_variable			m_sendMessageCV;
+        std::mutex                      m_sendMessageCVMutex;
 
         std::map<int, std::unique_ptr<InterprocessConnectionImpl>> m_connections;
         int m_connectionIdIter = 0;
@@ -178,6 +246,9 @@ public:
 
     //==============================================================================
     AudioDeviceManager* getDeviceManager();
+
+    //==============================================================================
+    double getNetworkHealth();
 
     //==============================================================================
     const String getName() const override;

@@ -462,6 +462,14 @@ AudioDeviceManager* MenuBarMatrixProcessor::getDeviceManager()
 		return nullptr;
 }
 
+double MenuBarMatrixProcessor::getNetworkHealth()
+{
+	if (m_networkServer)
+		return m_networkServer->getListHealth();
+	else
+		return 0.0;
+}
+
 //==============================================================================
 const String MenuBarMatrixProcessor::getName() const
 {
@@ -592,7 +600,7 @@ void MenuBarMatrixProcessor::handleMessage(const Message& message)
 	}
 
 	if (m_networkServer && m_networkServer->hasActiveConnections())
-		if (!m_networkServer->sendMessage(serializedMessageMemoryBlock))
+		if (!m_networkServer->enqueueMessage(serializedMessageMemoryBlock))
 			m_networkServer->cleanupDeadConnections();
 }
 

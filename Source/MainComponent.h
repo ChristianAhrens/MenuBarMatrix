@@ -25,6 +25,7 @@ namespace MenuBarMatrix
     class MenuBarMatrix;
 }
 class LoadBar;
+class NetworkHealthBar;
 class EmptySpace;
 class AboutComponent;
 
@@ -60,11 +61,12 @@ private:
     std::unique_ptr<juce::DrawableButton>           m_powerButton;
     std::unique_ptr<EmptySpace>                     m_emptySpace;
     std::unique_ptr<LoadBar>                        m_sysLoadBar;
+    std::unique_ptr<LoadBar>                        m_netHealthBar;
     std::unique_ptr<juce::LookAndFeel>              m_lookAndFeel;
     std::unique_ptr<AboutComponent>                 m_aboutComponent;
     
     static constexpr int sc_buttonSize = 26;
-    static constexpr int sc_loadWidth = 100;
+    static constexpr int sc_loadNetWidth = 70;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

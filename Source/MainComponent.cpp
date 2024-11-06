@@ -25,11 +25,11 @@
 #include <CustomLookAndFeel.h>
 #include <AppConfigurationBase.h>
 
- //==============================================================================
+//==============================================================================
 class LoadBar : public juce::Component
 {
 public:
-    LoadBar() : juce::Component::Component() {}
+    LoadBar(juce::String label, bool showPercent = true) : juce::Component::Component() { m_label = label; m_showPercent = showPercent; }
     ~LoadBar() {}
 
     //==============================================================================
@@ -39,13 +39,41 @@ public:
 
         g.setColour(getLookAndFeel().findColour(juce::LookAndFeel_V4::ColourScheme::windowBackground));
         g.fillRect(bounds);
+        
+        auto normalPercent = m_loadPercent;
+        auto warningPercent = 0;
+        auto criticalPercent = 0;
+        if (m_loadPercent > 75)
+        {
+            normalPercent = 75;
+            warningPercent = m_loadPercent - normalPercent;
+        }
+        if (m_loadPercent > 95)
+        {
+            warningPercent = 20;
+            criticalPercent = m_loadPercent - normalPercent - warningPercent;
+        }
+        if (m_loadPercent >= 100)
+        {
+            criticalPercent = 5;
+        }
+
+        auto barBounds = bounds.reduced(1);
+        g.setColour(getLookAndFeel().findColour(juce::TextButton::ColourIds::buttonColourId));
+        g.fillRect(barBounds.removeFromLeft(barBounds.getWidth() * (float(normalPercent) / 100.0f)));
+        if (warningPercent > 0)
+        {
+            g.setColour(juce::Colour(0xff, 0xe8, 0x00));
+            g.fillRect(barBounds.removeFromLeft(barBounds.getWidth() * (float(warningPercent) / 25.0f)));
+        }
+        if (criticalPercent > 0)
+        {
+            g.setColour(juce::Colour(0xff, 0x40, 0x02));
+            g.fillRect(barBounds.removeFromLeft(barBounds.getWidth() * (float(criticalPercent) / 5.0f)));
+        }
 
         g.setColour(getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
-        
-        auto barBounds = bounds.reduced(1);
-        g.fillRect(barBounds.removeFromLeft(barBounds.getWidth() * (float(m_loadPercent) / 100.0f)));
-
-        g.drawText(juce::String("Load ") + juce::String(m_loadPercent) + juce::String("%"), bounds, juce::Justification::centred);
+        g.drawText(m_label + (m_showPercent ? (juce::String(" ") + juce::String(m_loadPercent) + juce::String("%")) : ""), bounds, juce::Justification::centred);
     };
 
     //==============================================================================
@@ -57,6 +85,8 @@ public:
 
 private:
     int m_loadPercent = 0;
+    juce::String m_label;
+    bool m_showPercent = false;
 };
 
 //==============================================================================
@@ -81,8 +111,8 @@ MainComponent::MainComponent()
         auto width = requestedSize.getWidth();
         auto height = requestedSize.getHeight() + sc_buttonSize;
         
-        if (width < (sc_loadWidth + 5 * sc_buttonSize))
-            width = sc_loadWidth + 5 * sc_buttonSize;
+        if (width < (2 * sc_loadNetWidth + 3 * sc_buttonSize))
+            width = 2 * sc_loadNetWidth + 3 * sc_buttonSize;
         
         setSize(width, height);
     };
@@ -117,9 +147,13 @@ MainComponent::MainComponent()
     m_emptySpace = std::make_unique<EmptySpace>();
     addAndMakeVisible(m_emptySpace.get());
 
-    m_sysLoadBar = std::make_unique<LoadBar>();
+    m_sysLoadBar = std::make_unique<LoadBar>("Load");
     m_mbm->onCpuUsageUpdate = [=](int loadPercent) { m_sysLoadBar->setLoadPercent(loadPercent); };
     addAndMakeVisible(m_sysLoadBar.get());
+
+    m_netHealthBar = std::make_unique<LoadBar>("Network", false);
+    m_mbm->onNetworkUsageUpdate = [=](int loadPercent) { m_netHealthBar->setLoadPercent(loadPercent); };
+    addAndMakeVisible(m_netHealthBar.get());
 
     juce::Desktop::getInstance().addDarkModeSettingListener(this);
     darkModeSettingChanged(); // initially trigger correct colourscheme
@@ -155,7 +189,10 @@ void MainComponent::resized()
         m_setupButton->setBounds(setupElementArea.removeFromRight(setupElementArea.getHeight()));
     setupElementArea.removeFromRight(margin);
     if (m_sysLoadBar)
-        m_sysLoadBar->setBounds(setupElementArea.removeFromLeft(sc_loadWidth));
+        m_sysLoadBar->setBounds(setupElementArea.removeFromLeft(sc_loadNetWidth));
+    setupElementArea.removeFromLeft(margin);
+    if (m_netHealthBar)
+        m_netHealthBar->setBounds(setupElementArea.removeFromLeft(sc_loadNetWidth));
     setupElementArea.removeFromLeft(margin);
     if (m_emptySpace)
         m_emptySpace->setBounds(setupElementArea);
