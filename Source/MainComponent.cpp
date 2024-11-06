@@ -35,56 +35,75 @@ public:
     //==============================================================================
     void paint(Graphics& g) override
     {
+        auto margin = 1.0f;
+
         auto bounds = getLocalBounds().toFloat();
 
         g.setColour(getLookAndFeel().findColour(juce::LookAndFeel_V4::ColourScheme::windowBackground));
         g.fillRect(bounds);
+
+        auto barBounds = bounds.reduced(margin);
+
+        auto loadBarHeight = barBounds.getHeight();
+        if (!m_loadsPercent.empty())
+            loadBarHeight = (barBounds.getHeight() / m_loadsPercent.size()) - (margin * (m_loadsPercent.size() - 1));
         
-        auto normalPercent = m_loadPercent;
-        auto warningPercent = 0;
-        auto criticalPercent = 0;
-        if (m_loadPercent > 75)
+        auto avgLoad = 0;
+        for (auto const& loadPercent : m_loadsPercent)
         {
-            normalPercent = 75;
-            warningPercent = m_loadPercent - normalPercent;
-        }
-        if (m_loadPercent > 95)
-        {
-            warningPercent = 20;
-            criticalPercent = m_loadPercent - normalPercent - warningPercent;
-        }
-        if (m_loadPercent >= 100)
-        {
-            criticalPercent = 5;
+            auto normalPercent = loadPercent.second;
+            auto warningPercent = 0;
+            auto criticalPercent = 0;
+            if (loadPercent.second > 75)
+            {
+                normalPercent = 75;
+                warningPercent = loadPercent.second - normalPercent;
+            }
+            if (loadPercent.second > 95)
+            {
+                warningPercent = 20;
+                criticalPercent = loadPercent.second - normalPercent - warningPercent;
+            }
+            if (loadPercent.second >= 100)
+            {
+                criticalPercent = 5;
+            }
+
+            auto individualBarBounds = barBounds.removeFromTop(loadBarHeight);
+            individualBarBounds.removeFromBottom(margin);
+
+            g.setColour(getLookAndFeel().findColour(juce::TextButton::ColourIds::buttonColourId));
+            g.fillRect(individualBarBounds.removeFromLeft(individualBarBounds.getWidth() * (float(normalPercent) / 100.0f)));
+            if (warningPercent > 0)
+            {
+                g.setColour(juce::Colour(0xff, 0xe8, 0x00));
+                g.fillRect(individualBarBounds.removeFromLeft(individualBarBounds.getWidth() * (float(warningPercent) / 25.0f)));
+            }
+            if (criticalPercent > 0)
+            {
+                g.setColour(juce::Colour(0xff, 0x40, 0x02));
+                g.fillRect(individualBarBounds.removeFromLeft(individualBarBounds.getWidth() * (float(criticalPercent) / 5.0f)));
+            }
+
+            avgLoad += loadPercent.second;
         }
 
-        auto barBounds = bounds.reduced(1);
-        g.setColour(getLookAndFeel().findColour(juce::TextButton::ColourIds::buttonColourId));
-        g.fillRect(barBounds.removeFromLeft(barBounds.getWidth() * (float(normalPercent) / 100.0f)));
-        if (warningPercent > 0)
-        {
-            g.setColour(juce::Colour(0xff, 0xe8, 0x00));
-            g.fillRect(barBounds.removeFromLeft(barBounds.getWidth() * (float(warningPercent) / 25.0f)));
-        }
-        if (criticalPercent > 0)
-        {
-            g.setColour(juce::Colour(0xff, 0x40, 0x02));
-            g.fillRect(barBounds.removeFromLeft(barBounds.getWidth() * (float(criticalPercent) / 5.0f)));
-        }
+        if (!m_loadsPercent.empty())
+            avgLoad /= int(m_loadsPercent.size());
 
         g.setColour(getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
-        g.drawText(m_label + (m_showPercent ? (juce::String(" ") + juce::String(m_loadPercent) + juce::String("%")) : ""), bounds, juce::Justification::centred);
+        g.drawText(m_label + (m_showPercent ? (juce::String(" ") + juce::String(avgLoad) + juce::String("%")) : ""), bounds, juce::Justification::centred);
     };
 
     //==============================================================================
-    void setLoadPercent(int loadPercent)
+    void setLoadPercent(int loadPercent, int id = 0)
     {
-        m_loadPercent = loadPercent;
+        m_loadsPercent[id] = loadPercent;
         repaint();
     };
 
 private:
-    int m_loadPercent = 0;
+    std::map<int, int> m_loadsPercent;
     juce::String m_label;
     bool m_showPercent = false;
 };
@@ -152,7 +171,10 @@ MainComponent::MainComponent()
     addAndMakeVisible(m_sysLoadBar.get());
 
     m_netHealthBar = std::make_unique<LoadBar>("Network", false);
-    m_mbm->onNetworkUsageUpdate = [=](int loadPercent) { m_netHealthBar->setLoadPercent(loadPercent); };
+    m_mbm->onNetworkUsageUpdate = [=](std::map<int, double> netLoads) {
+        for (auto const& netLoad : netLoads)
+            m_netHealthBar->setLoadPercent(int(netLoad.second * 100.0), netLoad.first);
+    };
     addAndMakeVisible(m_netHealthBar.get());
 
     juce::Desktop::getInstance().addDarkModeSettingListener(this);

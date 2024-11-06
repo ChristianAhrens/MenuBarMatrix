@@ -61,49 +61,91 @@ int InterprocessConnectionImpl::getId()
 //==============================================================================
 InterprocessConnectionServerImpl::InterprocessConnectionServerImpl() : juce::InterprocessConnectionServer()
 {
-    m_sendMessageResult.store(true);
-
-    m_sendMessageThreadActive.store(true);
-    m_sendMessageThread = std::make_unique<std::thread>([this]() {
-        std::unique_lock<std::mutex> sendMessageSignal(m_sendMessageCVMutex);
-        while (m_sendMessageThreadActive.load())
-        {
-            m_sendMessageCV.wait(sendMessageSignal);
-
-            std::unique_lock<std::mutex> l(m_sendMessageMutex);
-            while (!m_sendMessageList.empty())
-            {
-                auto messageData = m_sendMessageList.front();
-                m_sendMessageList.pop();
-                l.unlock();
-                if (!sendMessage(messageData))
-                    m_sendMessageResult.store(false);
-                l.lock();
-            }
-        }
-        });
+    
 }
 
 InterprocessConnectionServerImpl::~InterprocessConnectionServerImpl()
 {
+    for (auto const& connection : m_connections)
     {
-        std::lock_guard<std::mutex> sendMessageSignal(m_sendMessageCVMutex);
-        m_sendMessageThreadActive.store(false);
+        endMessageThread(connection.first);
     }
-    m_sendMessageCV.notify_all();
-    if (m_sendMessageThread)
-        m_sendMessageThread->join();
 }
 
-double InterprocessConnectionServerImpl::getListHealth()
+void InterprocessConnectionServerImpl::createMessageThread(int id)
 {
-    auto listSize = size_t(0);
+    DBG(juce::String(__FUNCTION__) << id);
+
+    m_sendMessageResults[id].store(true);
+
+    m_sendMessageThreadsActive[id].store(true);
+    m_sendMessageThreads[id] = std::make_unique<std::thread>([this, id]() {
+        auto thisId = id;
+        std::unique_lock<std::mutex> sendMessageSignal(m_sendMessageCVMutexs[thisId]);
+        while (m_sendMessageThreadsActive[thisId].load())
+        {
+            m_sendMessageCVs[id].wait(sendMessageSignal);
+
+            std::unique_lock<std::mutex> l(m_sendMessageMutexs[thisId]);
+            while (!m_sendMessageLists[thisId].empty())
+            {
+                auto messageData = m_sendMessageLists[thisId].front();
+                m_sendMessageLists[thisId].pop();
+                l.unlock();
+                if (m_connections[thisId] && !m_connections[thisId]->sendMessage(messageData))
+                    m_sendMessageResults[thisId].store(false);
+                l.lock();
+            }
+        }
+
+        DBG(juce::String(__FUNCTION__) << juce::String("end ") << id);
+
+    });
+}
+
+void InterprocessConnectionServerImpl::endMessageThread(int id)
+{
+    DBG(juce::String(__FUNCTION__) << id);
+
     {
-        std::lock_guard<std::mutex> l(m_sendMessageMutex);
-        listSize = m_sendMessageList.size();
+        std::lock_guard<std::mutex> sendMessageSignal(m_sendMessageCVMutexs[id]);
+        m_sendMessageThreadsActive[id].store(false);
+    }
+    m_sendMessageCVs[id].notify_all();
+    if (m_sendMessageThreads[id])
+    {
+        m_sendMessageThreads[id]->join();
     }
 
-    return double(listSize) / 35.0;
+    m_sendMessageMutexs.erase(id);
+    m_sendMessageLists.erase(id);
+    m_sendMessageResults.erase(id);
+
+    m_sendMessageThreadsActive.erase(id);
+    m_sendMessageThreads.erase(id);
+    m_sendMessageCVs.erase(id);
+    m_sendMessageCVMutexs.erase(id);
+}
+
+std::map<int, double> InterprocessConnectionServerImpl::getListHealth()
+{
+    std::map<int, double> rList;
+    for (auto const& list : m_sendMessageLists)
+    {
+        auto listSize = size_t(0);
+        {
+            std::lock_guard<std::mutex> l(m_sendMessageMutexs[list.first]);
+            listSize = m_sendMessageLists[list.first].size();
+        }
+
+        if (listSize >= 35)
+            rList[list.first] = 1.0;
+        else
+            rList[list.first] = double(listSize) / 35.0;
+
+        DBG(juce::String(__FUNCTION__) << " " << list.first << " " << listSize);
+    }
+    return rList;
 }
 
 bool InterprocessConnectionServerImpl::hasActiveConnection(int id)
@@ -144,37 +186,37 @@ void InterprocessConnectionServerImpl::cleanupDeadConnections()
             idsToErase.push_back(connection.first);
 
     for (auto const& id : idsToErase)
+    {
         m_connections.erase(id);
+        endMessageThread(id);
+    }
 }
 
 bool InterprocessConnectionServerImpl::enqueueMessage(const MemoryBlock& message)
 {
     auto rVal = true;
+    for (auto const& th : m_sendMessageThreads)
     {
-        std::lock_guard<std::mutex> l(m_sendMessageMutex);
-        m_sendMessageList.push(message);
-        if (!m_sendMessageResult.load())
         {
-            rVal = false;
-            m_sendMessageResult.store(true);
+            std::lock_guard<std::mutex> l(m_sendMessageMutexs[th.first]);
+            m_sendMessageLists[th.first].push(message);
+            if (!m_sendMessageResults[th.first].load())
+            {
+                rVal = false;
+                m_sendMessageResults[th.first].store(true);
+            }
         }
+        m_sendMessageCVs[th.first].notify_all();
     }
-    m_sendMessageCV.notify_all();
 
     return rVal;
-}
-
-bool InterprocessConnectionServerImpl::sendMessage(const MemoryBlock& message)
-{
-    auto success = true;
-    for (auto const& connection : m_connections)
-        success = success && connection.second->sendMessage(message);
-    return success;
 }
 
 InterprocessConnection* InterprocessConnectionServerImpl::createConnectionObject()
 {
     m_connections[++m_connectionIdIter] = std::make_unique<InterprocessConnectionImpl>(m_connectionIdIter);
+    
+    createMessageThread(m_connectionIdIter);
 
     m_connections[m_connectionIdIter]->onConnectionLost = [=](int /*connectionId*/) {
         cleanupDeadConnections();

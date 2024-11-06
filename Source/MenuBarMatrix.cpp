@@ -67,7 +67,7 @@ void MenuBarMatrix::timerCallback()
     if (m_menuBarMatrixProcessor && m_menuBarMatrixProcessor->getDeviceManager() && onCpuUsageUpdate)
     {
         onCpuUsageUpdate(int(m_menuBarMatrixProcessor->getDeviceManager()->getCpuUsage() * 100.0));
-        onNetworkUsageUpdate(int(m_menuBarMatrixProcessor->getNetworkHealth() * 100.0));
+        onNetworkUsageUpdate(m_menuBarMatrixProcessor->getNetworkHealth());
     }
 }
 

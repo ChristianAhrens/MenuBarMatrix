@@ -56,7 +56,9 @@ public:
     InterprocessConnectionServerImpl();
     virtual ~InterprocessConnectionServerImpl();
 
-    double getListHealth();
+    void createMessageThread(int id);
+
+    std::map<int, double> getListHealth();
 
     bool hasActiveConnection(int id);
     bool hasActiveConnections();
@@ -67,20 +69,18 @@ public:
 
     std::function<void(int)>   onConnectionCreated;
 
-protected:
-    bool sendMessage(const MemoryBlock& message);
-
 private:
     InterprocessConnection* createConnectionObject();
+    void endMessageThread(int id);
 
-    std::mutex                      m_sendMessageMutex;
-    std::queue<juce::MemoryBlock>   m_sendMessageList;
-    std::atomic<bool>               m_sendMessageResult;
+    std::map<int, std::mutex>                       m_sendMessageMutexs;
+    std::map<int, std::queue<juce::MemoryBlock>>    m_sendMessageLists;
+    std::map<int, std::atomic<bool>>                m_sendMessageResults;
 
-    std::atomic<bool>               m_sendMessageThreadActive;
-    std::unique_ptr<std::thread>    m_sendMessageThread;
-    std::condition_variable			m_sendMessageCV;
-    std::mutex                      m_sendMessageCVMutex;
+    std::map<int, std::atomic<bool>>            m_sendMessageThreadsActive;
+    std::map<int, std::unique_ptr<std::thread>> m_sendMessageThreads;
+    std::map<int, std::condition_variable>		m_sendMessageCVs;
+    std::map<int, std::mutex>                   m_sendMessageCVMutexs;
 
     std::map<int, std::unique_ptr<InterprocessConnectionImpl>> m_connections;
     int m_connectionIdIter = 0;
