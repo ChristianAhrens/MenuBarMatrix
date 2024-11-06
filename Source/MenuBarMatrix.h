@@ -56,6 +56,7 @@ public:
 
     //==========================================================================
     std::function<void(int)> onCpuUsageUpdate;
+    std::function<void(std::map<int, double>)> onNetworkUsageUpdate;
     std::function<void(juce::Rectangle<int>)> onSizeChangeRequested;
 
     //==========================================================================

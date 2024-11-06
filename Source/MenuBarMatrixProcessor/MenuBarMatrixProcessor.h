@@ -28,10 +28,15 @@
 namespace MenuBarMatrix
 {
 
+class InterprocessConnectionImpl;
+class InterprocessConnectionServerImpl;
 class MenuBarMatrixChannelCommander;
 class MenuBarMatrixInputCommander;
 class MenuBarMatrixOutputCommander;
 class MenuBarMatrixCrosspointCommander;
+#if JUCE_WINDOWS
+struct ServiceAdvertiser;
+#endif
 
 
 //==============================================================================
@@ -43,52 +48,6 @@ class MenuBarMatrixProcessor :  public juce::AudioProcessor,
                                 public juce::ChangeListener,
                                 public AppConfiguration::XmlConfigurableElement
 {
-private:
-    class InterprocessConnectionImpl : public juce::InterprocessConnection
-    {
-    public:
-        InterprocessConnectionImpl() : juce::InterprocessConnection() {};
-        virtual ~InterprocessConnectionImpl() { disconnect(); };
-
-        void connectionMade() override { if (onConnectionMade) onConnectionMade(); };
-
-        void connectionLost() override { if (onConnectionLost) onConnectionLost(); };
-
-        void messageReceived(const MemoryBlock& message) override { if (onMessageReceived) onMessageReceived(message); };
-
-        std::function<void()>                   onConnectionMade;
-        std::function<void()>                   onConnectionLost;
-        std::function<void(const MemoryBlock&)> onMessageReceived;
-
-    private:
-
-    };
-
-    class InterprocessConnectionServerImpl : public juce::InterprocessConnectionServer
-    {
-    public:
-        InterprocessConnectionServerImpl() : juce::InterprocessConnectionServer() {};
-        virtual ~InterprocessConnectionServerImpl() {};
-
-        bool hasActiveConnection() { return m_connection && m_connection->isConnected(); };
-
-        const std::unique_ptr<InterprocessConnectionImpl>& getActiveConnection() { return m_connection; };
-
-        std::function<void()>   onConnectionCreated;
-
-    private:
-        InterprocessConnection* createConnectionObject() {
-            m_connection = std::make_unique<InterprocessConnectionImpl>();
-
-            if (onConnectionCreated)
-                onConnectionCreated();
-
-            return m_connection.get();
-        };
-
-        std::unique_ptr<InterprocessConnectionImpl> m_connection;
-    };
-
 public:
     MenuBarMatrixProcessor(XmlElement* stateXml);
     ~MenuBarMatrixProcessor();
@@ -126,6 +85,9 @@ public:
 
     //==============================================================================
     AudioDeviceManager* getDeviceManager();
+
+    //==============================================================================
+    std::map<int, double> getNetworkHealth();
 
     //==============================================================================
     const String getName() const override;
@@ -238,7 +200,11 @@ private:
     std::unique_ptr<MenuBarMatrixEditor>  m_processorEditor;
 
     //==============================================================================
+#if JUCE_WINDOWS
+    std::unique_ptr<ServiceAdvertiser>  m_serviceAdvertiser;
+#else
     std::unique_ptr<juce::NetworkServiceDiscovery::Advertiser>  m_serviceAdvertiser;
+#endif
     std::unique_ptr<InterprocessConnectionServerImpl> m_networkServer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MenuBarMatrixProcessor)

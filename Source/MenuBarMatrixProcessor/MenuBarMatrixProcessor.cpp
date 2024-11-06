@@ -18,6 +18,7 @@
 
 #include "MenuBarMatrixProcessor.h"
 
+#include "InterprocessConnection.h"
 #include "MenuBarMatrixCommanders.h"
 #include "MenuBarMatrixServiceData.h"
 #include "MenuBarMatrixMessages.h"
@@ -27,6 +28,83 @@
 
 namespace MenuBarMatrix
 {
+
+
+#if JUCE_WINDOWS
+/** Copy of juce::NetworkServiceDiscovery::Advertiser, simply because the underlying juce::IPAddress::getInterfaceBroadcastAddress is not implemented on windows and therefor the advertisement functionality not available here. */
+struct ServiceAdvertiser : private juce::Thread
+{
+	ServiceAdvertiser(const String& serviceTypeUID,
+		const String& serviceDescription,
+		int broadcastPort,
+		int connectionPort,
+		RelativeTime minTimeBetweenBroadcasts = RelativeTime::seconds(1.5))
+		: Thread(juce::JUCEApplication::getInstance()->getApplicationName() + ": Discovery_broadcast"),
+		message(serviceTypeUID), broadcastPort(broadcastPort),
+		minInterval(minTimeBetweenBroadcasts)
+	{
+		DBG("!!! Using juce::NetworkServiceDiscovery::Advertiser clone 'ServiceAdvertiser' just because juce::IPAddress::getInterfaceBroadcastAddress implementation is missing on windows. Rework required as soon as this changes. !!!");
+
+		message.setAttribute("id", Uuid().toString());
+		message.setAttribute("name", serviceDescription);
+		message.setAttribute("address", String());
+		message.setAttribute("port", connectionPort);
+
+		startThread(Priority::background);
+	};
+	~ServiceAdvertiser() override {
+		stopThread(2000);
+		socket.shutdown();
+	};
+
+private:
+	XmlElement message;
+	const int broadcastPort;
+	const RelativeTime minInterval;
+	DatagramSocket socket{ true };
+
+	IPAddress getInterfaceBroadcastAddress(const IPAddress& address)
+	{
+		if (address.isIPv6)
+			// TODO
+			return {};
+
+		String broadcastAddress = address.toString().upToLastOccurrenceOf(".", true, false) + "255";
+		return IPAddress(broadcastAddress);
+	};
+	void run() override
+	{
+		if (!socket.bindToPort(0))
+		{
+			jassertfalse;
+			return;
+		}
+
+		while (!threadShouldExit())
+		{
+			sendBroadcast();
+			wait((int)minInterval.inMilliseconds());
+		}
+	};
+	void sendBroadcast()
+	{
+		static IPAddress local = IPAddress::local();
+
+		for (auto& address : IPAddress::getAllAddresses())
+		{
+			if (address == local)
+				continue;
+
+			message.setAttribute("address", address.toString());
+
+			auto broadcastAddress = getInterfaceBroadcastAddress(address);
+			auto data = message.toString(XmlElement::TextFormat().singleLine().withoutHeader());
+
+			socket.write(broadcastAddress.toString(), broadcastPort, data.toRawUTF8(), (int)data.getNumBytesAsUTF8());
+		}
+	};
+};
+#endif
 
 
 //==============================================================================
@@ -58,21 +136,29 @@ MenuBarMatrixProcessor::MenuBarMatrixProcessor(XmlElement* stateXml) :
 	}
 
 	// init the announcement of this app instance as discoverable service
+#if JUCE_WINDOWS
+	m_serviceAdvertiser = std::make_unique<ServiceAdvertiser>(
+		MenuBarMatrix::ServiceData::getServiceTypeUID(),
+		MenuBarMatrix::ServiceData::getServiceDescription(),
+		MenuBarMatrix::ServiceData::getBroadcastPort(),
+		MenuBarMatrix::ServiceData::getConnectionPort());
+#else
 	m_serviceAdvertiser = std::make_unique<juce::NetworkServiceDiscovery::Advertiser>(
 		MenuBarMatrix::ServiceData::getServiceTypeUID(), 
 		MenuBarMatrix::ServiceData::getServiceDescription(),
 		MenuBarMatrix::ServiceData::getBroadcastPort(),
 		MenuBarMatrix::ServiceData::getConnectionPort());
+#endif
 
 	m_networkServer = std::make_unique<InterprocessConnectionServerImpl>();
 	m_networkServer->beginWaitingForSocket(MenuBarMatrix::ServiceData::getConnectionPort());
-    m_networkServer->onConnectionCreated = [=]() {
-        auto connection = dynamic_cast<InterprocessConnectionImpl*>(m_networkServer->getActiveConnection().get());
+    m_networkServer->onConnectionCreated = [=](int connectionId) {
+        auto connection = dynamic_cast<InterprocessConnectionImpl*>(m_networkServer->getActiveConnection(connectionId).get());
         if (connection)
         {
-			connection->onConnectionLost = [=]() { DBG(__FUNCTION__); };
-			connection->onConnectionMade = [=]() { DBG(__FUNCTION__);
-			postMessage(std::make_unique<AnalyzerParametersMessage>(int(m_sampleRate), m_bufferSize).release());
+			connection->onConnectionLost = [=](int /*connectionId*/) { DBG(__FUNCTION__); };
+			connection->onConnectionMade = [=](int /*connectionId*/ ) { DBG(__FUNCTION__);
+				postMessage(std::make_unique<AnalyzerParametersMessage>(int(m_sampleRate), m_bufferSize).release());
 				postMessage(std::make_unique<ReinitIOCountMessage>(m_inputChannelCount, m_outputChannelCount).release());
 				postMessage(std::make_unique<EnvironmentParametersMessage>(juce::Desktop::getInstance().isDarkModeActive() ? JUCEAppBasics::CustomLookAndFeel::PS_Dark : JUCEAppBasics::CustomLookAndFeel::PS_Light).release());
 			};
@@ -377,6 +463,14 @@ AudioDeviceManager* MenuBarMatrixProcessor::getDeviceManager()
 		return nullptr;
 }
 
+std::map<int, double> MenuBarMatrixProcessor::getNetworkHealth()
+{
+	if (m_networkServer)
+		return m_networkServer->getListHealth();
+	else
+		return {};
+}
+
 //==============================================================================
 const String MenuBarMatrixProcessor::getName() const
 {
@@ -463,15 +557,14 @@ void MenuBarMatrixProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffer
 
 void MenuBarMatrixProcessor::handleMessage(const Message& message)
 {
+	juce::MemoryBlock serializedMessageMemoryBlock;
 	if (auto const epm = dynamic_cast<const EnvironmentParametersMessage*>(&message))
 	{
-		if (m_networkServer && m_networkServer->hasActiveConnection())
-			m_networkServer->getActiveConnection()->sendMessage(epm->getSerializedMessage());
+		serializedMessageMemoryBlock = epm->getSerializedMessage();
 	}
 	else if (auto const apm = dynamic_cast<const AnalyzerParametersMessage*>(&message))
 	{
-		if (m_networkServer && m_networkServer->hasActiveConnection())
-			m_networkServer->getActiveConnection()->sendMessage(apm->getSerializedMessage());
+		serializedMessageMemoryBlock = apm->getSerializedMessage();
 	}
 	else if (auto const iom = dynamic_cast<const ReinitIOCountMessage*> (&message))
 	{
@@ -491,8 +584,7 @@ void MenuBarMatrixProcessor::handleMessage(const Message& message)
 
 		initializeCtrlValues(iom->getInputCount(), iom->getOutputCount());
 
-		if (m_networkServer && m_networkServer->hasActiveConnection())
-			m_networkServer->getActiveConnection()->sendMessage(iom->getSerializedMessage());
+		serializedMessageMemoryBlock = iom->getSerializedMessage();
 	}
 	else if (auto m = dynamic_cast<const AudioBufferMessage*> (&message))
 	{
@@ -505,9 +597,12 @@ void MenuBarMatrixProcessor::handleMessage(const Message& message)
 			m_outputDataAnalyzer->analyzeData(m->getAudioBuffer());
 		}
 
-		if (m_networkServer && m_networkServer->hasActiveConnection())
-			m_networkServer->getActiveConnection()->sendMessage(m->getSerializedMessage());
+		serializedMessageMemoryBlock = m->getSerializedMessage();
 	}
+
+	if (m_networkServer && m_networkServer->hasActiveConnections())
+		if (!m_networkServer->enqueueMessage(serializedMessageMemoryBlock))
+			m_networkServer->cleanupDeadConnections();
 }
 
 double MenuBarMatrixProcessor::getTailLengthSeconds() const

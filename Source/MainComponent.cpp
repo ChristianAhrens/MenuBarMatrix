@@ -25,38 +25,92 @@
 #include <CustomLookAndFeel.h>
 #include <AppConfigurationBase.h>
 
- //==============================================================================
+//==============================================================================
 class LoadBar : public juce::Component
 {
 public:
-    LoadBar() : juce::Component::Component() {}
+    LoadBar(juce::String label, bool showPercent = true) : juce::Component::Component() { m_label = label; m_showPercent = showPercent; }
     ~LoadBar() {}
 
     //==============================================================================
     void paint(Graphics& g) override
     {
+        auto margin = 1.0f;
+
         auto bounds = getLocalBounds().toFloat();
 
         g.setColour(getLookAndFeel().findColour(juce::LookAndFeel_V4::ColourScheme::windowBackground));
         g.fillRect(bounds);
 
-        g.setColour(getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
-        
-        auto barBounds = bounds.reduced(1);
-        g.fillRect(barBounds.removeFromLeft(barBounds.getWidth() * (float(m_loadPercent) / 100.0f)));
+        auto barBounds = bounds.reduced(margin);
 
-        g.drawText(juce::String("Load ") + juce::String(m_loadPercent) + juce::String("%"), bounds, juce::Justification::centred);
+        auto loadBarHeight = barBounds.getHeight();
+        if (!m_loadsPercent.empty())
+            loadBarHeight = (barBounds.getHeight() / m_loadsPercent.size());
+        
+        auto avgLoad = 0;
+        int i = 0;
+        for (auto & loadPercentKV : m_loadsPercent)
+        {
+            auto loadPercent = loadPercentKV.second;
+            
+            auto normalPercent = loadPercent;
+            auto warningPercent = 0;
+            auto criticalPercent = 0;
+            if (loadPercent > 75)
+            {
+                normalPercent = 75;
+                warningPercent = loadPercent - normalPercent;
+            }
+            if (loadPercent > 95)
+            {
+                warningPercent = 20;
+                criticalPercent = loadPercent - normalPercent - warningPercent;
+            }
+            if (loadPercent >= 100)
+            {
+                criticalPercent = 5;
+            }
+
+            auto individualBarBounds = barBounds.removeFromTop(loadBarHeight);
+            if (i < m_loadsPercent.size()-1)
+                individualBarBounds.removeFromBottom(margin);
+
+            g.setColour(getLookAndFeel().findColour(juce::TextButton::ColourIds::buttonColourId));
+            g.fillRect(individualBarBounds.removeFromLeft(individualBarBounds.getWidth() * (float(normalPercent) / 100.0f)));
+            if (warningPercent > 0)
+            {
+                g.setColour(juce::Colour(0xff, 0xe8, 0x00).withAlpha(0.5f));
+                g.fillRect(individualBarBounds.removeFromLeft(individualBarBounds.getWidth() * (float(warningPercent) / 25.0f)));
+            }
+            if (criticalPercent > 0)
+            {
+                g.setColour(juce::Colour(0xff, 0x40, 0x02).withAlpha(0.5f));
+                g.fillRect(individualBarBounds.removeFromLeft(individualBarBounds.getWidth() * (float(criticalPercent) / 5.0f)));
+            }
+
+            avgLoad += loadPercent;
+            i++;
+        }
+
+        if (!m_loadsPercent.empty())
+            avgLoad /= int(m_loadsPercent.size());
+
+        g.setColour(getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
+        g.drawText(m_label + (m_showPercent ? (juce::String(" ") + juce::String(avgLoad) + juce::String("%")) : ""), bounds, juce::Justification::centred);
     };
 
     //==============================================================================
-    void setLoadPercent(int loadPercent)
+    void setLoadPercent(int loadPercent, int id = 0)
     {
-        m_loadPercent = loadPercent;
+        m_loadsPercent[id] = loadPercent;
         repaint();
     };
 
 private:
-    int m_loadPercent = 0;
+    std::map<int, int> m_loadsPercent;
+    juce::String m_label;
+    bool m_showPercent = false;
 };
 
 //==============================================================================
@@ -81,8 +135,8 @@ MainComponent::MainComponent()
         auto width = requestedSize.getWidth();
         auto height = requestedSize.getHeight() + sc_buttonSize;
         
-        if (width < (sc_loadWidth + 5 * sc_buttonSize))
-            width = sc_loadWidth + 5 * sc_buttonSize;
+        if (width < (2 * sc_loadNetWidth + 3 * sc_buttonSize))
+            width = 2 * sc_loadNetWidth + 3 * sc_buttonSize;
         
         setSize(width, height);
     };
@@ -117,9 +171,16 @@ MainComponent::MainComponent()
     m_emptySpace = std::make_unique<EmptySpace>();
     addAndMakeVisible(m_emptySpace.get());
 
-    m_sysLoadBar = std::make_unique<LoadBar>();
+    m_sysLoadBar = std::make_unique<LoadBar>("Load");
     m_mbm->onCpuUsageUpdate = [=](int loadPercent) { m_sysLoadBar->setLoadPercent(loadPercent); };
     addAndMakeVisible(m_sysLoadBar.get());
+
+    m_netHealthBar = std::make_unique<LoadBar>("Network", false);
+    m_mbm->onNetworkUsageUpdate = [=](std::map<int, double> netLoads) {
+        for (auto const& netLoad : netLoads)
+            m_netHealthBar->setLoadPercent(int(netLoad.second * 100.0), netLoad.first);
+    };
+    addAndMakeVisible(m_netHealthBar.get());
 
     juce::Desktop::getInstance().addDarkModeSettingListener(this);
     darkModeSettingChanged(); // initially trigger correct colourscheme
@@ -155,7 +216,10 @@ void MainComponent::resized()
         m_setupButton->setBounds(setupElementArea.removeFromRight(setupElementArea.getHeight()));
     setupElementArea.removeFromRight(margin);
     if (m_sysLoadBar)
-        m_sysLoadBar->setBounds(setupElementArea.removeFromLeft(sc_loadWidth));
+        m_sysLoadBar->setBounds(setupElementArea.removeFromLeft(sc_loadNetWidth));
+    setupElementArea.removeFromLeft(margin);
+    if (m_netHealthBar)
+        m_netHealthBar->setBounds(setupElementArea.removeFromLeft(sc_loadNetWidth));
     setupElementArea.removeFromLeft(margin);
     if (m_emptySpace)
         m_emptySpace->setBounds(setupElementArea);
