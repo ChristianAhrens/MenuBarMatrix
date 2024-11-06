@@ -18,6 +18,7 @@
 
 #include "MenuBarMatrixProcessor.h"
 
+#include "InterprocessConnection.h"
 #include "MenuBarMatrixCommanders.h"
 #include "MenuBarMatrixServiceData.h"
 #include "MenuBarMatrixMessages.h"

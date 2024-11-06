@@ -41,6 +41,10 @@
               file="Source/MenuBarMatrixProcessor/AbstractProcessorData.cpp"/>
         <FILE id="x81X07" name="AbstractProcessorData.h" compile="0" resource="0"
               file="Source/MenuBarMatrixProcessor/AbstractProcessorData.h"/>
+        <FILE id="GtE2NW" name="InterprocessConnection.cpp" compile="1" resource="0"
+              file="Source/MenuBarMatrixProcessor/InterprocessConnection.cpp"/>
+        <FILE id="tyifLD" name="InterprocessConnection.h" compile="0" resource="0"
+              file="Source/MenuBarMatrixProcessor/InterprocessConnection.h"/>
         <FILE id="DsrX3U" name="MenuBarMatrixCommanders.cpp" compile="1" resource="0"
               file="Source/MenuBarMatrixProcessor/MenuBarMatrixCommanders.cpp"/>
         <FILE id="H7SdxY" name="MenuBarMatrixCommanders.h" compile="0" resource="0"
