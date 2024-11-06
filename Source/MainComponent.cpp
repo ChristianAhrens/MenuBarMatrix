@@ -46,46 +46,51 @@ public:
 
         auto loadBarHeight = barBounds.getHeight();
         if (!m_loadsPercent.empty())
-            loadBarHeight = (barBounds.getHeight() / m_loadsPercent.size()) - (margin * (m_loadsPercent.size() - 1));
+            loadBarHeight = (barBounds.getHeight() / m_loadsPercent.size());
         
         auto avgLoad = 0;
-        for (auto const& loadPercent : m_loadsPercent)
+        int i = 0;
+        for (auto & loadPercentKV : m_loadsPercent)
         {
-            auto normalPercent = loadPercent.second;
+            auto loadPercent = loadPercentKV.second;
+            
+            auto normalPercent = loadPercent;
             auto warningPercent = 0;
             auto criticalPercent = 0;
-            if (loadPercent.second > 75)
+            if (loadPercent > 75)
             {
                 normalPercent = 75;
-                warningPercent = loadPercent.second - normalPercent;
+                warningPercent = loadPercent - normalPercent;
             }
-            if (loadPercent.second > 95)
+            if (loadPercent > 95)
             {
                 warningPercent = 20;
-                criticalPercent = loadPercent.second - normalPercent - warningPercent;
+                criticalPercent = loadPercent - normalPercent - warningPercent;
             }
-            if (loadPercent.second >= 100)
+            if (loadPercent >= 100)
             {
                 criticalPercent = 5;
             }
 
             auto individualBarBounds = barBounds.removeFromTop(loadBarHeight);
-            individualBarBounds.removeFromBottom(margin);
+            if (i < m_loadsPercent.size()-1)
+                individualBarBounds.removeFromBottom(margin);
 
             g.setColour(getLookAndFeel().findColour(juce::TextButton::ColourIds::buttonColourId));
             g.fillRect(individualBarBounds.removeFromLeft(individualBarBounds.getWidth() * (float(normalPercent) / 100.0f)));
             if (warningPercent > 0)
             {
-                g.setColour(juce::Colour(0xff, 0xe8, 0x00));
+                g.setColour(juce::Colour(0xff, 0xe8, 0x00).withAlpha(0.5f));
                 g.fillRect(individualBarBounds.removeFromLeft(individualBarBounds.getWidth() * (float(warningPercent) / 25.0f)));
             }
             if (criticalPercent > 0)
             {
-                g.setColour(juce::Colour(0xff, 0x40, 0x02));
+                g.setColour(juce::Colour(0xff, 0x40, 0x02).withAlpha(0.5f));
                 g.fillRect(individualBarBounds.removeFromLeft(individualBarBounds.getWidth() * (float(criticalPercent) / 5.0f)));
             }
 
-            avgLoad += loadPercent.second;
+            avgLoad += loadPercent;
+            i++;
         }
 
         if (!m_loadsPercent.empty())
