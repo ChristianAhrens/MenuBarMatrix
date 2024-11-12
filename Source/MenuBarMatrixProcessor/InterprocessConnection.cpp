@@ -92,7 +92,7 @@ void InterprocessConnectionServerImpl::createMessageThread(int id)
                 auto messageData = m_sendMessageLists[thisId].front();
                 m_sendMessageLists[thisId].pop();
                 l.unlock();
-                if (m_connections[thisId] && !m_connections[thisId]->sendMessage(messageData))
+                if (m_connections[thisId] && m_connections[thisId]->isConnected() && !m_connections[thisId]->sendMessage(messageData))
                     m_sendMessageResults[thisId].store(false);
                 l.lock();
             }
