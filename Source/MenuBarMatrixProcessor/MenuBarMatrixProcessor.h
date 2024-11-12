@@ -87,7 +87,7 @@ public:
     AudioDeviceManager* getDeviceManager();
 
     //==============================================================================
-    std::map<int, double> getNetworkHealth();
+    std::map<int, std::pair<double, bool>> getNetworkHealth();
 
     //==============================================================================
     const String getName() const override;

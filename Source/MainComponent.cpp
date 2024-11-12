@@ -53,6 +53,7 @@ public:
         for (auto & loadPercentKV : m_loadsPercent)
         {
             auto loadPercent = loadPercentKV.second;
+            auto alert = m_alerts[loadPercentKV.first];
             
             auto normalPercent = loadPercent;
             auto warningPercent = 0;
@@ -76,6 +77,11 @@ public:
             if (i < m_loadsPercent.size()-1)
                 individualBarBounds.removeFromBottom(margin);
 
+            auto centerQuad = individualBarBounds;
+            auto remW = (individualBarBounds.getWidth() - individualBarBounds.getHeight()) / 2;
+            centerQuad.removeFromLeft(remW);
+            centerQuad.removeFromRight(remW);
+
             g.setColour(getLookAndFeel().findColour(juce::TextButton::ColourIds::buttonColourId));
             g.fillRect(individualBarBounds.removeFromLeft(individualBarBounds.getWidth() * (float(normalPercent) / 100.0f)));
             if (warningPercent > 0)
@@ -87,6 +93,11 @@ public:
             {
                 g.setColour(juce::Colour(0xff, 0x40, 0x02).withAlpha(0.5f));
                 g.fillRect(individualBarBounds.removeFromLeft(individualBarBounds.getWidth() * (float(criticalPercent) / 5.0f)));
+            }
+            if (alert)
+            {
+                g.setColour(juce::Colour(0xff, 0x30, 0x02).withAlpha(0.8f));
+                g.fillEllipse(centerQuad);
             }
 
             avgLoad += loadPercent;
@@ -106,9 +117,15 @@ public:
         m_loadsPercent[id] = loadPercent;
         repaint();
     };
+    void setAlert(bool alert, int id = 0)
+    {
+        m_alerts[id] = alert;
+        repaint();
+    };
 
 private:
     std::map<int, int> m_loadsPercent;
+    std::map<int, bool> m_alerts;
     juce::String m_label;
     bool m_showPercent = false;
 };
@@ -171,14 +188,17 @@ MainComponent::MainComponent()
     m_emptySpace = std::make_unique<EmptySpace>();
     addAndMakeVisible(m_emptySpace.get());
 
-    m_sysLoadBar = std::make_unique<LoadBar>("Load");
+    m_sysLoadBar = std::make_unique<LoadBar>("PLoad");
     m_mbm->onCpuUsageUpdate = [=](int loadPercent) { m_sysLoadBar->setLoadPercent(loadPercent); };
     addAndMakeVisible(m_sysLoadBar.get());
 
-    m_netHealthBar = std::make_unique<LoadBar>("Network", false);
-    m_mbm->onNetworkUsageUpdate = [=](std::map<int, double> netLoads) {
+    m_netHealthBar = std::make_unique<LoadBar>("NLoad");
+    m_mbm->onNetworkUsageUpdate = [=](std::map<int, std::pair<double, bool>> netLoads) {
         for (auto const& netLoad : netLoads)
-            m_netHealthBar->setLoadPercent(int(netLoad.second * 100.0), netLoad.first);
+        {
+            m_netHealthBar->setLoadPercent(int(netLoad.second.first * 100.0), netLoad.first);
+            m_netHealthBar->setAlert(netLoad.second.second, netLoad.first);
+        }
     };
     addAndMakeVisible(m_netHealthBar.get());
 
