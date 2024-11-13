@@ -18,9 +18,13 @@ See [LATEST RELEASE](https://github.com/ChristianAhrens/MenuBarMatrix/releases/l
 ## Table of contents
 
 * [Introduction](#introduction)
+  * [MenuBarMatrix and MenuBarMatrixMonitor](#menubarmatrixNmonitor)
+  * [MenuBarMatrix UI](#menubarmatrixUI)
+  * [MenuBarMatrixMonitor UI](#menubarmatrixmonitorUI)
 * [How to build the tools](#howtobuild)
   * [MenuBarMatrix](#buildmenubarmatrix)
   * [MenuBarMatrixMonitor](#buildmenubarmatrixmonitor)
+    * [Note on running on RaspberryPiOS Bullseye](#runonbullseye)
 * [Usecase: Studio sidecar monitoring](#rackmonitoringusecase)
 * [Usecase: Mobile recording monitoring](#mobilerecordingusecase)
 * [App Architecture](#architectureoverview)
@@ -38,7 +42,23 @@ Its sourcecode and prebuilt binaries are made publicly available to enable inter
 
 Use what is provided here at your own risk!
 
-![Showreel.003.png](Resources/Documentation/Showreel/Showreel.003.png "MenuBarMatrix UI")
+<a name="menubarmatrixNmonitor" />
+
+### MenuBarMatrix and MenuBarMatrixMonitor
+
+![Showreel.003.png](Resources/Documentation/Showreel/Showreel.003.png "MenuBarMatrix and -Monitor in action")
+
+<a name="menubarmatrixUI" />
+
+### MenuBarMatrix UI details
+
+![Showreel.004.png](Resources/Documentation/Showreel/Showreel.004.png "MenuBarMatrix UI")
+
+<a name="menubarmatrixmonitorUI" />
+
+### MenuBarMatrixMonitor UI details
+
+![Showreel.005.png](Resources/Documentation/Showreel/Showreel.005.png "MenuBarMatrixMonitor UI")
 
 
 <a name="howtobuild" />
@@ -77,12 +97,29 @@ In [Windows buildscripts](Resources/Deployment/Windows), bash scripts for automa
 
 In [Linux buildscripts](Resources/Deployment/Linux), shell scripts for automated building of the app are kept. These are aimed at building on Debian/Ubuntu/RaspberryPiOS and TRY to collect the required dev packages via apt packetmanager automatically.
 
+<a name="runonbullseye" />
+
+#### Building and running MenuBarMatrixMonitor on RaspberryPiOS Bullseye
+
+The build script `build_MenuBarMatrixMonitor_RaspberryPIOS.sh` in `Resources/Deployment/Linux` can be used on a vanilla installation of RaspberryPi OS to build the tool.
+
+On RaspberriPi 3B it is required to run the build without graphical interface, to avoid the build failing due to going out of memory (e.g. `sudo raspi-config` -> System Options -> Boot -> Console Autologin).
+
+The build result can be run in kind of a kiosk configuration by changing the system to not start the desktop session when running Xserver, but instead run MenuBarMatrixMonitor directly in the X session. To do this, edit or create `.xsession` in user home and simply add a line
+```
+exec <PATH_TO_REPO>/MenuBarMatrix/MenuBarMatrixMonitor/Builds/LinuxMakefile/build/MenuBarMatrixMonitor
+```
+Then configure the system to auto login to x session (e.g. `sudo raspi-config` -> System Options -> Boot -> Desktop Autologin).
+
+This does only work up to Raspberry Pi OS Bullseye versions, that use X server as window manager. From Bookworm on, Wayland is used that requires differing approaches.
 
 <a name="rackmonitoringusecase" />
 
 ## Usecase: Studio rack monitoring
 
-![UseCase-RackMonitoring.png](Resources/Documentation/UseCase-RackMonitoring.png "Homestudio setup")
+![Showreel.006.png](Resources/Documentation/Showreel/Showreel.006.png "Homestudio setup")
+
+![Showreel.007.png](Resources/Documentation/Showreel/Showreel.007.png "RaspberryPi rack DIY device")
 
 * MenuBarMatrix on macOS
   * BlackHole 16ch used to route signal from LogicPro, Apple Music, etc. to MenuBarMatrix
@@ -96,7 +133,7 @@ In [Linux buildscripts](Resources/Deployment/Linux), shell scripts for automated
 
 ## Usecase: Mobile recording monitoring
 
-![UseCase-MobileMonitoring.png](Resources/Documentation/UseCase-MobileMonitoring.png "Mobile rig")
+![Showreel.008.png](Resources/Documentation/Showreel/Showreel.008.png "Mobile rig")
 
 * MenuBarMatrix on macOS
   * BlackHole 16ch used to route signal from LogicPro, Apple Music, etc. to MenuBarMatrix
