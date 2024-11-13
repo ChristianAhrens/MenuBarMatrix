@@ -50,19 +50,6 @@ void MenuBarMatrixMonitorComponent::paint(Graphics &g)
         g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOnId));
         m_startRunningIndicator.paint(g);
     }
-    else
-    {
-        auto margin = 6;
-        auto bounds = getLocalBounds().reduced(margin, margin);
-        auto inputsBounds = bounds.removeFromLeft(int(bounds.getWidth() * m_ioRatio));
-        inputsBounds.removeFromRight(margin / 2);
-        auto outputsBounds = bounds;
-        outputsBounds.removeFromLeft(margin / 2);
-
-        g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::ColourIds::backgroundColourId));
-        g.fillRect(inputsBounds);
-        g.fillRect(outputsBounds);
-    }
 }
 
 void MenuBarMatrixMonitorComponent::resized()
@@ -73,24 +60,38 @@ void MenuBarMatrixMonitorComponent::resized()
     }
     else if (m_inputMeteringComponent && m_outputMeteringComponent)
     {
-        if (m_inputMeteringComponent && m_outputMeteringComponent)
-        {
-            auto ic = float(m_inputMeteringComponent->getChannelCount());
-            auto oc = float(m_outputMeteringComponent->getChannelCount());
-
-            if (0.0f != ic && 0.0f != oc)
-                m_ioRatio = ic / (ic + oc);
-        }
-
-        auto margin = 12;
+        auto margin = 8;
         auto bounds = getLocalBounds().reduced(margin, margin);
-        auto inputsBounds = bounds.removeFromLeft(int(bounds.getWidth() * m_ioRatio));
-        inputsBounds.removeFromRight(margin / 2);
-        auto outputsBounds = bounds;
-        outputsBounds.removeFromLeft(margin);
+        DBG(bounds.getAspectRatio());
+        if (bounds.getAspectRatio() >= 1)
+        {
+            if (m_inputMeteringComponent && m_outputMeteringComponent)
+            {
+                auto ic = float(m_inputMeteringComponent->getChannelCount());
+                auto oc = float(m_outputMeteringComponent->getChannelCount());
 
-        m_inputMeteringComponent->setBounds(inputsBounds);
-        m_outputMeteringComponent->setBounds(outputsBounds);
+                if (0.0f != ic && 0.0f != oc)
+                    m_ioRatio = ic / (ic + oc);
+            }
+
+            auto inputsBounds = bounds.removeFromLeft(int(bounds.getWidth() * m_ioRatio));
+            inputsBounds.removeFromRight(margin / 2);
+            auto outputsBounds = bounds;
+            outputsBounds.removeFromLeft(margin / 2);
+
+            m_inputMeteringComponent->setBounds(inputsBounds);
+            m_outputMeteringComponent->setBounds(outputsBounds);
+        }
+        else
+        {
+            auto inputBounds = bounds.removeFromTop(bounds.getHeight() / 2);
+            inputBounds.removeFromBottom(margin / 2);
+            auto outputBounds = bounds;
+            outputBounds.removeFromTop(margin / 2);
+
+            m_inputMeteringComponent->setBounds(inputBounds);
+            m_outputMeteringComponent->setBounds(outputBounds);
+        }
     }
 }
 

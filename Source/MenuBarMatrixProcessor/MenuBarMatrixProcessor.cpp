@@ -463,7 +463,7 @@ AudioDeviceManager* MenuBarMatrixProcessor::getDeviceManager()
 		return nullptr;
 }
 
-std::map<int, double> MenuBarMatrixProcessor::getNetworkHealth()
+std::map<int, std::pair<double, bool>> MenuBarMatrixProcessor::getNetworkHealth()
 {
 	if (m_networkServer)
 		return m_networkServer->getListHealth();

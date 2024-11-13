@@ -74,8 +74,6 @@ InterprocessConnectionServerImpl::~InterprocessConnectionServerImpl()
 
 void InterprocessConnectionServerImpl::createMessageThread(int id)
 {
-    DBG(juce::String(__FUNCTION__) << id);
-
     m_sendMessageResults[id].store(true);
 
     m_sendMessageThreadsActive[id].store(true);
@@ -92,21 +90,17 @@ void InterprocessConnectionServerImpl::createMessageThread(int id)
                 auto messageData = m_sendMessageLists[thisId].front();
                 m_sendMessageLists[thisId].pop();
                 l.unlock();
-                if (m_connections[thisId] && !m_connections[thisId]->sendMessage(messageData))
+                if (m_connections[thisId] && m_connections[thisId]->isConnected() && !m_connections[thisId]->sendMessage(messageData))
                     m_sendMessageResults[thisId].store(false);
                 l.lock();
             }
         }
-
-        DBG(juce::String(__FUNCTION__) << juce::String("end ") << id);
 
     });
 }
 
 void InterprocessConnectionServerImpl::endMessageThread(int id)
 {
-    DBG(juce::String(__FUNCTION__) << id);
-
     {
         std::lock_guard<std::mutex> sendMessageSignal(m_sendMessageCVMutexs[id]);
         m_sendMessageThreadsActive[id].store(false);
@@ -127,9 +121,9 @@ void InterprocessConnectionServerImpl::endMessageThread(int id)
     m_sendMessageCVMutexs.erase(id);
 }
 
-std::map<int, double> InterprocessConnectionServerImpl::getListHealth()
+std::map<int, std::pair<double, bool>> InterprocessConnectionServerImpl::getListHealth()
 {
-    std::map<int, double> rList;
+    std::map<int, std::pair<double, bool>> rList;
     for (auto const& list : m_sendMessageLists)
     {
         auto listSize = size_t(0);
@@ -138,12 +132,10 @@ std::map<int, double> InterprocessConnectionServerImpl::getListHealth()
             listSize = m_sendMessageLists[list.first].size();
         }
 
-        if (listSize >= 35)
-            rList[list.first] = 1.0;
+        if (listSize >= s_listSizeThreshold)
+            rList[list.first] = std::make_pair(1.0, m_sendMessageListClipped[list.first]);
         else
-            rList[list.first] = double(listSize) / 35.0;
-
-        DBG(juce::String(__FUNCTION__) << " " << list.first << " " << listSize);
+            rList[list.first] = std::make_pair(double(listSize) / s_listSizeThreshold, m_sendMessageListClipped[list.first]);
     }
     return rList;
 }
@@ -200,6 +192,13 @@ bool InterprocessConnectionServerImpl::enqueueMessage(const MemoryBlock& message
         {
             std::lock_guard<std::mutex> l(m_sendMessageMutexs[th.first]);
             m_sendMessageLists[th.first].push(message);
+            if (m_sendMessageLists[th.first].size() > s_listSizeThreshold)
+            {
+                m_sendMessageLists[th.first].pop();
+                m_sendMessageListClipped[th.first] = true;
+            }
+            else
+                m_sendMessageListClipped[th.first] = false;
             if (!m_sendMessageResults[th.first].load())
             {
                 rVal = false;

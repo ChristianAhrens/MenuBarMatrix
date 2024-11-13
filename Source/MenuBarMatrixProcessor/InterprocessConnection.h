@@ -58,7 +58,7 @@ public:
 
     void createMessageThread(int id);
 
-    std::map<int, double> getListHealth();
+    std::map<int, std::pair<double, bool>> getListHealth();
 
     bool hasActiveConnection(int id);
     bool hasActiveConnections();
@@ -69,12 +69,15 @@ public:
 
     std::function<void(int)>   onConnectionCreated;
 
+    static constexpr double s_listSizeThreshold = 35.0;
+
 private:
     InterprocessConnection* createConnectionObject();
     void endMessageThread(int id);
 
     std::map<int, std::mutex>                       m_sendMessageMutexs;
     std::map<int, std::queue<juce::MemoryBlock>>    m_sendMessageLists;
+    std::map<int, bool>                             m_sendMessageListClipped;
     std::map<int, std::atomic<bool>>                m_sendMessageResults;
 
     std::map<int, std::atomic<bool>>            m_sendMessageThreadsActive;
