@@ -1,6 +1,6 @@
 /* Copyright (c) 2024, Christian Ahrens
  *
- * This file is part of MenuBarMatrix <https://github.com/ChristianAhrens/MenuBarMatrix>
+ * This file is part of Mema <https://github.com/ChristianAhrens/Mema>
  *
  * This tool is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -22,9 +22,9 @@
 
 #include <AppConfigurationBase.h>
 
-#define MENUBARMATRIX_CONFIG_VERSION "1.0.0"
+#define Mema_CONFIG_VERSION "1.0.0"
 
-namespace MenuBarMatrix
+namespace Mema
 {
 
 class AppConfiguration : public JUCEAppBasics::AppConfigurationBase

@@ -1,6 +1,6 @@
 /* Copyright (c) 2024, Christian Ahrens
  *
- * This file is part of MenuBarMatrix <https://github.com/ChristianAhrens/MenuBarMatrix>
+ * This file is part of Mema <https://github.com/ChristianAhrens/Mema>
  *
  * This tool is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -20,9 +20,9 @@
 
 #include <JuceHeader.h>
 
-namespace MenuBarMatrix
+namespace Mema
 {
-    class MenuBarMatrix;
+    class Mema;
 }
 class LoadBar;
 class NetworkHealthBar;
@@ -55,7 +55,7 @@ public:
     std::function<void()> onFocusLostWhileVisible;
 
 private:
-    std::unique_ptr<MenuBarMatrix::MenuBarMatrix>   m_mbm;
+    std::unique_ptr<Mema::Mema>   m_mbm;
     std::unique_ptr<juce::DrawableButton>           m_setupButton;
     std::unique_ptr<juce::DrawableButton>           m_aboutButton;
     std::unique_ptr<juce::DrawableButton>           m_powerButton;
