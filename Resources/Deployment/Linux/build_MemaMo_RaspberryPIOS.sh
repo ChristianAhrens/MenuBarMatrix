@@ -29,9 +29,9 @@ git submodule update --init --recursive
 cd Resources/Deployment/Linux
 
 # start the buildscript (make -j 2 instead of default 8 to not overload the poor raspi)
-chmod +x build_Mema.Mo.sh
-./build_Mema.Mo.sh 2
+chmod +x build_MemaMo.sh
+./build_MemaMo.sh 2
 
 # -> after a successful build, one could e.g. use the following as contents for .xsession to have the app start in kind of a kiosk mode. VNC of raspbian will still work in this scenario btw
 ##!/bin/sh
-#exec Documents/Development/GitHub/MenuBarMatrix/Mema.Mo/Builds/LinuxMakefile/build/Mema.Mo
+#exec Documents/Development/GitHub/MenuBarMatrix/MemaMo/Builds/LinuxMakefile/build/MemaMo

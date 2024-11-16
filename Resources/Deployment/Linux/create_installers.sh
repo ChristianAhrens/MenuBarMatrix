@@ -1,5 +1,5 @@
-chmod +rwx build_Mema_RaspberryPIOS.sh
-./build_Mema_RaspberryPIOS.sh
+chmod +rwx build_Mema.sh
+./build_Mema.sh
 
-chmod +rwx build_Mema.Mo_RaspberryPIOS.sh
-./build_Mema.Mo_RaspberryPIOS.sh
+chmod +rwx build_MemaMo.sh
+./build_MemaMo.sh

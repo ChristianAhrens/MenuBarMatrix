@@ -12,8 +12,8 @@ echo Using "$Cores" cores to build
 JUCEDir=submodules/JUCE
 ProjucerMakefilePath="$JUCEDir"/extras/Projucer/Builds/LinuxMakefile
 ProjucerBinPath="$ProjucerMakefilePath"/build/Projucer
-JucerProjectPath=Mema.Mo/Mema.Mo.jucer
-ProjectMakefilePath=Mema.Mo/Builds/LinuxMakefile
+JucerProjectPath=MemaMo/MemaMo.jucer
+ProjectMakefilePath=MemaMo/Builds/LinuxMakefile
 
 # build projucer
 echo Build Projucer
