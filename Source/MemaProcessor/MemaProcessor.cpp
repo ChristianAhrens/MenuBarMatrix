@@ -227,8 +227,8 @@ bool MemaProcessor::setStateXml(XmlElement* stateXml)
 #if JUCE_IOS
             if (audioDeviceSetup.bufferSize < 512)
                 audioDeviceSetup.bufferSize = 512; // temp. workaround for iOS where buffersizes <512 lead to no sample data being delivered?
+			m_deviceManager->setAudioDeviceSetup(audioDeviceSetup, true);
 #endif
-            m_deviceManager->setAudioDeviceSetup(audioDeviceSetup, true);
             return true;
         }
 	}
