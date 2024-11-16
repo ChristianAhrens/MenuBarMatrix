@@ -4,4 +4,4 @@ echo Create Mema Installer
 CALL create_Mema-installer.bat
 
 echo Create Mema.Mo Installer
-CALL create_Mema.Mo-installer.bat
+CALL create_MemaMo-installer.bat

@@ -1,9 +1,9 @@
-#define MyAppName "Mema.Mo"
-#define MyAppExeName "Mema.Mo.exe"
-#define MyAppExePath "..\..\..\Mema.Mo\Builds\VisualStudio2022\x64\Release\App\Mema.Mo.exe"
-#define MyAppVersion GetVersionNumbersString("..\..\..\Mema.Mo\Builds\VisualStudio2022\x64\Release\App\Mema.Mo.exe")
+#define MyAppName "MemaMo"
+#define MyAppExeName "MemaMo.exe"
+#define MyAppExePath "..\..\..\MemaMo\Builds\VisualStudio2022\x64\Release\App\MemaMo.exe"
+#define MyAppVersion GetVersionNumbersString("..\..\..\MemaMo\Builds\VisualStudio2022\x64\Release\App\MemaMo.exe")
 #define MyAppPublisher "Christian Ahrens"
-#define MyAppURL "https://www.github.com/ChristianAhrens/Mema.Mo"
+#define MyAppURL "https://www.github.com/ChristianAhrens/Mema"
 
 [Setup]
 AppId={{0973C12E-915A-4D77-92FA-187CB97D1239}
@@ -21,7 +21,7 @@ LicenseFile=..\..\..\LICENSE
 InfoAfterFile=..\..\..\CHANGELOG.md
 PrivilegesRequired=lowest
 OutputBaseFilename="{#MyAppName}Setup_v{#MyAppVersion}"
-SetupIconFile=..\..\..\Mema.Mo\Builds\VisualStudio2022\icon.ico
+SetupIconFile=..\..\..\MemaMo\Builds\VisualStudio2022\icon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern

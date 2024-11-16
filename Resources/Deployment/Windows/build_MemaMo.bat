@@ -18,9 +18,9 @@ echo Building Projucer binary
 echo.
 
 echo Exporting Projucer project
-"%PROJUCERVSDIR%\x64\Release\App\Projucer.exe" --resave %WORKSPACE%\Mema.Mo\Mema.Mo.jucer
+"%PROJUCERVSDIR%\x64\Release\App\Projucer.exe" --resave %WORKSPACE%\MemaMo\MemaMo.jucer
 echo.
 
 echo Build release
-"%VSDIR%\devenv.com" %WORKSPACE%\Mema.Mo\Builds\VisualStudio2022\Mema.Mo.sln /build Release
+"%VSDIR%\devenv.com" %WORKSPACE%\MemaMo\Builds\VisualStudio2022\Mema.sln /build Release
 echo.

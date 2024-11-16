@@ -10,11 +10,11 @@ echo WORKSPACE = %WORKSPACE%
 echo.
 
 echo Build project
-CALL build_Mema.Mo.bat
+CALL build_MemaMo.bat
 
 echo Build installer
-"%INNOSETUPDIR%\ISCC.exe" create_Mema.Mo-installer.iss
+"%INNOSETUPDIR%\ISCC.exe" create_MemaMo-installer.iss
 echo.
 
 echo Move setup executable to workspace root
-move Output\Mema.MoSetup*.exe %WORKSPACE%
+move Output\MemaMoSetup*.exe %WORKSPACE%
