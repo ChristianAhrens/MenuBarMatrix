@@ -1,6 +1,6 @@
 /* Copyright (c) 2024, Christian Ahrens
  *
- * This file is part of MenuBarMatrix <https://github.com/ChristianAhrens/MenuBarMatrix>
+ * This file is part of Mema <https://github.com/ChristianAhrens/Mema>
  *
  * This tool is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -20,7 +20,7 @@
 
 #include "AboutComponent.h"
 #include "CustomPopupMenuComponent.h"
-#include "MenuBarMatrix.h"
+#include "Mema.h"
 
 #include <CustomLookAndFeel.h>
 #include <AppConfigurationBase.h>
@@ -153,7 +153,7 @@ public:
 MainComponent::MainComponent()
     : juce::Component()
 {
-    m_mbm = std::make_unique<MenuBarMatrix::MenuBarMatrix>();
+    m_mbm = std::make_unique<Mema::Mema>();
     m_mbm->onSizeChangeRequested = [=](juce::Rectangle<int> requestedSize) {
         auto width = requestedSize.getWidth();
         auto height = requestedSize.getHeight() + sc_buttonSize;
@@ -174,7 +174,7 @@ MainComponent::MainComponent()
     };
     addAndMakeVisible(m_setupButton.get());
 
-    m_aboutComponent = std::make_unique<AboutComponent>(BinaryData::MenuBarMatrixRect_png, BinaryData::MenuBarMatrixRect_pngSize);
+    m_aboutComponent = std::make_unique<AboutComponent>(BinaryData::MemaRect_png, BinaryData::MemaRect_pngSize);
     m_aboutButton = std::make_unique<juce::DrawableButton>("About", juce::DrawableButton::ButtonStyle::ImageFitted);
     m_aboutButton->setTooltip(juce::String("About") + juce::JUCEApplication::getInstance()->getApplicationName());
     m_aboutButton->onClick = [this] {
@@ -250,9 +250,9 @@ void MainComponent::resized()
     if (m_emptySpace)
         m_emptySpace->setBounds(setupElementArea);
 
-    auto MenuBarMatrixComponent = m_mbm->getUIComponent();
-    if (MenuBarMatrixComponent)
-        MenuBarMatrixComponent->setBounds(contentAreaBounds);
+    auto MemaComponent = m_mbm->getUIComponent();
+    if (MemaComponent)
+        MemaComponent->setBounds(contentAreaBounds);
 }
 
 void MainComponent::darkModeSettingChanged()

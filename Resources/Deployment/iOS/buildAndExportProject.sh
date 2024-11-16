@@ -3,7 +3,7 @@ cd ../../../
 
 # set convenience variables
 AppStoreUser=$1 # appleid to use for appstore access
-ProjectName=$2 # app name like "MenuBarMatrixMonitor"
+ProjectName=$2 # app name like "MemaMo"
 JUCEDir=submodules/JUCE
 ProjucerPath="$JUCEDir"/extras/Projucer/Builds/MacOSX
 ProjucerBinPath="$ProjucerPath"/build/Release/Projucer.app/Contents/MacOS/Projucer

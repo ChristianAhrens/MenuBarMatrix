@@ -1,6 +1,6 @@
 /* Copyright (c) 2024, Christian Ahrens
  *
- * This file is part of MenuBarMatrix <https://github.com/ChristianAhrens/MenuBarMatrix>
+ * This file is part of Mema <https://github.com/ChristianAhrens/Mema>
  *
  * This tool is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -32,7 +32,7 @@ AboutComponent::AboutComponent(const char* imageData, int imageDataSize)
 	m_appInfoLabel->setFont(juce::Font(juce::FontOptions(16.0, juce::Font::plain)));
 	addAndMakeVisible(m_appInfoLabel.get());
 
-	m_appRepoLink = std::make_unique<juce::HyperlinkButton>(juce::JUCEApplication::getInstance()->getApplicationName() + juce::String(" on GitHub"), URL("https://www.github.com/ChristianAhrens/MenuBarMatrix"));
+	m_appRepoLink = std::make_unique<juce::HyperlinkButton>(juce::JUCEApplication::getInstance()->getApplicationName() + juce::String(" on GitHub"), URL("https://www.github.com/ChristianAhrens/Mema"));
 	m_appRepoLink->setFont(juce::Font(juce::FontOptions(16.0, juce::Font::plain)), false /* do not resize */);
 	m_appRepoLink->setJustificationType(juce::Justification::centredTop);
 	addAndMakeVisible(m_appRepoLink.get());

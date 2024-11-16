@@ -1,6 +1,6 @@
 /* Copyright (c) 2024, Christian Ahrens
  *
- * This file is part of MenuBarMatrix <https://github.com/ChristianAhrens/MenuBarMatrix>
+ * This file is part of Mema <https://github.com/ChristianAhrens/Mema>
  *
  * This tool is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -20,12 +20,12 @@
 #include "MainComponent.h"
 
 //==============================================================================
-class MenuBarMatrixApplication  : public juce::JUCEApplication
+class MemaApplication  : public juce::JUCEApplication
 {
 public:
     //==============================================================================
-    MenuBarMatrixApplication() {};
-    ~MenuBarMatrixApplication() {};
+    MemaApplication() {};
+    ~MemaApplication() {};
 
     const juce::String getApplicationName() override       { return ProjectInfo::projectName; }
     const juce::String getApplicationVersion() override    { return ProjectInfo::versionString; }
@@ -35,14 +35,14 @@ public:
     void initialise (const juce::String& /*commandLine*/) override
     {
         m_taskbarComponent = std::make_unique<TaskbarComponent>(*this);
-        m_taskbarComponent->setName("MenuBarMatrix taskbar icon");
+        m_taskbarComponent->setName("Mema taskbar icon");
 
         m_mainComponent = (std::make_unique<MainComponent>());
         m_mainComponent->setVisible(m_isMainComponentVisible);
         m_mainComponent->addToDesktop(juce::ComponentPeer::windowHasDropShadow);
         m_mainComponent->setTopLeftPosition(m_taskbarComponent->getX(), 50);
         m_mainComponent->onFocusLostWhileVisible = [=]() { toggleVisibilty(); };
-        m_mainComponent->setName("MenuBarMatrix content component");
+        m_mainComponent->setName("Mema content component");
     }
 
     void shutdown() override
@@ -89,7 +89,7 @@ public:
     // Just add a simple icon to the Window system tray area or Mac menu bar..
     struct TaskbarComponent : public juce::SystemTrayIconComponent
     {
-        TaskbarComponent(MenuBarMatrixApplication& app) : m_appRef(app)
+        TaskbarComponent(MemaApplication& app) : m_appRef(app)
         {
             setIconImage(juce::ImageFileFormat::loadFrom(BinaryData::grid_4x4_24dp_png, BinaryData::grid_4x4_24dp_pngSize),
                 juce::ImageFileFormat::loadFrom(BinaryData::grid_4x4_24dp_png, BinaryData::grid_4x4_24dp_pngSize));
@@ -109,7 +109,7 @@ public:
         }
 
     private:
-        MenuBarMatrixApplication& m_appRef;
+        MemaApplication& m_appRef;
     };
 
 private:
@@ -118,9 +118,9 @@ private:
     std::unique_ptr<MainComponent> m_mainComponent;
     std::unique_ptr<juce::Component> m_taskbarComponent;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MenuBarMatrixApplication)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MemaApplication)
 };
 
 //==============================================================================
 // This macro generates the main() routine that launches the app.
-START_JUCE_APPLICATION (MenuBarMatrixApplication)
+START_JUCE_APPLICATION (MemaApplication)

@@ -1,6 +1,6 @@
 /* Copyright (c) 2024, Christian Ahrens
  *
- * This file is part of MenuBarMatrix <https://github.com/ChristianAhrens/MenuBarMatrix>
+ * This file is part of Mema <https://github.com/ChristianAhrens/Mema>
  *
  * This tool is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -18,13 +18,13 @@
 
 #include "AppConfiguration.h"
 
-namespace MenuBarMatrix
+namespace Mema
 {
 
 AppConfiguration::AppConfiguration(const juce::File& file)
 	: JUCEAppBasics::AppConfigurationBase()
 {
-	InitializeBase(file, JUCEAppBasics::AppConfigurationBase::Version::FromString(MENUBARMATRIX_CONFIG_VERSION));
+	InitializeBase(file, JUCEAppBasics::AppConfigurationBase::Version::FromString(Mema_CONFIG_VERSION));
 }
 
 AppConfiguration::~AppConfiguration()
@@ -72,7 +72,7 @@ bool AppConfiguration::ResetToDefault()
 	if (xmlConfig)
 	{
 
-		if (MenuBarMatrix::AppConfiguration::isValid(xmlConfig))
+		if (Mema::AppConfiguration::isValid(xmlConfig))
 		{
 
 			SetFlushAndUpdateDisabled();
@@ -111,12 +111,12 @@ bool AppConfiguration::ResetToDefault()
 
 bool AppConfiguration::HandleConfigVersionConflict(const JUCEAppBasics::AppConfigurationBase::Version& configVersionFound)
 {
-	if (configVersionFound != JUCEAppBasics::AppConfigurationBase::Version::FromString(MENUBARMATRIX_CONFIG_VERSION))
+	if (configVersionFound != JUCEAppBasics::AppConfigurationBase::Version::FromString(Mema_CONFIG_VERSION))
 	{
 		auto conflictTitle = "Incompatible configuration version";
 		auto conflictInfo = "The configuration file version detected\ncannot be handled by this version of " + juce::JUCEApplication::getInstance()->getApplicationName();
 #ifdef DEBUG
-		conflictInfo << "\n(Found " + configVersionFound.ToString() + ", expected " + MENUBARMATRIX_CONFIG_VERSION + ")";
+		conflictInfo << "\n(Found " + configVersionFound.ToString() + ", expected " + Mema_CONFIG_VERSION + ")";
 #endif
 		juce::AlertWindow::showOkCancelBox(juce::MessageBoxIconType::WarningIcon, conflictTitle, conflictInfo, "Reset to default", "Quit", nullptr, juce::ModalCallbackFunction::create([this](int result) {
 			if (1 == result)
@@ -136,4 +136,4 @@ bool AppConfiguration::HandleConfigVersionConflict(const JUCEAppBasics::AppConfi
 }	
 
 
-} // namespace MenuBarMatrix
+} // namespace Mema

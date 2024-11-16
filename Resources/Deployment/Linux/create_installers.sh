@@ -1,5 +1,5 @@
-chmod +rwx build_MenuBarMatrix_RaspberryPIOS.sh
-./build_MenuBarMatrix_RaspberryPIOS.sh
+chmod +rwx build_Mema_RaspberryPIOS.sh
+./build_Mema_RaspberryPIOS.sh
 
-chmod +rwx build_MenuBarMatrixMonitor_RaspberryPIOS.sh
-./build_MenuBarMatrixMonitor_RaspberryPIOS.sh
+chmod +rwx build_Mema.Mo_RaspberryPIOS.sh
+./build_Mema.Mo_RaspberryPIOS.sh
