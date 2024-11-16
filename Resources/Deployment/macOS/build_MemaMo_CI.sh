@@ -1,12 +1,12 @@
 # we are in Resources/Deployment/macOS/ -> change directory to project root
-cd ../../../Mema.Mo
+cd ../../../MemaMo
 
 # set convenience variables
 JUCEDir=../submodules/JUCE
 ProjucerPath="$JUCEDir"/extras/Projucer/Builds/MacOSX
 ProjucerBinPath="$ProjucerPath"/build/Release/Projucer.app/Contents/MacOS/Projucer
-JucerProjectPath=Mema.Mo.jucer
-XCodeProjectPath=Builds/MacOSX/Mema.Mo.xcodeproj
+JucerProjectPath=MemaMo.jucer
+XCodeProjectPath=Builds/MacOSX/Mema.xcodeproj
 
 # build projucer
 xcodebuild -project "$ProjucerPath"/Projucer.xcodeproj -configuration Release -jobs 8

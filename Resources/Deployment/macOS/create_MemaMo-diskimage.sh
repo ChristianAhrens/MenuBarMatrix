@@ -2,20 +2,20 @@
 cd ../../../
 
 # set convenience variables
-AppBundlePath=Builds/MacOSX/build/Release/Mema.Mo.app
+AppBundlePath=Builds/MacOSX/build/Release/MemaMo.app
 ChangeLogPath=../CHANGELOG.md
 CreateDmgPath=../submodules/create-dmg/create-dmg
 LicensePath=../LICENSE
-IconSetSourcePng=Mema.Mo.png
+IconSetSourcePng=MemaMo.png
 VolIconPath=../Resources/Images/Iconset.icns
-DmgTargetPath=Mema.Mo.dmg
+DmgTargetPath=MemaMo.dmg
 DmgContentsCollectionPath=ContentsPath
 
 # create the icns from existing png
 cd Resources/Images
 chmod +x makeIconset.sh
 ./makeIconset.sh "$IconSetSourcePng"
-cd ../../Mema.Mo
+cd ../../MemaMo
 
 # collect dmg contents
 test -d "$DmgContentsCollectionPath" && rm -r "$DmgContentsCollectionPath"

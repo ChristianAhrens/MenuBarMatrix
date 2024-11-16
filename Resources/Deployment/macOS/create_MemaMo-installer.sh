@@ -8,13 +8,13 @@ echo "Using certificate $CodeSignCertName for codesigning."
 
 # set convenience variables
 AppBundlePath=Builds/MacOSX/build/Release
-DmgTargetPath=Mema.Mo.dmg
+DmgTargetPath=MemaMo.dmg
 
 # build the project and create dmg
 cd Resources/Deployment/macOS
-./build_Mema.Mo.sh
-./create_Mema.Mo-diskimage.sh
-cd ../../../Mema.Mo
+./build_MemaMo.sh
+./create_MemaMo-diskimage.sh
+cd ../../../MemaMo
 
 # codesign the disk image
 codesign --force --sign "$CodesignCertName" "$DmgTargetPath"
