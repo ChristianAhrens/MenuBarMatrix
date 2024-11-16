@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.3.0] 2024-11-16
+### Added
+
+### Changed
+- Project is now called 'Mema' accompanied by 'Mema.Mo' app
+
+### Fixed
+- Fixed storing and loading audio IO setup to config file
+
 ## [0.2.2] 2024-11-13
 ### Added
 - Added visualization of network connections load incl. ovl to MenuBarMatrix
