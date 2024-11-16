@@ -8,9 +8,9 @@ See [LATEST RELEASE](https://github.com/ChristianAhrens/Mema/releases/latest) fo
 
 |Appveyor CI build status|Mema|Mema.Mo|
 |:----------------|:-----|:-----|
-|macOS Xcode| [![Build status](https://ci.appveyor.com/api/projects/status/m1jqb2d19wv9e74o?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/Mema-06mmy) | [![Build status](https://ci.appveyor.com/api/projects/status/va72we76lhlkxxs5?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/Mema-ubusx) |
-|Windows Visual Studio| [![Build status](https://ci.appveyor.com/api/projects/status/2wi23e7i44xh1fye?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/Mema) | [![Build status](https://ci.appveyor.com/api/projects/status/hp8ixwxa5ccumjcj?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/Mema-t97el) |
-|Linux makefile| [![Build status](https://ci.appveyor.com/api/projects/status/3lwra86k9i0233io?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/Mema-y20bx) | [![Build status](https://ci.appveyor.com/api/projects/status/j0qj6sqtaa5mq4dc?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/Mema-vhiu1) |
+|macOS Xcode| [![Build status](https://ci.appveyor.com/api/projects/status/42rpdmi560qotdfb/branch/main?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/mema-macos) | [![Build status](https://ci.appveyor.com/api/projects/status/v7uy57s7peoiqw71/branch/main?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/memamo-macos) |
+|Windows Visual Studio| [![Build status](https://ci.appveyor.com/api/projects/status/pth9bd9r42l7n42r/branch/main?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/mema-windows) | [![Build status](https://ci.appveyor.com/api/projects/status/jjb3xuxm8oe94fc6/branch/main?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/memamo-windows) |
+|Linux makefile| [![Build status](https://ci.appveyor.com/api/projects/status/4mkms53fa8acra9d/branch/main?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/mema-linux) | [![Build status](https://ci.appveyor.com/api/projects/status/uraaj3kbmsce52tt/branch/main?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/memamo-linux) |
 
 
 <a name="toc" />
@@ -18,7 +18,7 @@ See [LATEST RELEASE](https://github.com/ChristianAhrens/Mema/releases/latest) fo
 ## Table of contents
 
 * [Introduction](#introduction)
-  * [Mema and Mema.Mo](#MemaNmonitor)
+  * [Mema and Mema.Mo](#MemaNMo)
   * [Mema UI](#MemaUI)
   * [Mema.Mo UI](#MemaMoUI)
 * [How to build the tools](#howtobuild)
@@ -34,15 +34,15 @@ See [LATEST RELEASE](https://github.com/ChristianAhrens/Mema/releases/latest) fo
 
 ## Introduction
 
-Mema is an project initially created to try out if a macOS menubar tool based on JUCE C++ framework can be created, that provides audio matrix routing functionality - e.g. to route [BlackHole](https://github.com/ExistentialAudio/BlackHole) 16ch virtual device to system output to overcome AppleMusic behaviour on macOS to only play out higher order surround sound formats when exactly 16 output channels are presented by selected system audio output device.
+Mema (MenubarMatrix) is a project initially created to try out if a macOS menubar tool based on JUCE C++ framework can be created, that provides audio matrix routing functionality - e.g. to route [BlackHole](https://github.com/ExistentialAudio/BlackHole) 16ch virtual device to system output to overcome AppleMusic behaviour on macOS to only play out higher order surround sound formats when exactly 16 output channels are presented by selected system audio output device.
 
-It is accompanied by a separate tool Mema.Mo to monitor the audio IO as levelmeters via network. It connects to Mema through a TCP connection and supports discovering the available instances through a multicast service announcement done by ManuBarMatrix.
+It is accompanied by a separate tool Mema.Mo (MenubarMatrixMonitor) to monitor the audio IO as levelmeters via network. It connects to Mema through a TCP connection and supports discovering the available instances through a multicast service announcement done by Mema.
 
 Its sourcecode and prebuilt binaries are made publicly available to enable interested users to experiment, extend and create own adaptations.
 
 Use what is provided here at your own risk!
 
-<a name="MemaNmonitor" />
+<a name="MemaNMo" />
 
 ### Mema and Mema.Mo
 
