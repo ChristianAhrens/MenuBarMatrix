@@ -170,7 +170,7 @@
         <MODULEPATH id="juce_gui_extra" path="../submodules/JUCE/modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
-    <XCODE_IPHONE targetFolder="Builds/iOS" smallIcon="FTY1kZ" bigIcon="FTY1kZ"
+    <XCODE_IPHONE targetFolder="Builds/iOS" smallIcon="P02GhK" bigIcon="P02GhK"
                   customLaunchStoryboard="../Resources/Deployment/iOS/Launchscreen.storyboard"
                   iosScreenOrientation="UIInterfaceOrientationLandscapeRight,UIInterfaceOrientationPortrait"
                   iPadScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight,UIInterfaceOrientationPortrait,UIInterfaceOrientationPortraitUpsideDown"

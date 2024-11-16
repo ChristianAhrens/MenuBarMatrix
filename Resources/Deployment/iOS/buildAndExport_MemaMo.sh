@@ -3,14 +3,15 @@ cd ../../../
 
 # set convenience variables
 AppStoreUser=$1 # appleid to use for appstore access
-ProjectName=$2 # app name like "MemaMo"
+ProjectName=MemaMo
+ProjectSpecialName=Mema.Mo
 JUCEDir=submodules/JUCE
 ProjucerPath="$JUCEDir"/extras/Projucer/Builds/MacOSX
 ProjucerBinPath="$ProjucerPath"/build/Release/Projucer.app/Contents/MacOS/Projucer
 ProjectDir="$ProjectName"/Builds/iOS
 JucerProjectPath="$ProjectName"/"$ProjectName".jucer
-XCodeProjectPath="$ProjectDir"/"$ProjectName".xcodeproj
-XCodeProjectScheme="$ProjectName"" - App"
+XCodeProjectPath="$ProjectDir"/Mema.xcodeproj
+XCodeProjectScheme="$ProjectSpecialName"" - App"
 XCodeBuildPath="$ProjectDir"/build
 XCodeEntitlementsPath=Resources/Deployment/iOS/App.entitlements
 XCodeExportOptionsPath=Resources/Deployment/iOS/exportOptions.plist
@@ -30,6 +31,9 @@ xcodebuild -project "$XCodeProjectPath" -scheme "$XCodeProjectScheme" clean arch
 
 # export the archive to app bundle
 xcodebuild -exportArchive -archivePath "$XCodeBuildPath"/"$ProjectName".xcarchive -exportOptionsPlist "$XCodeExportOptionsPath" -exportPath "$AppExportPath" -allowProvisioningUpdates
+
+# for validation and upload, we use a simplified package name
+mv "$AppExportPath"/"$ProjectSpecialName".ipa "$AppExportPath"/"$ProjectName".ipa
 
 # validate the app bundle
 # (assumes that a keychain item "AppSpecificPW" exists, created e.g. with "xcrun altool --store-password-in-keychain-item "AppSpecificPW" -u "abc" -p "def"")
