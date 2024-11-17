@@ -13,9 +13,9 @@ build_script:
 - sh: >-
     cd Resources/Deployment/macOS
 
-    chmod +rwx build_Mema.Mo_CI.sh
+    chmod +rwx build_MemaMo_CI.sh
     
-    ./build_Mema.Mo_CI.sh
+    ./build_MemaMo_CI.sh
 notifications:
 - provider: Email
   to:
