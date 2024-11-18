@@ -11,9 +11,9 @@ build_script:
 - cmd: >-
     cd Resources/Deployment/Windows
     
-    create_Mema.Mo-Installer.bat
+    create_MemaMo-Installer.bat
 artifacts:
-- path: MenuBarMatrix*.exe
+- path: MemaMo*.exe
   name: Installer Binary
 notifications:
 - provider: Email

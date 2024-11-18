@@ -37,9 +37,9 @@ build_script:
 - sh: >-
     cd Resources/Deployment/Linux
 
-    sudo chmod +x build_Mema.Mo.sh
+    sudo chmod +x build_MemaMo.sh
 
-    ./build_Mema.Mo.sh
+    ./build_MemaMo.sh
 notifications:
 - provider: Email
   to:
