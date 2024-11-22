@@ -82,10 +82,12 @@ Mema::~Mema()
 
 void Mema::timerCallback()
 {
-    if (m_MemaProcessor && m_MemaProcessor->getDeviceManager() && onCpuUsageUpdate)
+    if (m_MemaProcessor && m_MemaProcessor->getDeviceManager())
     {
-        onCpuUsageUpdate(int(m_MemaProcessor->getDeviceManager()->getCpuUsage() * 100.0));
-        onNetworkUsageUpdate(m_MemaProcessor->getNetworkHealth());
+        if (onCpuUsageUpdate)
+            onCpuUsageUpdate(int(m_MemaProcessor->getDeviceManager()->getCpuUsage() * 100.0));
+        if (onNetworkUsageUpdate)
+            onNetworkUsageUpdate(m_MemaProcessor->getNetworkHealth());
     }
 }
 
