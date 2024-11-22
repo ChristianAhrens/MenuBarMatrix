@@ -24,6 +24,8 @@
 
 #include <AboutComponent.h>
 #include <CustomLookAndFeel.h>
+#include <WebUpdateDetector.h>
+
 #include <MemaProcessor/MemaMessages.h>
 #include <MemaProcessor/MemaServiceData.h>
 
@@ -275,6 +277,22 @@ MainComponent::MainComponent()
 #endif
 
     setSize(400, 350);
+
+#if defined JUCE_IOS
+    // iOS is updated via AppStore
+#define IGNORE_UPDATES
+#elif defined JUCE_ANDROID
+    // Android as well
+#define IGNORE_UPDATES
+#endif
+
+#if defined IGNORE_UPDATES
+#else
+    auto updater = JUCEAppBasics::WebUpdateDetector::getInstance();
+    updater->SetReferenceVersion(ProjectInfo::versionString);
+    updater->SetDownloadUpdateWebAddress("https://github.com/christianahrens/mema/releases/latest");
+    updater->CheckForNewVersion(true, "https://raw.githubusercontent.com/ChristianAhrens/Mema/refs/heads/main/");
+#endif
 }
 
 MainComponent::~MainComponent()
