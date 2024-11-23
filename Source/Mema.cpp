@@ -21,6 +21,8 @@
 #include "MemaEditor/MemaEditor.h"
 #include "MemaProcessor/MemaProcessor.h"
 
+#include <WebUpdateDetector.h>
+
 namespace Mema
 {
 
@@ -54,6 +56,22 @@ Mema::Mema() :
     m_config->triggerWatcherUpdate();
 
     startTimer(500);
+
+#if defined JUCE_IOS
+// iOS is updated via AppStore
+#define IGNORE_UPDATES
+#elif defined JUCE_ANDROID
+// Android as well
+#define IGNORE_UPDATES
+#endif
+
+#if defined IGNORE_UPDATES
+#else
+    auto updater = JUCEAppBasics::WebUpdateDetector::getInstance();
+    updater->SetReferenceVersion(ProjectInfo::versionString);
+    updater->SetDownloadUpdateWebAddress("https://github.com/christianahrens/mema/releases/latest");
+    updater->CheckForNewVersion(true, "https://raw.githubusercontent.com/ChristianAhrens/Mema/refs/heads/main/");
+#endif
 }
 
 Mema::~Mema()
@@ -64,10 +82,12 @@ Mema::~Mema()
 
 void Mema::timerCallback()
 {
-    if (m_MemaProcessor && m_MemaProcessor->getDeviceManager() && onCpuUsageUpdate)
+    if (m_MemaProcessor && m_MemaProcessor->getDeviceManager())
     {
-        onCpuUsageUpdate(int(m_MemaProcessor->getDeviceManager()->getCpuUsage() * 100.0));
-        onNetworkUsageUpdate(m_MemaProcessor->getNetworkHealth());
+        if (onCpuUsageUpdate)
+            onCpuUsageUpdate(int(m_MemaProcessor->getDeviceManager()->getCpuUsage() * 100.0));
+        if (onNetworkUsageUpdate)
+            onNetworkUsageUpdate(m_MemaProcessor->getNetworkHealth());
     }
 }
 
