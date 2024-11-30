@@ -24,6 +24,7 @@ namespace Mema
 {
     class ProcessorDataAnalyzer;
     class MeterbridgeComponent;
+    class TwoDFieldOutputComponent;
 }
 
 class MemaMoComponent :   public juce::Component, juce::MessageListener, juce::Timer
@@ -86,6 +87,9 @@ public:
     MemaMoComponent();
     ~MemaMoComponent() override;
 
+    void setOutputMeteringVisuActive();
+    void setOutputFieldVisuActive(const juce::AudioChannelSet& channelConfiguration);
+
     //========================================================================*
     void paint(Graphics&) override;
     void resized() override;
@@ -115,12 +119,15 @@ private:
 
     std::unique_ptr<Mema::MeterbridgeComponent> m_inputMeteringComponent;
     std::unique_ptr<Mema::MeterbridgeComponent> m_outputMeteringComponent;
+    std::unique_ptr<Mema::TwoDFieldOutputComponent> m_outputFieldComponent;
 
     //========================================================================*
     RunningStatus m_runningStatus = RunningStatus::Inactive;
     int m_startRunningAttemptTime = 0;
     static constexpr int sc_startRunningRefreshInterval = 50; // 50ms update rate
     static constexpr int sc_startRunningTimeout = 5000; // 5s running before attempt is considered failed
+
+    std::pair<int, int> m_currentIOCount = { 0, 0 };
 
     StartupRunningIndicator m_startRunningIndicator;
 

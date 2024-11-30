@@ -19,6 +19,7 @@
 #include "MemaMoComponent.h"
 
 #include "MemaEditor/MeterbridgeComponent.h"
+#include "MemaEditor/TwoDFieldOutputComponent.h"
 #include "MemaProcessor/MemaMessages.h"
 #include "MemaProcessor/MemaProcessor.h"
 #include "MemaProcessor/ProcessorDataAnalyzer.h"
@@ -28,18 +29,71 @@ MemaMoComponent::MemaMoComponent()
 {
     m_inputMeteringComponent = std::make_unique<Mema::MeterbridgeComponent>(Mema::MeterbridgeComponent::Direction::Horizontal);
     addAndMakeVisible(m_inputMeteringComponent.get());
-    m_outputMeteringComponent = std::make_unique<Mema::MeterbridgeComponent>(Mema::MeterbridgeComponent::Direction::Horizontal);
-    addAndMakeVisible(m_outputMeteringComponent.get());
 
     m_inputDataAnalyzer = std::make_unique<Mema::ProcessorDataAnalyzer>();
     m_inputDataAnalyzer->addListener(m_inputMeteringComponent.get());
 
     m_outputDataAnalyzer = std::make_unique<Mema::ProcessorDataAnalyzer>();
-    m_outputDataAnalyzer->addListener(m_outputMeteringComponent.get());
+
+    setOutputMeteringVisuActive();
 }
 
 MemaMoComponent::~MemaMoComponent()
 {
+}
+
+void MemaMoComponent::setOutputMeteringVisuActive()
+{
+    auto resizeRequired = false;
+    if (!m_outputMeteringComponent)
+    {
+        m_outputMeteringComponent = std::make_unique<Mema::MeterbridgeComponent>(Mema::MeterbridgeComponent::Direction::Horizontal);
+        m_outputMeteringComponent->setChannelCount(m_currentIOCount.second);
+        addAndMakeVisible(m_outputMeteringComponent.get());
+        if (m_outputDataAnalyzer)
+            m_outputDataAnalyzer->addListener(m_outputMeteringComponent.get());
+        resizeRequired = true;
+    }
+
+    if (m_outputFieldComponent)
+    {
+        if (m_outputDataAnalyzer)
+            m_outputDataAnalyzer->removeListener(m_outputFieldComponent.get());
+
+        removeChildComponent(m_outputFieldComponent.get());
+        m_outputFieldComponent.reset();
+        resizeRequired = true;
+    }
+
+    if (resizeRequired && !getLocalBounds().isEmpty())
+        resized();
+}
+
+void MemaMoComponent::setOutputFieldVisuActive(const juce::AudioChannelSet& channelConfiguration)
+{
+    auto resizeRequired = false;
+    if (!m_outputFieldComponent)
+    {
+        m_outputFieldComponent = std::make_unique<Mema::TwoDFieldOutputComponent>();
+        addAndMakeVisible(m_outputFieldComponent.get());
+        if (m_outputDataAnalyzer)
+            m_outputDataAnalyzer->addListener(m_outputFieldComponent.get());
+        resizeRequired = true;
+    }
+    m_outputFieldComponent->setChannelConfiguration(channelConfiguration);
+
+    if (m_outputMeteringComponent)
+    {
+        if (m_outputDataAnalyzer)
+            m_outputDataAnalyzer->removeListener(m_outputMeteringComponent.get());
+
+        removeChildComponent(m_outputMeteringComponent.get());
+        m_outputMeteringComponent.reset();
+        resizeRequired = true;
+    }
+
+    if (resizeRequired && !getLocalBounds().isEmpty())
+        resized();
 }
 
 void MemaMoComponent::paint(Graphics &g)
@@ -57,6 +111,33 @@ void MemaMoComponent::resized()
     if (RunningStatus::Active != m_runningStatus)
     {
         m_startRunningIndicator.setBounds(getLocalBounds());
+    }
+    else if (m_inputMeteringComponent && m_outputFieldComponent)
+    {
+        auto margin = 8;
+        auto bounds = getLocalBounds().reduced(margin, margin);
+        DBG(bounds.getAspectRatio());
+        if (bounds.getAspectRatio() >= 1)
+        {
+
+            auto outputsBounds = bounds.removeFromRight(bounds.getHeight());
+            outputsBounds.removeFromLeft(margin / 2);
+            auto inputsBounds = bounds;
+            inputsBounds.removeFromRight(margin / 2);
+
+            m_inputMeteringComponent->setBounds(inputsBounds);
+            m_outputFieldComponent->setBounds(outputsBounds);
+        }
+        else
+        {
+            auto outputBounds = bounds.removeFromBottom(bounds.getWidth());
+            outputBounds.removeFromTop(margin / 2);
+            auto inputBounds = bounds;
+            inputBounds.removeFromBottom(margin / 2);
+
+            m_inputMeteringComponent->setBounds(inputBounds);
+            m_outputFieldComponent->setBounds(outputBounds);
+        }
     }
     else if (m_inputMeteringComponent && m_outputMeteringComponent)
     {
@@ -130,7 +211,10 @@ void MemaMoComponent::handleMessage(const Message& message)
         m_inputMeteringComponent->setChannelCount(inputCount);
         auto outputCount = iom->getOutputCount();
         jassert(outputCount > 0);
-        m_outputMeteringComponent->setChannelCount(outputCount);
+        if (m_outputMeteringComponent)
+            m_outputMeteringComponent->setChannelCount(outputCount);
+
+        m_currentIOCount = std::make_pair(inputCount, outputCount);
 
         resized();
     }

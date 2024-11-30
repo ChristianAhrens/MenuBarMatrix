@@ -108,51 +108,31 @@ MainComponent::MainComponent()
     m_aboutButton->setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, juce::Colours::transparentBlack);
     addAndMakeVisible(m_aboutButton.get());
 
-    //default lookandfeel is follow local, therefor none selected
-    m_settingsItems[1] = std::make_pair("Follow host", 0);
-    m_settingsItems[2] = std::make_pair("Dark", 0);
-    m_settingsItems[3] = std::make_pair("Light", 0);
+    // default lookandfeel is follow local, therefor none selected
+    m_settingsItems[SettingsOptions::LookAndFeel_FollowHost] = std::make_pair("Follow host", 0);
+    m_settingsItems[SettingsOptions::LookAndFeel_Dark] = std::make_pair("Dark", 0);
+    m_settingsItems[SettingsOptions::LookAndFeel_Light] = std::make_pair("Light", 0);
+    // default output visu is normal meterbridge
+    m_settingsItems[SettingsOptions::OutputVisuType_Meterbridge] = std::make_pair("Meterbridge", 1);
+    m_settingsItems[SettingsOptions::OutputVisuType_LRS] = std::make_pair(juce::AudioChannelSet::createLRS().getDescription().toStdString(), 0);
+    m_settingsItems[SettingsOptions::OutputVisuType_LCRS] = std::make_pair(juce::AudioChannelSet::createLCRS().getDescription().toStdString(), 0);
+    m_settingsItems[SettingsOptions::OutputVisuType_5point1] = std::make_pair(juce::AudioChannelSet::create5point1().getDescription().toStdString(), 0);
+    m_settingsItems[SettingsOptions::OutputVisuType_7point1] = std::make_pair(juce::AudioChannelSet::create7point1().getDescription().toStdString(), 0);
     m_settingsButton = std::make_unique<juce::DrawableButton>("Settings", juce::DrawableButton::ButtonStyle::ImageFitted);
     m_settingsButton->setTooltip(juce::String("Settings for") + juce::JUCEApplication::getInstance()->getApplicationName());
     m_settingsButton->onClick = [this] {
-        juce::PopupMenu settingsMenu;
-        settingsMenu.addSectionHeader("LookAndFeel");
-        
-        for(auto const& item : m_settingsItems)
-        {
-            juce::PopupMenu::Item followHostItem("Follow host");
-            followHostItem.setTicked();
-            settingsMenu.addItem(item.first, item.second.first, true, item.second.second == 1);
-        }
+        juce::PopupMenu lookAndFeelSubMenu;
+        for (int i = SettingsOptions::LookAndFeel_First; i <= SettingsOptions::LookAndFeel_Last; i++)
+            lookAndFeelSubMenu.addItem(i, m_settingsItems[i].first, true, m_settingsItems[i].second == 1);
 
-        settingsMenu.showMenuAsync(juce::PopupMenu::Options(), [=](int selectedId) {
-            switch (selectedId)
-            {
-            case 1:
-                m_settingsItems[1].second = 1;
-                m_settingsItems[2].second = 0;
-                m_settingsItems[3].second = 0;
-                if (onPaletteStyleChange && m_settingsHostLookAndFeelId != -1)
-                    onPaletteStyleChange(m_settingsHostLookAndFeelId, false);
-                break;
-            case 2:
-                m_settingsItems[1].second = 0;
-                m_settingsItems[2].second = 1;
-                m_settingsItems[3].second = 0;
-                if (onPaletteStyleChange)
-                    onPaletteStyleChange(JUCEAppBasics::CustomLookAndFeel::PS_Dark, false);
-                break;
-            case 3:
-                m_settingsItems[1].second = 0;
-                m_settingsItems[2].second = 0;
-                m_settingsItems[3].second = 1;
-                if (onPaletteStyleChange)
-                    onPaletteStyleChange(JUCEAppBasics::CustomLookAndFeel::PS_Light, false);
-                break;
-            default:
-                break;
-            }
-        });
+        juce::PopupMenu outputVisuTypeSubMenu;
+        for (int i = SettingsOptions::OutputVisuType_First; i <= SettingsOptions::OutputVisuType_Last; i++)
+            outputVisuTypeSubMenu.addItem(i, m_settingsItems[i].first, true, m_settingsItems[i].second == 1);
+
+        juce::PopupMenu settingsMenu;
+        settingsMenu.addSubMenu("LookAndFeel", lookAndFeelSubMenu);
+        settingsMenu.addSubMenu("Output monitoring", outputVisuTypeSubMenu);
+        settingsMenu.showMenuAsync(juce::PopupMenu::Options(), [=](int selectedId) { handleSettingsMenuResult(selectedId); });
     };
     m_settingsButton->setAlwaysOnTop(true);
     m_settingsButton->setColour(juce::DrawableButton::ColourIds::backgroundColourId, juce::Colours::transparentBlack);
@@ -346,5 +326,105 @@ void MainComponent::lookAndFeelChanged()
     auto disconnectDrawable = juce::Drawable::createFromSVG(*juce::XmlDocument::parse(BinaryData::link_off_24dp_svg).get());
     disconnectDrawable->replaceColour(juce::Colours::black, getLookAndFeel().findColour(juce::TextButton::ColourIds::textColourOnId));
     m_disconnectButton->setImages(disconnectDrawable.get());
+}
+
+void MainComponent::handleSettingsMenuResult(int selectedId)
+{
+    if (0 == selectedId)
+        return; // nothing selected, dismiss
+    else if (SettingsOptions::LookAndFeel_First <= selectedId && SettingsOptions::LookAndFeel_Last >= selectedId)
+        handleSettingsLookAndFeelMenuResult(selectedId);
+    else if (SettingsOptions::OutputVisuType_First <= selectedId && SettingsOptions::OutputVisuType_Last >= selectedId)
+        handleSettingsOutputVisuTypeMenuResult(selectedId);
+    else
+        jassertfalse; // unhandled menu entry!?
+}
+
+void MainComponent::handleSettingsLookAndFeelMenuResult(int selectedId)
+{
+    switch (selectedId)
+    {
+    case SettingsOptions::LookAndFeel_FollowHost:
+        m_settingsItems[SettingsOptions::LookAndFeel_FollowHost].second = 1;
+        m_settingsItems[SettingsOptions::LookAndFeel_Dark].second = 0;
+        m_settingsItems[SettingsOptions::LookAndFeel_Light].second = 0;
+        if (onPaletteStyleChange && m_settingsHostLookAndFeelId != -1)
+            onPaletteStyleChange(m_settingsHostLookAndFeelId, false);
+        break;
+    case SettingsOptions::LookAndFeel_Dark:
+        m_settingsItems[SettingsOptions::LookAndFeel_FollowHost].second = 0;
+        m_settingsItems[SettingsOptions::LookAndFeel_Dark].second = 1;
+        m_settingsItems[SettingsOptions::LookAndFeel_Light].second = 0;
+        if (onPaletteStyleChange)
+            onPaletteStyleChange(JUCEAppBasics::CustomLookAndFeel::PS_Dark, false);
+        break;
+    case SettingsOptions::LookAndFeel_Light:
+        m_settingsItems[SettingsOptions::LookAndFeel_FollowHost].second = 0;
+        m_settingsItems[SettingsOptions::LookAndFeel_Dark].second = 0;
+        m_settingsItems[SettingsOptions::LookAndFeel_Light].second = 1;
+        if (onPaletteStyleChange)
+            onPaletteStyleChange(JUCEAppBasics::CustomLookAndFeel::PS_Light, false);
+        break;
+    default:
+        jassertfalse; // unknown id fed in unintentionally ?!
+        break;
+    }
+}
+
+void MainComponent::handleSettingsOutputVisuTypeMenuResult(int selectedId)
+{
+    switch (selectedId)
+    {
+    case SettingsOptions::OutputVisuType_Meterbridge:
+        m_settingsItems[SettingsOptions::OutputVisuType_Meterbridge].second = 1;
+        m_settingsItems[SettingsOptions::OutputVisuType_LRS].second = 0;
+        m_settingsItems[SettingsOptions::OutputVisuType_LCRS].second = 0;
+        m_settingsItems[SettingsOptions::OutputVisuType_5point1].second = 0;
+        m_settingsItems[SettingsOptions::OutputVisuType_7point1].second = 0;
+        if (m_monitorComponent)
+            m_monitorComponent->setOutputMeteringVisuActive();
+        break;
+    case SettingsOptions::OutputVisuType_LRS:
+        m_settingsItems[SettingsOptions::OutputVisuType_Meterbridge].second = 0;
+        m_settingsItems[SettingsOptions::OutputVisuType_LRS].second = 1;
+        m_settingsItems[SettingsOptions::OutputVisuType_LCRS].second = 0;
+        m_settingsItems[SettingsOptions::OutputVisuType_5point1].second = 0;
+        m_settingsItems[SettingsOptions::OutputVisuType_7point1].second = 0;
+        if (m_monitorComponent)
+            m_monitorComponent->setOutputFieldVisuActive(juce::AudioChannelSet::createLRS());
+        break;
+    case SettingsOptions::OutputVisuType_LCRS:
+        m_settingsItems[SettingsOptions::OutputVisuType_Meterbridge].second = 0;
+        m_settingsItems[SettingsOptions::OutputVisuType_LRS].second = 0;
+        m_settingsItems[SettingsOptions::OutputVisuType_LCRS].second = 1;
+        m_settingsItems[SettingsOptions::OutputVisuType_5point1].second = 0;
+        m_settingsItems[SettingsOptions::OutputVisuType_7point1].second = 0;
+        if (m_monitorComponent)
+            m_monitorComponent->setOutputFieldVisuActive(juce::AudioChannelSet::createLCRS());
+        break;
+    case SettingsOptions::OutputVisuType_5point1:
+        m_settingsItems[SettingsOptions::OutputVisuType_Meterbridge].second = 0;
+        m_settingsItems[SettingsOptions::OutputVisuType_LRS].second = 0;
+        m_settingsItems[SettingsOptions::OutputVisuType_LCRS].second = 0;
+        m_settingsItems[SettingsOptions::OutputVisuType_5point1].second = 1;
+        m_settingsItems[SettingsOptions::OutputVisuType_7point1].second = 0;
+        if (m_monitorComponent)
+            m_monitorComponent->setOutputFieldVisuActive(juce::AudioChannelSet::create5point1());
+        break;
+    case SettingsOptions::OutputVisuType_7point1:
+        m_settingsItems[SettingsOptions::OutputVisuType_Meterbridge].second = 0;
+        m_settingsItems[SettingsOptions::OutputVisuType_LRS].second = 0;
+        m_settingsItems[SettingsOptions::OutputVisuType_LCRS].second = 0;
+        m_settingsItems[SettingsOptions::OutputVisuType_5point1].second = 0;
+        m_settingsItems[SettingsOptions::OutputVisuType_7point1].second = 1;
+        if (m_monitorComponent)
+            m_monitorComponent->setOutputFieldVisuActive(juce::AudioChannelSet::create7point1());
+        break;
+    default:
+        jassertfalse; // unknown id fed in unintentionally ?!
+        break;
+    }
+
+    resized();
 }
 
