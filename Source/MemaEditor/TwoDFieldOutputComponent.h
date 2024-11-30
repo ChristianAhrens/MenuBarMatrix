@@ -38,6 +38,8 @@ public:
     const juce::Array<juce::AudioChannelSet>& getSupportedChannelConfigurations();
 
     float getAngleForChannelTypeInCurrentConfiguration(const juce::AudioChannelSet::ChannelType& channelType);
+    int getChannelNumberForChannelTypeInCurrentConfiguration(const juce::AudioChannelSet::ChannelType& channelType);
+    void setClockwiseOrderedChannelTypesForCurrentConfiguration();
     
     //==============================================================================
     void paint (Graphics&) override;
@@ -56,8 +58,9 @@ private:
     juce::Point<float>                  m_levelOrig;
     std::map<int, juce::Point<float>>   m_channelLevelMaxPoints;
 
-    juce::AudioChannelSet               m_channelConfiguration;
-    juce::Array<juce::AudioChannelSet>  m_supportedChannelConfigurations = { 
+    juce::AudioChannelSet                           m_channelConfiguration;
+    juce::Array<juce::AudioChannelSet::ChannelType> m_clockwiseOrderedChannelTypes;
+    juce::Array<juce::AudioChannelSet>              m_supportedChannelConfigurations = { 
         juce::AudioChannelSet::mono(),
         juce::AudioChannelSet::stereo(),
         juce::AudioChannelSet::createLCR(),

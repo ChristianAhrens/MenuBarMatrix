@@ -55,26 +55,26 @@ void TwoDFieldOutputComponent::paint (Graphics& g)
 
     // draw level indication lines
     std::map<int, juce::Point<float>> maxPoints;
-    for (auto const& channelType : m_channelConfiguration.getChannelTypes())
+    for (auto const& channelType : m_clockwiseOrderedChannelTypes)
         maxPoints[channelType] = m_levelOrig - m_channelLevelMaxPoints[channelType];
 
     // hold values
     std::map<int, float> holdLevels;
     if (getUsesValuesInDB())
     {
-        for (auto const& channelType : m_channelConfiguration.getChannelTypes())
-            holdLevels[channelType] = m_levelData.GetLevel(channelType).GetFactorHOLDdB();
+        for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+            holdLevels[channelType] = m_levelData.GetLevel(getChannelNumberForChannelTypeInCurrentConfiguration(channelType)).GetFactorHOLDdB();
     }
     else
     {
-        for (auto const& channelType : m_channelConfiguration.getChannelTypes())
-            holdLevels[channelType] = m_levelData.GetLevel(channelType).hold;
+        for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+            holdLevels[channelType] = m_levelData.GetLevel(getChannelNumberForChannelTypeInCurrentConfiguration(channelType)).hold;
     }
 
     g.setColour(juce::Colours::grey);
     juce::Path holdPath;
     auto holdPathStarted = false;
-    for (auto const& channelType : m_channelConfiguration.getChannelTypes())
+    for (auto const& channelType : m_clockwiseOrderedChannelTypes)
     {
         if (!holdPathStarted)
         {
@@ -84,6 +84,7 @@ void TwoDFieldOutputComponent::paint (Graphics& g)
         else
             holdPath.lineTo(m_levelOrig - maxPoints[channelType] * holdLevels[channelType]);
     }
+    holdPath.closeSubPath();
     g.strokePath(holdPath, PathStrokeType(1));
 #if defined DEBUG && defined PAINTINGHELPER
     g.setColour(juce::Colours::yellow);
@@ -94,19 +95,19 @@ void TwoDFieldOutputComponent::paint (Graphics& g)
     std::map<int, float> peakLevels;
     if (getUsesValuesInDB())
     {
-        for (auto const& channelType : m_channelConfiguration.getChannelTypes())
-            peakLevels[channelType] = m_levelData.GetLevel(channelType).GetFactorPEAKdB();
+        for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+            peakLevels[channelType] = m_levelData.GetLevel(getChannelNumberForChannelTypeInCurrentConfiguration(channelType)).GetFactorPEAKdB();
     }
     else
     {
-        for (auto const& channelType : m_channelConfiguration.getChannelTypes())
-            peakLevels[channelType] = m_levelData.GetLevel(channelType).peak;
+        for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+            peakLevels[channelType] = m_levelData.GetLevel(getChannelNumberForChannelTypeInCurrentConfiguration(channelType)).peak;
     }
 
     g.setColour(juce::Colours::forestgreen.darker());
     juce::Path peakPath;
     auto peakPathStarted = false;
-    for (auto const& channelType : m_channelConfiguration.getChannelTypes())
+    for (auto const& channelType : m_clockwiseOrderedChannelTypes)
     {
         if (!peakPathStarted)
         {
@@ -126,19 +127,19 @@ void TwoDFieldOutputComponent::paint (Graphics& g)
     std::map<int, float> rmsLevels;
     if (getUsesValuesInDB())
     {
-        for (auto const& channelType : m_channelConfiguration.getChannelTypes())
-            rmsLevels[channelType] = m_levelData.GetLevel(channelType).GetFactorRMSdB();
+        for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+            rmsLevels[channelType] = m_levelData.GetLevel(getChannelNumberForChannelTypeInCurrentConfiguration(channelType)).GetFactorRMSdB();
     }
     else
     {
-        for (auto const& channelType : m_channelConfiguration.getChannelTypes())
-            rmsLevels[channelType] = m_levelData.GetLevel(channelType).rms;
+        for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+            rmsLevels[channelType] = m_levelData.GetLevel(getChannelNumberForChannelTypeInCurrentConfiguration(channelType)).rms;
     }
 
     g.setColour(juce::Colours::forestgreen);
     juce::Path rmsPath;
     auto rmsPathStarted = false;
-    for (auto const& channelType : m_channelConfiguration.getChannelTypes())
+    for (auto const& channelType : m_clockwiseOrderedChannelTypes)
     {
         if (!rmsPathStarted)
         {
@@ -160,8 +161,18 @@ void TwoDFieldOutputComponent::paint (Graphics& g)
 
     // draw dashed field dimension indication lines
     float dparam[]{ 4.0f, 5.0f };
-    for (auto const& channelType : m_channelConfiguration.getChannelTypes())
+    for (auto const& channelType : m_clockwiseOrderedChannelTypes)
         g.drawDashedLine(juce::Line<float>(m_channelLevelMaxPoints[channelType], m_levelOrig), dparam, 2);
+
+    //// draw channelType naming legend
+    //g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
+    //for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+    //{
+    //    auto channelName = juce::AudioChannelSet::getAbbreviatedChannelTypeName(channelType);
+    //    auto textRect = juce::Rectangle<float>(juce::GlyphArrangement::getStringWidthInt(g.getCurrentFont(), channelName), g.getCurrentFont().getHeight());
+    //    textRect.tra
+    //    g.drawText(channelName, textRect, Justification::centred, true);
+    //}
 
     //// draw L C R LS RS legend
     //auto textRectSize = juce::Point<float>(20.0f, 20.0f);
@@ -229,7 +240,7 @@ void TwoDFieldOutputComponent::resized()
 
     m_levelOrig = juce::Point<float>(m_visuAreaOrigX + 0.5f * m_visuAreaWidth, m_visuAreaOrigY - 0.5f * m_visuAreaHeight);
 
-    for (auto const& channelType : m_channelConfiguration.getChannelTypes())
+    for (auto const& channelType : m_clockwiseOrderedChannelTypes)
     {
         auto xLength = cosf(juce::MathConstants<float>::pi / 180.0f * (getAngleForChannelTypeInCurrentConfiguration(channelType) + 90.0f)) * visuAreaHalfWidth;
         auto yLength = sinf(juce::MathConstants<float>::pi / 180.0f * (getAngleForChannelTypeInCurrentConfiguration(channelType) + 90.0f)) * visuAreaHalfHeight;
@@ -263,11 +274,13 @@ bool TwoDFieldOutputComponent::setChannelConfiguration(const juce::AudioChannelS
     if (getSupportedChannelConfigurations().contains(channelLayout))
     {
         m_channelConfiguration = channelLayout;
+        setClockwiseOrderedChannelTypesForCurrentConfiguration();
         return true;
     }
     else
     {
         m_channelConfiguration = juce::AudioChannelSet::mono();
+        setClockwiseOrderedChannelTypesForCurrentConfiguration();
         return false;
     }
 }
@@ -393,6 +406,186 @@ float TwoDFieldOutputComponent::getAngleForChannelTypeInCurrentConfiguration(con
         jassertfalse;
 
     return 0.0f;
+}
+
+int TwoDFieldOutputComponent::getChannelNumberForChannelTypeInCurrentConfiguration(const juce::AudioChannelSet::ChannelType& channelType)
+{
+    if (juce::AudioChannelSet::mono() == m_channelConfiguration)
+    {
+        switch (channelType)
+        {
+        case juce::AudioChannelSet::ChannelType::centre:
+            return 1;
+        default:
+            jassertfalse;
+        }
+    }
+    else if (juce::AudioChannelSet::stereo() == m_channelConfiguration)
+    {
+        switch (channelType)
+        {
+        case juce::AudioChannelSet::ChannelType::left:
+            return 1;
+        case juce::AudioChannelSet::ChannelType::right:
+            return 2;
+        default:
+            jassertfalse;
+        }
+    }
+    else if (juce::AudioChannelSet::createLCR() == m_channelConfiguration)
+    {
+        switch (channelType)
+        {
+        case juce::AudioChannelSet::ChannelType::left:
+            return 1;
+        case juce::AudioChannelSet::ChannelType::right:
+            return 2;
+        case juce::AudioChannelSet::ChannelType::centre:
+            return 3;
+        default:
+            jassertfalse;
+        }
+    }
+    else if (juce::AudioChannelSet::createLCRS() == m_channelConfiguration)
+    {
+        switch (channelType)
+        {
+        case juce::AudioChannelSet::ChannelType::left:
+            return 1;
+        case juce::AudioChannelSet::ChannelType::right:
+            return 2;
+        case juce::AudioChannelSet::ChannelType::centre:
+            return 3;
+        case juce::AudioChannelSet::ChannelType::surround:
+            return 4;
+        default:
+            jassertfalse;
+        }
+    }
+    else if (juce::AudioChannelSet::createLRS() == m_channelConfiguration)
+    {
+        switch (channelType)
+        {
+        case juce::AudioChannelSet::ChannelType::left:
+            return 1;
+        case juce::AudioChannelSet::ChannelType::right:
+            return 2;
+        case juce::AudioChannelSet::ChannelType::surround:
+            return 3;
+        default:
+            jassertfalse;
+        }
+    }
+    else if (juce::AudioChannelSet::create5point1() == m_channelConfiguration)
+    {
+        switch (channelType)
+        {
+        case juce::AudioChannelSet::ChannelType::left:
+            return 1;
+        case juce::AudioChannelSet::ChannelType::right:
+            return 2;
+        case juce::AudioChannelSet::ChannelType::centre:
+            return 3;
+        case juce::AudioChannelSet::ChannelType::LFE:
+            return 4;
+        case juce::AudioChannelSet::ChannelType::leftSurround:
+            return 5;
+        case juce::AudioChannelSet::ChannelType::rightSurround:
+            return 6;
+        default:
+            jassertfalse;
+        }
+    }
+    else if (juce::AudioChannelSet::create7point1() == m_channelConfiguration)
+    {
+        switch (channelType)
+        {
+        case juce::AudioChannelSet::ChannelType::left:
+            return 1;
+        case juce::AudioChannelSet::ChannelType::right:
+            return 2;
+        case juce::AudioChannelSet::ChannelType::centre:
+            return 3;
+        case juce::AudioChannelSet::ChannelType::LFE:
+            return 4;
+        case juce::AudioChannelSet::ChannelType::leftSurroundSide:
+            return 5;
+        case juce::AudioChannelSet::ChannelType::rightSurroundSide:
+            return 6;
+        case juce::AudioChannelSet::ChannelType::leftSurroundRear:
+            return 7;
+        case juce::AudioChannelSet::ChannelType::rightSurroundRear:
+            return 8;
+        default:
+            jassertfalse;
+        }
+    }
+    else
+        jassertfalse;
+
+    return 1;
+}
+
+void TwoDFieldOutputComponent::setClockwiseOrderedChannelTypesForCurrentConfiguration()
+{
+    if (juce::AudioChannelSet::mono() == m_channelConfiguration)
+    {
+        m_clockwiseOrderedChannelTypes = m_channelConfiguration.getChannelTypes();
+    }
+    else if (juce::AudioChannelSet::stereo() == m_channelConfiguration)
+    {
+        m_clockwiseOrderedChannelTypes = { 
+            juce::AudioChannelSet::ChannelType::left,
+            juce::AudioChannelSet::ChannelType::right };
+    }
+    else if (juce::AudioChannelSet::createLCR() == m_channelConfiguration)
+    {
+        m_clockwiseOrderedChannelTypes = { 
+            juce::AudioChannelSet::ChannelType::left,
+            juce::AudioChannelSet::ChannelType::centre,
+            juce::AudioChannelSet::ChannelType::right };
+    }
+    else if (juce::AudioChannelSet::createLCRS() == m_channelConfiguration)
+    {
+        m_clockwiseOrderedChannelTypes = { 
+            juce::AudioChannelSet::ChannelType::left,
+            juce::AudioChannelSet::ChannelType::centre,
+            juce::AudioChannelSet::ChannelType::right,
+            juce::AudioChannelSet::ChannelType::surround };
+    }
+    else if (juce::AudioChannelSet::createLRS() == m_channelConfiguration)
+    {
+        m_clockwiseOrderedChannelTypes = { 
+            juce::AudioChannelSet::ChannelType::left,
+            juce::AudioChannelSet::ChannelType::right,
+            juce::AudioChannelSet::ChannelType::surround };
+    }
+    else if (juce::AudioChannelSet::create5point1() == m_channelConfiguration)
+    {
+        m_clockwiseOrderedChannelTypes = { 
+            juce::AudioChannelSet::ChannelType::left,
+            juce::AudioChannelSet::ChannelType::centre,
+            juce::AudioChannelSet::ChannelType::right,
+            juce::AudioChannelSet::ChannelType::rightSurround,
+            juce::AudioChannelSet::ChannelType::leftSurround,
+            //juce::AudioChannelSet::ChannelType::LFE does not have a positionin 2d field
+        };
+    }
+    else if (juce::AudioChannelSet::create7point1() == m_channelConfiguration)
+    {
+        m_clockwiseOrderedChannelTypes = { 
+            juce::AudioChannelSet::ChannelType::left,
+            juce::AudioChannelSet::ChannelType::centre,
+            juce::AudioChannelSet::ChannelType::right,
+            juce::AudioChannelSet::ChannelType::rightSurroundSide,
+            juce::AudioChannelSet::ChannelType::rightSurroundRear,
+            juce::AudioChannelSet::ChannelType::leftSurroundRear,
+            juce::AudioChannelSet::ChannelType::leftSurroundSide
+            //juce::AudioChannelSet::ChannelType::LFE does not have a positionin 2d field
+        };
+    }
+    else
+        jassertfalse;
 }
 
 
