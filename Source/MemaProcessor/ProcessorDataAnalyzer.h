@@ -97,8 +97,9 @@ private:
     ProcessorLevelData          m_level;
     ProcessorSpectrumData       m_spectrum;
 
-    String                      m_Name;
-    Array<Listener*>            m_callbackListeners;
+    juce::String                m_Name;
+    juce::Array<Listener*>      m_callbackListeners;
+    std::mutex                  m_callbackListenersMutex;
 
     //==============================================================================
     CriticalSection     m_readLock;

@@ -34,6 +34,22 @@ public:
         Monitoring
     };
 
+    enum SettingsOptions
+    {
+        LookAndFeel_First = 1,
+        LookAndFeel_FollowHost = LookAndFeel_First,
+        LookAndFeel_Dark,
+        LookAndFeel_Light,
+        LookAndFeel_Last = LookAndFeel_Light,
+        OutputVisuType_First,
+        OutputVisuType_Meterbridge = OutputVisuType_First,
+        OutputVisuType_LRS,
+        OutputVisuType_LCRS,
+        OutputVisuType_5point1,
+        OutputVisuType_7point1,
+        OutputVisuType_Last = OutputVisuType_7point1
+    };
+
 public:
     MainComponent();
     ~MainComponent() override;
@@ -69,11 +85,16 @@ private:
     };
 
     //========================================================================*
+    void handleSettingsMenuResult(int selectedId);
+    void handleSettingsLookAndFeelMenuResult(int selectedId);
+    void handleSettingsOutputVisuTypeMenuResult(int selectedId);
+
+    //========================================================================*
     std::unique_ptr<juce::NetworkServiceDiscovery::AvailableServiceList>    m_availableServices;
     std::unique_ptr<InterprocessConnectionImpl>                             m_networkConnection;
 
-    std::unique_ptr<MemaMoComponent>                          m_monitorComponent;
-    std::unique_ptr<MemaDiscoverComponent>                         m_discoverComponent;
+    std::unique_ptr<MemaMoComponent>                                        m_monitorComponent;
+    std::unique_ptr<MemaDiscoverComponent>                                  m_discoverComponent;
 
     std::unique_ptr<juce::DrawableButton>                                   m_settingsButton;
     std::map<int, std::pair<std::string, int>>                              m_settingsItems;
