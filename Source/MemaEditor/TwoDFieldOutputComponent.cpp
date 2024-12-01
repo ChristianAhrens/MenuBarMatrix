@@ -203,8 +203,6 @@ void TwoDFieldOutputComponent::paint (Graphics& g)
     else
         rangeText = "0 ... 1";
     g.drawText(rangeText, getLocalBounds(), juce::Justification::topRight, true);
-
-
 }
 
 void TwoDFieldOutputComponent::resized()
@@ -257,18 +255,19 @@ void TwoDFieldOutputComponent::processingDataChanged(AbstractProcessorData *data
 
 bool TwoDFieldOutputComponent::setChannelConfiguration(const juce::AudioChannelSet& channelLayout)
 {
+    auto rVal = false;
     if (getSupportedChannelConfigurations().contains(channelLayout))
     {
         m_channelConfiguration = channelLayout;
-        setClockwiseOrderedChannelTypesForCurrentConfiguration();
-        return true;
+        rVal = true;
     }
     else
-    {
         m_channelConfiguration = juce::AudioChannelSet::mono();
-        setClockwiseOrderedChannelTypesForCurrentConfiguration();
-        return false;
-    }
+
+    setClockwiseOrderedChannelTypesForCurrentConfiguration();
+    resized();
+
+    return rVal;
 }
 
 const juce::Array<juce::AudioChannelSet>& TwoDFieldOutputComponent::getSupportedChannelConfigurations()

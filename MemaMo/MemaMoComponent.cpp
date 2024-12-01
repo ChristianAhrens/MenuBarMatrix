@@ -116,7 +116,6 @@ void MemaMoComponent::resized()
     {
         auto margin = 8;
         auto bounds = getLocalBounds().reduced(margin, margin);
-        DBG(bounds.getAspectRatio());
         if (bounds.getAspectRatio() >= 1)
         {
 
@@ -143,7 +142,6 @@ void MemaMoComponent::resized()
     {
         auto margin = 8;
         auto bounds = getLocalBounds().reduced(margin, margin);
-        DBG(bounds.getAspectRatio());
         if (bounds.getAspectRatio() >= 1)
         {
             if (m_inputMeteringComponent && m_outputMeteringComponent)
