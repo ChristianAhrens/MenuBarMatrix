@@ -164,49 +164,35 @@ void TwoDFieldOutputComponent::paint (Graphics& g)
     for (auto const& channelType : m_clockwiseOrderedChannelTypes)
         g.drawDashedLine(juce::Line<float>(m_channelLevelMaxPoints[channelType], m_levelOrig), dparam, 2);
 
-    //// draw channelType naming legend
-    //g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
-    //for (auto const& channelType : m_clockwiseOrderedChannelTypes)
-    //{
-    //    auto channelName = juce::AudioChannelSet::getAbbreviatedChannelTypeName(channelType);
-    //    auto textRect = juce::Rectangle<float>(juce::GlyphArrangement::getStringWidthInt(g.getCurrentFont(), channelName), g.getCurrentFont().getHeight());
-    //    textRect.tra
-    //    g.drawText(channelName, textRect, Justification::centred, true);
-    //}
-
-    //// draw L C R LS RS legend
-    //auto textRectSize = juce::Point<float>(20.0f, 20.0f);
-    //auto gainTextRectWidth = juce::Point<float>(40.0f, 0.0f);
-    //auto textRectSizeInv = juce::Point<float>(20.0f, -20.0f);
-    //
-    //auto textLRect = juce::Rectangle<float>(m_leftMaxPoint, m_leftMaxPoint - textRectSize - gainTextRectWidth);
-    //g.setColour(Colours::white);
-    //g.drawText("L", textLRect, Justification::centred, true);
-    //
-    //auto textCRect = juce::Rectangle<float>(m_centerMaxPoint + 0.5f * gainTextRectWidth, m_centerMaxPoint - textRectSize - 0.5f * gainTextRectWidth) + juce::Point<float>(0.5f * textRectSize.getX(), 0.0f);
-    //g.setColour(Colours::white);
-    //g.drawText("C", textCRect, Justification::centred, true);
-    //
-    //auto textRRect = juce::Rectangle<float>(m_rightMaxPoint, m_rightMaxPoint + textRectSizeInv + gainTextRectWidth);
-    //g.setColour(Colours::white);
-    //g.drawText("R", textRRect, Justification::centred, true);
-    //
-    //auto textLSRect = juce::Rectangle<float>(m_leftSurroundMaxPoint, m_leftSurroundMaxPoint - textRectSizeInv - gainTextRectWidth);
-    //g.setColour(Colours::white);
-    //g.drawText("LS", textLSRect, Justification::centred, true);
-    //
-    //auto textRSRect = juce::Rectangle<float>(m_rightSurroundMaxPoint, m_rightSurroundMaxPoint + textRectSize + gainTextRectWidth);
-    //g.setColour(Colours::white);
-    //g.drawText("RS", textRSRect, Justification::centred, true);
+    // draw channelType naming legend
+    g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
+    for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+    {
+        auto channelName = juce::AudioChannelSet::getAbbreviatedChannelTypeName(channelType);
+        auto textRect = juce::Rectangle<float>(juce::GlyphArrangement::getStringWidth(g.getCurrentFont(), channelName), g.getCurrentFont().getHeight());
+        auto angle = getAngleForChannelTypeInCurrentConfiguration(channelType);
+        auto textRectOffset = juce::Point<int>(-int(textRect.getWidth() / 2.0f), 0);
+        if (90.0f < angle)
+            angle += 180.0f;
+        else if (-90.0f > angle)
+            angle -= 180.0f;
+        else
+            textRectOffset.addXY(0, -int(g.getCurrentFont().getHeight()));
+        auto angleRad = juce::degreesToRadians(angle);
+        
+        g.saveState();
+        g.setOrigin(m_channelLevelMaxPoints[channelType].toInt());
+        g.addTransform(juce::AffineTransform().translated(textRectOffset).rotated(-angleRad));
+        g.drawText(channelName, textRect, Justification::centred, true);
 
 #if defined DEBUG && defined PAINTINGHELPER
-    //g.setColour(juce::Colours::lightblue);
-    //g.drawRect(textLRect);
-    //g.drawRect(textCRect);
-    //g.drawRect(textRRect);
-    //g.drawRect(textLSRect);
-    //g.drawRect(textRSRect);
+        g.setColour(juce::Colours::lightblue);
+        g.drawRect(textRect);
+        g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
 #endif
+
+        g.restoreState();
+    }
 
     // draw dBFS
     g.setFont(12.0f);
