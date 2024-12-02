@@ -117,6 +117,7 @@ void TwoDFieldOutputComponent::paint (Graphics& g)
         else
             peakPath.lineTo(m_levelOrig - maxPoints[channelType] * peakLevels[channelType]);
     }
+    peakPath.closeSubPath();
     g.fillPath(peakPath);
 #if defined DEBUG && defined PAINTINGHELPER
     g.setColour(juce::Colours::orange);
@@ -149,6 +150,7 @@ void TwoDFieldOutputComponent::paint (Graphics& g)
         else
             rmsPath.lineTo(m_levelOrig - maxPoints[channelType] * rmsLevels[channelType]);
     }
+    rmsPath.closeSubPath();
     g.fillPath(rmsPath);
 #if defined DEBUG && defined PAINTINGHELPER
     g.setColour(juce::Colours::turquoise);
