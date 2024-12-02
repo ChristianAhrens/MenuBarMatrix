@@ -49,6 +49,10 @@ public:
     void processingDataChanged(AbstractProcessorData *data) override;
 
 private:
+    //==============================================================================
+    void paintCircularLevelIndication(juce::Graphics& g, const juce::Rectangle<float>& circleArea, const juce::Array<juce::AudioChannelSet::ChannelType>& channelsToPaint);
+    
+    //==============================================================================
     float   m_outerMargin{ 20.0f };
     float   m_visuAreaWidth{ 0.0f };
     float   m_visuAreaHeight{ 0.0f };

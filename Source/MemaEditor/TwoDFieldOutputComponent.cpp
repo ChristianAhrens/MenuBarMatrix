@@ -35,46 +35,61 @@ TwoDFieldOutputComponent::~TwoDFieldOutputComponent()
 {
 }
 
-void TwoDFieldOutputComponent::paint (Graphics& g)
+void TwoDFieldOutputComponent::paint (juce::Graphics& g)
 {
     AbstractAudioVisualizer::paint(g);
 
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
+    paintCircularLevelIndication(g, m_visuArea, m_clockwiseOrderedChannelTypes);
+
+    // draw dBFS
+    g.setFont(12.0f);
+    g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
+    String rangeText;
+    if (getUsesValuesInDB())
+        rangeText = juce::String(MemaProcessor::getGlobalMindB()) + " ... " + juce::String(MemaProcessor::getGlobalMaxdB()) + " dBFS";
+    else
+        rangeText = "0 ... 1";
+    g.drawText(rangeText, getLocalBounds(), juce::Justification::topRight, true);
+}
+
+void TwoDFieldOutputComponent::paintCircularLevelIndication(juce::Graphics& g, const juce::Rectangle<float>& circleArea, const juce::Array<juce::AudioChannelSet::ChannelType>& channelsToPaint)
+{
     // fill circle background
     g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId).darker());
-    g.fillEllipse(m_visuArea);
+    g.fillEllipse(circleArea);
 
 #if defined DEBUG && defined PAINTINGHELPER
     g.setColour(juce::Colours::red);
-    g.drawRect(m_visuArea);
+    g.drawRect(circleArea);
     g.setColour(juce::Colours::blue);
     g.drawRect(getLocalBounds());
 #endif
 
-    // draw level indication lines
+    // draw level indication areas
     std::map<int, juce::Point<float>> maxPoints;
-    for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+    for (auto const& channelType : channelsToPaint)
         maxPoints[channelType] = m_levelOrig - m_channelLevelMaxPoints[channelType];
 
     // hold values
     std::map<int, float> holdLevels;
     if (getUsesValuesInDB())
     {
-        for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+        for (auto const& channelType : channelsToPaint)
             holdLevels[channelType] = m_levelData.GetLevel(getChannelNumberForChannelTypeInCurrentConfiguration(channelType)).GetFactorHOLDdB();
     }
     else
     {
-        for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+        for (auto const& channelType : channelsToPaint)
             holdLevels[channelType] = m_levelData.GetLevel(getChannelNumberForChannelTypeInCurrentConfiguration(channelType)).hold;
     }
 
     g.setColour(juce::Colours::grey);
     juce::Path holdPath;
     auto holdPathStarted = false;
-    for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+    for (auto const& channelType : channelsToPaint)
     {
         if (!holdPathStarted)
         {
@@ -95,19 +110,19 @@ void TwoDFieldOutputComponent::paint (Graphics& g)
     std::map<int, float> peakLevels;
     if (getUsesValuesInDB())
     {
-        for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+        for (auto const& channelType : channelsToPaint)
             peakLevels[channelType] = m_levelData.GetLevel(getChannelNumberForChannelTypeInCurrentConfiguration(channelType)).GetFactorPEAKdB();
     }
     else
     {
-        for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+        for (auto const& channelType : channelsToPaint)
             peakLevels[channelType] = m_levelData.GetLevel(getChannelNumberForChannelTypeInCurrentConfiguration(channelType)).peak;
     }
 
     g.setColour(juce::Colours::forestgreen.darker());
     juce::Path peakPath;
     auto peakPathStarted = false;
-    for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+    for (auto const& channelType : channelsToPaint)
     {
         if (!peakPathStarted)
         {
@@ -128,19 +143,19 @@ void TwoDFieldOutputComponent::paint (Graphics& g)
     std::map<int, float> rmsLevels;
     if (getUsesValuesInDB())
     {
-        for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+        for (auto const& channelType : channelsToPaint)
             rmsLevels[channelType] = m_levelData.GetLevel(getChannelNumberForChannelTypeInCurrentConfiguration(channelType)).GetFactorRMSdB();
     }
     else
     {
-        for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+        for (auto const& channelType : channelsToPaint)
             rmsLevels[channelType] = m_levelData.GetLevel(getChannelNumberForChannelTypeInCurrentConfiguration(channelType)).rms;
     }
 
     g.setColour(juce::Colours::forestgreen);
     juce::Path rmsPath;
     auto rmsPathStarted = false;
-    for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+    for (auto const& channelType : channelsToPaint)
     {
         if (!rmsPathStarted)
         {
@@ -159,16 +174,16 @@ void TwoDFieldOutputComponent::paint (Graphics& g)
 
     // draw a simple circle surrounding
     g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
-    g.drawEllipse(m_visuArea, 1);
+    g.drawEllipse(circleArea, 1);
 
     // draw dashed field dimension indication lines
     float dparam[]{ 4.0f, 5.0f };
-    for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+    for (auto const& channelType : channelsToPaint)
         g.drawDashedLine(juce::Line<float>(m_channelLevelMaxPoints[channelType], m_levelOrig), dparam, 2);
 
     // draw channelType naming legend
     g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
-    for (auto const& channelType : m_clockwiseOrderedChannelTypes)
+    for (auto const& channelType : channelsToPaint)
     {
         auto channelName = juce::AudioChannelSet::getAbbreviatedChannelTypeName(channelType);
         auto textRect = juce::Rectangle<float>(juce::GlyphArrangement::getStringWidth(g.getCurrentFont(), channelName), g.getCurrentFont().getHeight());
@@ -181,10 +196,10 @@ void TwoDFieldOutputComponent::paint (Graphics& g)
         else
             textRectOffset.addXY(0, -int(g.getCurrentFont().getHeight()));
         auto angleRad = juce::degreesToRadians(angle);
-        
+
         g.saveState();
         g.setOrigin(m_channelLevelMaxPoints[channelType].toInt());
-        g.addTransform(juce::AffineTransform().translated(textRectOffset).rotated(-angleRad));
+        g.addTransform(juce::AffineTransform().translated(textRectOffset).rotated(angleRad));
         g.drawText(channelName, textRect, Justification::centred, true);
 
 #if defined DEBUG && defined PAINTINGHELPER
@@ -195,16 +210,6 @@ void TwoDFieldOutputComponent::paint (Graphics& g)
 
         g.restoreState();
     }
-
-    // draw dBFS
-    g.setFont(12.0f);
-    g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
-    String rangeText;
-    if (getUsesValuesInDB())
-        rangeText = juce::String(MemaProcessor::getGlobalMindB()) + " ... " + juce::String(MemaProcessor::getGlobalMaxdB()) + " dBFS";
-    else
-        rangeText = "0 ... 1";
-    g.drawText(rangeText, getLocalBounds(), juce::Justification::topRight, true);
 }
 
 void TwoDFieldOutputComponent::resized()
@@ -228,8 +233,8 @@ void TwoDFieldOutputComponent::resized()
 
     for (auto const& channelType : m_clockwiseOrderedChannelTypes)
     {
-        auto xLength = cosf(juce::MathConstants<float>::pi / 180.0f * (getAngleForChannelTypeInCurrentConfiguration(channelType) + 90.0f)) * visuAreaHalfWidth;
-        auto yLength = sinf(juce::MathConstants<float>::pi / 180.0f * (getAngleForChannelTypeInCurrentConfiguration(channelType) + 90.0f)) * visuAreaHalfHeight;
+        auto xLength = sinf(juce::MathConstants<float>::pi / 180.0f * (getAngleForChannelTypeInCurrentConfiguration(channelType))) * visuAreaHalfHeight;
+        auto yLength = cosf(juce::MathConstants<float>::pi / 180.0f * (getAngleForChannelTypeInCurrentConfiguration(channelType))) * visuAreaHalfWidth;
         m_channelLevelMaxPoints[channelType] = m_levelOrig + juce::Point<float>(xLength, -yLength);
     }
 
