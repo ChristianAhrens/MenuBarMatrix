@@ -158,9 +158,15 @@ MemaProcessor::MemaProcessor(XmlElement* stateXml) :
         {
 			connection->onConnectionLost = [=](int /*connectionId*/) { DBG(__FUNCTION__); };
 			connection->onConnectionMade = [=](int /*connectionId*/ ) { DBG(__FUNCTION__);
-				postMessage(std::make_unique<AnalyzerParametersMessage>(int(m_sampleRate), m_bufferSize).release());
-				postMessage(std::make_unique<ReinitIOCountMessage>(m_inputChannelCount, m_outputChannelCount).release());
-				postMessage(std::make_unique<EnvironmentParametersMessage>(juce::Desktop::getInstance().isDarkModeActive() ? JUCEAppBasics::CustomLookAndFeel::PS_Dark : JUCEAppBasics::CustomLookAndFeel::PS_Light).release());
+				if (m_networkServer && m_networkServer->hasActiveConnections())
+				{
+					auto success = true;
+					success = success && m_networkServer->enqueueMessage(std::make_unique<AnalyzerParametersMessage>(int(m_sampleRate), m_bufferSize)->getSerializedMessage());
+					success = success && m_networkServer->enqueueMessage(std::make_unique<ReinitIOCountMessage>(m_inputChannelCount, m_outputChannelCount)->getSerializedMessage());
+					success = success && m_networkServer->enqueueMessage(std::make_unique<EnvironmentParametersMessage>(juce::Desktop::getInstance().isDarkModeActive() ? JUCEAppBasics::CustomLookAndFeel::PS_Dark : JUCEAppBasics::CustomLookAndFeel::PS_Light)->getSerializedMessage());
+					if (!success)
+						m_networkServer->cleanupDeadConnections();
+				}
 			};
 			connection->onMessageReceived = [=](const juce::MemoryBlock& /*data*/) { DBG(__FUNCTION__); };
         }
@@ -728,8 +734,6 @@ void MemaProcessor::audioDeviceAboutToStart(AudioIODevice* device)
         auto bufferSize = device->getCurrentBufferSizeSamples();
         //auto bitDepth = device->getCurrentBitDepth();
         
-        //DBG(juce::String(__FUNCTION__) << " " << device->getName() << " i:" << device->getInputChannelNames().joinIntoString(",") << "(" << inputChannelCnt << ") o:" << device->getOutputChannelNames().joinIntoString(",") << "(" << outputChannelCnt << ")");
-        
         setChannelCounts(inputChannelCnt, outputChannelCnt);
         prepareToPlay(sampleRate, bufferSize);
     }
@@ -759,8 +763,6 @@ void MemaProcessor::initializeCtrlValues(int inputCount, int outputCount)
     auto outputChannelCount = (outputCount > s_minOutputsCount) ? outputCount : s_minOutputsCount;
     for (auto channel = 1; channel <= outputChannelCount; channel++)
         setOutputMuteState(channel, false);
-
-	DBG(juce::String(__FUNCTION__) << " " << inputChannelCount << " " << outputChannelCount);
 
     for (auto in = 1; in <= inputChannelCount; in++)
         for (auto out = 1; out <= outputChannelCount; out++)
