@@ -80,7 +80,8 @@ void MemaMoComponent::setOutputFieldVisuActive(const juce::AudioChannelSet& chan
             m_outputDataAnalyzer->addListener(m_outputFieldComponent.get());
         resizeRequired = true;
     }
-    m_outputFieldComponent->setChannelConfiguration(channelConfiguration);
+    if (m_outputFieldComponent->setChannelConfiguration(channelConfiguration))
+        resizeRequired = true;
 
     if (m_outputMeteringComponent)
     {

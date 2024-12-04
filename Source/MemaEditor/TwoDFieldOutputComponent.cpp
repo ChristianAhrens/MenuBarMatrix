@@ -311,36 +311,36 @@ void TwoDFieldOutputComponent::resized()
     else if (coreTwoDFieldWithMeterbridge)
     {
         m_positionedChannelsArea = bounds.reduced(margin);
-        m_positionedChannelsArea.removeFromRight(width * (1.0f / 6.0f));
+        m_positionedChannelsArea.removeFromRight(width * (1.0f / 11.0f));
 
         m_positionedHeightChannelsArea = {};
 
         m_directionlessChannelsArea = bounds;
-        m_directionlessChannelsArea.removeFromLeft(width * (5.0f / 6.0f));
+        m_directionlessChannelsArea.removeFromLeft(width * (10.0f / 11.0f));
     }
     else if (bothTwoDFields)
     {
         m_positionedHeightChannelsArea = bounds.reduced(margin);
-        m_positionedHeightChannelsArea.removeFromRight(width * (4.7f / 6.0f));
-        m_positionedHeightChannelsArea.removeFromBottom(height * (2.7f / 5.0f));
+        m_positionedHeightChannelsArea.removeFromRight(width * (8.4f / 12.0f));
+        m_positionedHeightChannelsArea.removeFromBottom(height * (5.4f / 10.0f));
 
         m_positionedChannelsArea = bounds.reduced(margin);
-        m_positionedChannelsArea.removeFromLeft(width * (1.7f / 6.0f));
-        m_positionedChannelsArea.removeFromTop(height * (0.7f / 5.0f));
+        m_positionedChannelsArea.removeFromLeft(width * (3.4f / 12.0f));
+        m_positionedChannelsArea.removeFromTop(height * (1.4f / 10.0f));
 
         m_directionlessChannelsArea = {};
     }
     else if (bothTwoDFieldsWithMeterbridge)
     {
         m_positionedHeightChannelsArea = bounds.reduced(margin);
-        m_positionedHeightChannelsArea.removeFromRight(width * (4.7f / 7.0f));
-        m_positionedHeightChannelsArea.removeFromBottom(height * (2.7f / 5.0f));
+        m_positionedHeightChannelsArea.removeFromRight(width * (8.4f / 13.0f));
+        m_positionedHeightChannelsArea.removeFromBottom(height * (5.4f / 10.0f));
         
         m_positionedChannelsArea = bounds;
-        m_directionlessChannelsArea = m_positionedChannelsArea.removeFromRight(width * (1.0f / 7.0f));
+        m_directionlessChannelsArea = m_positionedChannelsArea.removeFromRight(width * (1.0f / 13.0f));
         m_positionedChannelsArea.reduce(margin, margin);
-        m_positionedChannelsArea.removeFromLeft(width * (1.7f / 7.0f));
-        m_positionedChannelsArea.removeFromTop(height * (0.7f / 5.0f));
+        m_positionedChannelsArea.removeFromLeft(width * (3.4f / 13.0f));
+        m_positionedChannelsArea.removeFromTop(height * (1.4f / 10.0f));
     }
 
     for (auto const& channelType : m_clockwiseOrderedChannelTypes)
@@ -381,19 +381,22 @@ void TwoDFieldOutputComponent::processingDataChanged(AbstractProcessorData *data
 
 bool TwoDFieldOutputComponent::setChannelConfiguration(const juce::AudioChannelSet& channelLayout)
 {
-    auto rVal = false;
+    auto wasUpdated = false;
     if (getSupportedChannelConfigurations().contains(channelLayout))
     {
-        m_channelConfiguration = channelLayout;
-        rVal = true;
+        if (m_channelConfiguration != channelLayout)
+        {
+            m_channelConfiguration = channelLayout;
+            wasUpdated = true;
+        }
     }
     else
         m_channelConfiguration = juce::AudioChannelSet::mono();
 
-    setClockwiseOrderedChannelTypesForCurrentConfiguration();
-    resized();
+    if (wasUpdated)
+        setClockwiseOrderedChannelTypesForCurrentConfiguration();
 
-    return rVal;
+    return wasUpdated;
 }
 
 const juce::Array<juce::AudioChannelSet>& TwoDFieldOutputComponent::getSupportedChannelConfigurations()
@@ -808,11 +811,11 @@ float TwoDFieldOutputComponent::getRequiredAspectRatio()
     if (coreTwoDFieldOnly)
         return 1.0f;
     else if (coreTwoDFieldWithMeterbridge)
-        return (5.0f / 6.0f);
+        return (10.0f / 11.0f);
     else if (bothTwoDFields)
-        return (5.0f / 6.0f);
+        return (10.0f / 12.0f);
     else if (bothTwoDFieldsWithMeterbridge)
-        return (5.0f / 7.0f);
+        return (10.0f / 13.0f);
     
     jassertfalse;
     return 0.0f;
