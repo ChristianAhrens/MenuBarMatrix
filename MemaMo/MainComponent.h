@@ -45,9 +45,13 @@ public:
         OutputVisuType_Meterbridge = OutputVisuType_First,
         OutputVisuType_LRS,
         OutputVisuType_LCRS,
+        OutputVisuType_5point0,
         OutputVisuType_5point1,
+        OutputVisuType_5point1point2,
+        OutputVisuType_7point0,
         OutputVisuType_7point1,
-        OutputVisuType_Last = OutputVisuType_7point1
+        OutputVisuType_7point1point4,
+        OutputVisuType_Last = OutputVisuType_7point1point4
     };
 
 public:

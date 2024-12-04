@@ -42,12 +42,18 @@ void TwoDFieldOutputComponent::paint (juce::Graphics& g)
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
-    paintCircularLevelIndication(g, m_visuArea, m_clockwiseOrderedChannelTypes);
+    // paint the level indications where applicable
+    if (!m_positionedChannelsArea.isEmpty())
+        paintCircularLevelIndication(g, m_positionedChannelsArea, m_channelLevelMaxPoints, m_clockwiseOrderedChannelTypes);
+    if (!m_positionedHeightChannelsArea.isEmpty())
+        paintCircularLevelIndication(g, m_positionedHeightChannelsArea, m_channelHeightLevelMaxPoints, m_clockwiseOrderedHeightChannelTypes);
+    if (!m_directionlessChannelsArea.isEmpty())
+        paintLevelMeterIndication(g, m_directionlessChannelsArea, m_directionLessChannelTypes);
 
     // draw dBFS
     g.setFont(12.0f);
     g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
-    String rangeText;
+    juce::String rangeText;
     if (getUsesValuesInDB())
         rangeText = juce::String(MemaProcessor::getGlobalMindB()) + " ... " + juce::String(MemaProcessor::getGlobalMaxdB()) + " dBFS";
     else
@@ -55,8 +61,13 @@ void TwoDFieldOutputComponent::paint (juce::Graphics& g)
     g.drawText(rangeText, getLocalBounds(), juce::Justification::topRight, true);
 }
 
-void TwoDFieldOutputComponent::paintCircularLevelIndication(juce::Graphics& g, const juce::Rectangle<float>& circleArea, const juce::Array<juce::AudioChannelSet::ChannelType>& channelsToPaint)
+void TwoDFieldOutputComponent::paintCircularLevelIndication(juce::Graphics& g, const juce::Rectangle<float>& circleArea, const std::map<int, juce::Point<float>>& channelLevelMaxPoints, const juce::Array<juce::AudioChannelSet::ChannelType>& channelsToPaint)
 {
+#if defined DEBUG && defined PAINTINGHELPER
+    g.setColour(juce::Colours::blueviolet);
+    g.drawRect(circleArea);
+#endif
+
     // fill circle background
     g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId).darker());
     g.fillEllipse(circleArea);
@@ -68,10 +79,13 @@ void TwoDFieldOutputComponent::paintCircularLevelIndication(juce::Graphics& g, c
     g.drawRect(getLocalBounds());
 #endif
 
+    auto circleCenter = circleArea.getCentre();
+
     // draw level indication areas
     std::map<int, juce::Point<float>> maxPoints;
     for (auto const& channelType : channelsToPaint)
-        maxPoints[channelType] = m_levelOrig - m_channelLevelMaxPoints[channelType];
+        if (0 < channelLevelMaxPoints.count(channelType))
+            maxPoints[channelType] = circleCenter - channelLevelMaxPoints.at(channelType);
 
     // hold values
     std::map<int, float> holdLevels;
@@ -93,11 +107,11 @@ void TwoDFieldOutputComponent::paintCircularLevelIndication(juce::Graphics& g, c
     {
         if (!holdPathStarted)
         {
-            holdPath.startNewSubPath(m_levelOrig - maxPoints[channelType] * holdLevels[channelType]);
+            holdPath.startNewSubPath(circleCenter - maxPoints[channelType] * holdLevels[channelType]);
             holdPathStarted = true;
         }
         else
-            holdPath.lineTo(m_levelOrig - maxPoints[channelType] * holdLevels[channelType]);
+            holdPath.lineTo(circleCenter - maxPoints[channelType] * holdLevels[channelType]);
     }
     holdPath.closeSubPath();
     g.strokePath(holdPath, PathStrokeType(1));
@@ -126,11 +140,11 @@ void TwoDFieldOutputComponent::paintCircularLevelIndication(juce::Graphics& g, c
     {
         if (!peakPathStarted)
         {
-            peakPath.startNewSubPath(m_levelOrig - maxPoints[channelType] * peakLevels[channelType]);
+            peakPath.startNewSubPath(circleCenter - maxPoints[channelType] * peakLevels[channelType]);
             peakPathStarted = true;
         }
         else
-            peakPath.lineTo(m_levelOrig - maxPoints[channelType] * peakLevels[channelType]);
+            peakPath.lineTo(circleCenter - maxPoints[channelType] * peakLevels[channelType]);
     }
     peakPath.closeSubPath();
     g.fillPath(peakPath);
@@ -159,11 +173,11 @@ void TwoDFieldOutputComponent::paintCircularLevelIndication(juce::Graphics& g, c
     {
         if (!rmsPathStarted)
         {
-            rmsPath.startNewSubPath(m_levelOrig - maxPoints[channelType] * rmsLevels[channelType]);
+            rmsPath.startNewSubPath(circleCenter - maxPoints[channelType] * rmsLevels[channelType]);
             rmsPathStarted = true;
         }
         else
-            rmsPath.lineTo(m_levelOrig - maxPoints[channelType] * rmsLevels[channelType]);
+            rmsPath.lineTo(circleCenter - maxPoints[channelType] * rmsLevels[channelType]);
     }
     rmsPath.closeSubPath();
     g.fillPath(rmsPath);
@@ -179,12 +193,16 @@ void TwoDFieldOutputComponent::paintCircularLevelIndication(juce::Graphics& g, c
     // draw dashed field dimension indication lines
     float dparam[]{ 4.0f, 5.0f };
     for (auto const& channelType : channelsToPaint)
-        g.drawDashedLine(juce::Line<float>(m_channelLevelMaxPoints[channelType], m_levelOrig), dparam, 2);
+        if (0 < channelLevelMaxPoints.count(channelType))
+            g.drawDashedLine(juce::Line<float>(channelLevelMaxPoints.at(channelType), circleCenter), dparam, 2);
 
     // draw channelType naming legend
     g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
     for (auto const& channelType : channelsToPaint)
     {
+        if (0 >= channelLevelMaxPoints.count(channelType))
+            continue;
+
         auto channelName = juce::AudioChannelSet::getAbbreviatedChannelTypeName(channelType);
         auto textRect = juce::Rectangle<float>(juce::GlyphArrangement::getStringWidth(g.getCurrentFont(), channelName), g.getCurrentFont().getHeight());
         auto angle = getAngleForChannelTypeInCurrentConfiguration(channelType);
@@ -198,7 +216,7 @@ void TwoDFieldOutputComponent::paintCircularLevelIndication(juce::Graphics& g, c
         auto angleRad = juce::degreesToRadians(angle);
 
         g.saveState();
-        g.setOrigin(m_channelLevelMaxPoints[channelType].toInt());
+        g.setOrigin(channelLevelMaxPoints.at(channelType).toInt());
         g.addTransform(juce::AffineTransform().translated(textRectOffset).rotated(angleRad));
         g.drawText(channelName, textRect, Justification::centred, true);
 
@@ -212,30 +230,131 @@ void TwoDFieldOutputComponent::paintCircularLevelIndication(juce::Graphics& g, c
     }
 }
 
+void TwoDFieldOutputComponent::paintLevelMeterIndication(juce::Graphics& g, const juce::Rectangle<float>& levelMeterArea, const juce::Array<juce::AudioChannelSet::ChannelType>& channelsToPaint)
+{
+#if defined DEBUG && defined PAINTINGHELPER
+    g.setColour(juce::Colours::aqua);
+    g.drawRect(levelMeterArea);
+#endif
+
+    auto channelCount = channelsToPaint.size();
+    auto margin = levelMeterArea.getWidth() / ((2 * channelCount) + 1);
+
+    auto visuArea = levelMeterArea;
+    auto visuAreaOrigY = visuArea.getBottom();
+
+    // draw meters
+    auto meterSpacing = margin;
+    auto meterThickness = float(visuArea.getWidth() - (channelCount)*meterSpacing) / float(channelCount);
+    auto meterMaxLength = visuArea.getHeight();
+    auto meterLeft = levelMeterArea.getX() + 0.5f * meterSpacing;
+
+    g.setFont(14.0f);
+    for (auto const& channelType : channelsToPaint)
+    {
+        auto level = m_levelData.GetLevel(getChannelNumberForChannelTypeInCurrentConfiguration(channelType));
+        float peakMeterLength{ 0 };
+        float rmsMeterLength{ 0 };
+        float holdMeterLength{ 0 };
+        if (getUsesValuesInDB())
+        {
+            peakMeterLength = meterMaxLength * level.GetFactorPEAKdB();
+            rmsMeterLength = meterMaxLength * level.GetFactorRMSdB();
+            holdMeterLength = meterMaxLength * level.GetFactorHOLDdB();
+        }
+        else
+        {
+            peakMeterLength = meterMaxLength * level.peak;
+            rmsMeterLength = meterMaxLength * level.rms;
+            holdMeterLength = meterMaxLength * level.hold;
+        }
+
+        // peak bar
+        g.setColour(juce::Colours::forestgreen.darker());
+        g.fillRect(juce::Rectangle<float>(meterLeft, visuAreaOrigY - peakMeterLength, meterThickness, peakMeterLength));
+        // rms bar
+        g.setColour(juce::Colours::forestgreen);
+        g.fillRect(juce::Rectangle<float>(meterLeft, visuAreaOrigY - rmsMeterLength, meterThickness, rmsMeterLength));
+        // hold strip
+        g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
+        g.drawLine(juce::Line<float>(meterLeft, visuAreaOrigY - holdMeterLength, meterLeft + meterThickness, visuAreaOrigY - holdMeterLength));
+        // channel # label
+        g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
+        g.drawText(juce::AudioChannelSet::getAbbreviatedChannelTypeName(channelType), juce::Rectangle<float>(meterLeft - (0.5f * meterSpacing), visuAreaOrigY - float(margin + 2), meterThickness + meterSpacing, float(margin)), juce::Justification::centred);
+
+        meterLeft += meterThickness + meterSpacing;
+    }
+
+    // draw a simple baseline
+    g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
+    g.drawLine(juce::Line<float>(levelMeterArea.getX(), visuAreaOrigY, levelMeterArea.getX() + visuArea.getWidth(), visuAreaOrigY));
+}
+
 void TwoDFieldOutputComponent::resized()
 {
-    // calculate what we need for our center circle
-    auto width = getWidth();
-    auto height = getHeight();
+    // process areas for level indication painting
+    auto coreTwoDFieldOnly = usesPositionedChannels() && !usesPositionedHeightChannels() && !usesDirectionlessChannels();
+    auto coreTwoDFieldWithMeterbridge = usesPositionedChannels() && !usesPositionedHeightChannels() && usesDirectionlessChannels();
+    auto bothTwoDFields = usesPositionedChannels() && usesPositionedHeightChannels() && !usesDirectionlessChannels();
+    auto bothTwoDFieldsWithMeterbridge = usesPositionedChannels() && usesPositionedHeightChannels() && usesDirectionlessChannels();
 
-    m_visuAreaWidth = static_cast<float>(width < height ? width : height) - 2 * m_outerMargin;
-    m_visuAreaHeight = static_cast<float>(width < height ? width : height) - 2 * m_outerMargin;
+    auto margin = 12.0f;
+    auto bounds = getLocalBounds().toFloat();
+    auto width = bounds.getWidth();
+    auto height = bounds.getHeight();
+    if (coreTwoDFieldOnly)
+    {
+        m_positionedChannelsArea = bounds.reduced(margin);
+        m_positionedHeightChannelsArea = {};
+        m_directionlessChannelsArea = {};
+    }
+    else if (coreTwoDFieldWithMeterbridge)
+    {
+        m_positionedChannelsArea = bounds.reduced(margin);
+        m_positionedChannelsArea.removeFromRight(width * (1.0f / 6.0f));
 
-    m_visuAreaOrigX = float(0.5f * (width - m_visuAreaWidth));
-    m_visuAreaOrigY = height - float(0.5f * (height - m_visuAreaHeight));
+        m_positionedHeightChannelsArea = {};
 
-    m_visuArea = juce::Rectangle<float>(m_visuAreaOrigX, m_visuAreaOrigY - m_visuAreaHeight, m_visuAreaWidth, m_visuAreaHeight);
+        m_directionlessChannelsArea = bounds;
+        m_directionlessChannelsArea.removeFromLeft(width * (5.0f / 6.0f));
+    }
+    else if (bothTwoDFields)
+    {
+        m_positionedHeightChannelsArea = bounds.reduced(margin);
+        m_positionedHeightChannelsArea.removeFromRight(width * (4.7f / 6.0f));
+        m_positionedHeightChannelsArea.removeFromBottom(height * (2.7f / 5.0f));
 
-    auto visuAreaHalfHeight = m_visuAreaHeight * 0.5f;
-    auto visuAreaHalfWidth = m_visuAreaWidth * 0.5f;
+        m_positionedChannelsArea = bounds.reduced(margin);
+        m_positionedChannelsArea.removeFromLeft(width * (1.7f / 6.0f));
+        m_positionedChannelsArea.removeFromTop(height * (0.7f / 5.0f));
 
-    m_levelOrig = juce::Point<float>(m_visuAreaOrigX + 0.5f * m_visuAreaWidth, m_visuAreaOrigY - 0.5f * m_visuAreaHeight);
+        m_directionlessChannelsArea = {};
+    }
+    else if (bothTwoDFieldsWithMeterbridge)
+    {
+        m_positionedHeightChannelsArea = bounds.reduced(margin);
+        m_positionedHeightChannelsArea.removeFromRight(width * (4.7f / 7.0f));
+        m_positionedHeightChannelsArea.removeFromBottom(height * (2.7f / 5.0f));
+        
+        m_positionedChannelsArea = bounds;
+        m_directionlessChannelsArea = m_positionedChannelsArea.removeFromRight(width * (1.0f / 7.0f));
+        m_positionedChannelsArea.reduce(margin, margin);
+        m_positionedChannelsArea.removeFromLeft(width * (1.7f / 7.0f));
+        m_positionedChannelsArea.removeFromTop(height * (0.7f / 5.0f));
+    }
 
     for (auto const& channelType : m_clockwiseOrderedChannelTypes)
     {
-        auto xLength = sinf(juce::MathConstants<float>::pi / 180.0f * (getAngleForChannelTypeInCurrentConfiguration(channelType))) * visuAreaHalfHeight;
-        auto yLength = cosf(juce::MathConstants<float>::pi / 180.0f * (getAngleForChannelTypeInCurrentConfiguration(channelType))) * visuAreaHalfWidth;
-        m_channelLevelMaxPoints[channelType] = m_levelOrig + juce::Point<float>(xLength, -yLength);
+        auto xLength = sinf(juce::MathConstants<float>::pi / 180.0f * (getAngleForChannelTypeInCurrentConfiguration(channelType))) * (m_positionedChannelsArea.getHeight() / 2);
+        auto yLength = cosf(juce::MathConstants<float>::pi / 180.0f * (getAngleForChannelTypeInCurrentConfiguration(channelType))) * (m_positionedChannelsArea.getWidth() / 2);
+        m_channelLevelMaxPoints[channelType] = m_positionedChannelsArea.getCentre() + juce::Point<float>(xLength, -yLength);
+    }
+
+    for (auto const& channelType : m_clockwiseOrderedHeightChannelTypes)
+    {
+        auto xLength = sinf(juce::MathConstants<float>::pi / 180.0f * (getAngleForChannelTypeInCurrentConfiguration(channelType))) * (m_positionedHeightChannelsArea.getHeight() / 2);
+        auto yLength = cosf(juce::MathConstants<float>::pi / 180.0f * (getAngleForChannelTypeInCurrentConfiguration(channelType))) * (m_positionedHeightChannelsArea.getWidth() / 2);
+        m_channelHeightLevelMaxPoints[channelType] = m_positionedHeightChannelsArea.getCentre() + juce::Point<float>(xLength, -yLength);
     }
 
     AbstractAudioVisualizer::resized();
@@ -350,7 +469,9 @@ float TwoDFieldOutputComponent::getAngleForChannelTypeInCurrentConfiguration(con
             jassertfalse;
         }
     }
-    else if (juce::AudioChannelSet::create5point1() == m_channelConfiguration)
+    else if (juce::AudioChannelSet::create5point0() == m_channelConfiguration
+        || juce::AudioChannelSet::create5point1() == m_channelConfiguration
+        || juce::AudioChannelSet::create5point1point2() == m_channelConfiguration)
     {
         switch (channelType)
         {
@@ -366,11 +487,17 @@ float TwoDFieldOutputComponent::getAngleForChannelTypeInCurrentConfiguration(con
             return -110.0f;
         case juce::AudioChannelSet::ChannelType::rightSurround:
             return 110.0f;
+        case juce::AudioChannelSet::ChannelType::topSideLeft:
+            return -90.0f;
+        case juce::AudioChannelSet::ChannelType::topSideRight:
+            return 90.0f;
         default:
             jassertfalse;
         }
     }
-    else if (juce::AudioChannelSet::create7point1() == m_channelConfiguration)
+    else if (juce::AudioChannelSet::create7point0() == m_channelConfiguration
+        || juce::AudioChannelSet::create7point1() == m_channelConfiguration
+        || juce::AudioChannelSet::create7point1point4() == m_channelConfiguration)
     {
         switch (channelType)
         {
@@ -390,6 +517,14 @@ float TwoDFieldOutputComponent::getAngleForChannelTypeInCurrentConfiguration(con
             return -145.0f;
         case juce::AudioChannelSet::ChannelType::rightSurroundRear:
             return 145.0f;
+        case juce::AudioChannelSet::ChannelType::topFrontLeft:
+            return -45.0f;
+        case juce::AudioChannelSet::ChannelType::topFrontRight:
+            return 45.0f;
+        case juce::AudioChannelSet::ChannelType::topRearLeft:
+            return -135.0f;
+        case juce::AudioChannelSet::ChannelType::topRearRight:
+            return 135.0f;
         default:
             jassertfalse;
         }
@@ -468,7 +603,9 @@ int TwoDFieldOutputComponent::getChannelNumberForChannelTypeInCurrentConfigurati
             jassertfalse;
         }
     }
-    else if (juce::AudioChannelSet::create5point1() == m_channelConfiguration)
+    else if (juce::AudioChannelSet::create5point0() == m_channelConfiguration
+        || juce::AudioChannelSet::create5point1() == m_channelConfiguration
+        || juce::AudioChannelSet::create5point1point2() == m_channelConfiguration)
     {
         switch (channelType)
         {
@@ -484,11 +621,17 @@ int TwoDFieldOutputComponent::getChannelNumberForChannelTypeInCurrentConfigurati
             return 5;
         case juce::AudioChannelSet::ChannelType::rightSurround:
             return 6;
+        case juce::AudioChannelSet::ChannelType::topSideLeft:
+            return 7;
+        case juce::AudioChannelSet::ChannelType::topSideRight:
+            return 8;
         default:
             jassertfalse;
         }
     }
-    else if (juce::AudioChannelSet::create7point1() == m_channelConfiguration)
+    else if (juce::AudioChannelSet::create7point0() == m_channelConfiguration
+        || juce::AudioChannelSet::create7point1() == m_channelConfiguration
+        || juce::AudioChannelSet::create7point1point4() == m_channelConfiguration)
     {
         switch (channelType)
         {
@@ -508,6 +651,14 @@ int TwoDFieldOutputComponent::getChannelNumberForChannelTypeInCurrentConfigurati
             return 7;
         case juce::AudioChannelSet::ChannelType::rightSurroundRear:
             return 8;
+        case juce::AudioChannelSet::ChannelType::topFrontLeft:
+            return 9;
+        case juce::AudioChannelSet::ChannelType::topFrontRight:
+            return 10;
+        case juce::AudioChannelSet::ChannelType::topRearLeft:
+            return 11;
+        case juce::AudioChannelSet::ChannelType::topRearRight:
+            return 12;
         default:
             jassertfalse;
         }
@@ -520,6 +671,10 @@ int TwoDFieldOutputComponent::getChannelNumberForChannelTypeInCurrentConfigurati
 
 void TwoDFieldOutputComponent::setClockwiseOrderedChannelTypesForCurrentConfiguration()
 {
+    m_clockwiseOrderedChannelTypes.clear();
+    m_clockwiseOrderedHeightChannelTypes.clear();
+    m_directionLessChannelTypes.clear();
+
     if (juce::AudioChannelSet::mono() == m_channelConfiguration)
     {
         m_clockwiseOrderedChannelTypes = m_channelConfiguration.getChannelTypes();
@@ -552,7 +707,7 @@ void TwoDFieldOutputComponent::setClockwiseOrderedChannelTypesForCurrentConfigur
             juce::AudioChannelSet::ChannelType::right,
             juce::AudioChannelSet::ChannelType::surround };
     }
-    else if (juce::AudioChannelSet::create5point1() == m_channelConfiguration)
+    else if (juce::AudioChannelSet::create5point0() == m_channelConfiguration)
     {
         m_clockwiseOrderedChannelTypes = { 
             juce::AudioChannelSet::ChannelType::left,
@@ -560,7 +715,48 @@ void TwoDFieldOutputComponent::setClockwiseOrderedChannelTypesForCurrentConfigur
             juce::AudioChannelSet::ChannelType::right,
             juce::AudioChannelSet::ChannelType::rightSurround,
             juce::AudioChannelSet::ChannelType::leftSurround,
-            //juce::AudioChannelSet::ChannelType::LFE does not have a positionin 2d field
+        };
+    }
+    else if (juce::AudioChannelSet::create5point1() == m_channelConfiguration)
+    {
+        m_clockwiseOrderedChannelTypes = {
+            juce::AudioChannelSet::ChannelType::left,
+            juce::AudioChannelSet::ChannelType::centre,
+            juce::AudioChannelSet::ChannelType::right,
+            juce::AudioChannelSet::ChannelType::rightSurround,
+            juce::AudioChannelSet::ChannelType::leftSurround
+        };
+        m_directionLessChannelTypes = {
+            juce::AudioChannelSet::ChannelType::LFE
+        };
+    }
+    else if (juce::AudioChannelSet::create5point1point2() == m_channelConfiguration)
+    {
+        m_clockwiseOrderedChannelTypes = {
+            juce::AudioChannelSet::ChannelType::left,
+            juce::AudioChannelSet::ChannelType::centre,
+            juce::AudioChannelSet::ChannelType::right,
+            juce::AudioChannelSet::ChannelType::rightSurround,
+            juce::AudioChannelSet::ChannelType::leftSurround
+        };
+        m_clockwiseOrderedHeightChannelTypes = {
+            juce::AudioChannelSet::ChannelType::topSideLeft,
+            juce::AudioChannelSet::ChannelType::topSideRight
+        };
+        m_directionLessChannelTypes = {
+            juce::AudioChannelSet::ChannelType::LFE
+        };
+    }
+    else if (juce::AudioChannelSet::create7point0() == m_channelConfiguration)
+    {
+        m_clockwiseOrderedChannelTypes = {
+            juce::AudioChannelSet::ChannelType::left,
+            juce::AudioChannelSet::ChannelType::centre,
+            juce::AudioChannelSet::ChannelType::right,
+            juce::AudioChannelSet::ChannelType::rightSurroundSide,
+            juce::AudioChannelSet::ChannelType::rightSurroundRear,
+            juce::AudioChannelSet::ChannelType::leftSurroundRear,
+            juce::AudioChannelSet::ChannelType::leftSurroundSide
         };
     }
     else if (juce::AudioChannelSet::create7point1() == m_channelConfiguration)
@@ -573,11 +769,53 @@ void TwoDFieldOutputComponent::setClockwiseOrderedChannelTypesForCurrentConfigur
             juce::AudioChannelSet::ChannelType::rightSurroundRear,
             juce::AudioChannelSet::ChannelType::leftSurroundRear,
             juce::AudioChannelSet::ChannelType::leftSurroundSide
-            //juce::AudioChannelSet::ChannelType::LFE does not have a positionin 2d field
+        };
+        m_directionLessChannelTypes = {
+            juce::AudioChannelSet::ChannelType::LFE
+        };
+    }
+    else if (juce::AudioChannelSet::create7point1point4() == m_channelConfiguration)
+    {
+        m_clockwiseOrderedChannelTypes = {
+            juce::AudioChannelSet::ChannelType::left,
+            juce::AudioChannelSet::ChannelType::centre,
+            juce::AudioChannelSet::ChannelType::right,
+            juce::AudioChannelSet::ChannelType::rightSurroundSide,
+            juce::AudioChannelSet::ChannelType::rightSurroundRear,
+            juce::AudioChannelSet::ChannelType::leftSurroundRear,
+            juce::AudioChannelSet::ChannelType::leftSurroundSide
+        };
+        m_clockwiseOrderedHeightChannelTypes = {
+            juce::AudioChannelSet::ChannelType::topFrontLeft,
+            juce::AudioChannelSet::ChannelType::topFrontRight,
+            juce::AudioChannelSet::ChannelType::topRearRight,
+            juce::AudioChannelSet::ChannelType::topRearLeft
+        };
+        m_directionLessChannelTypes = {
+            juce::AudioChannelSet::ChannelType::LFE
         };
     }
     else
         jassertfalse;
+}
+
+float TwoDFieldOutputComponent::getRequiredAspectRatio()
+{
+    auto coreTwoDFieldOnly = usesPositionedChannels() && !usesPositionedHeightChannels() && !usesDirectionlessChannels();
+    auto coreTwoDFieldWithMeterbridge = usesPositionedChannels() && !usesPositionedHeightChannels() && usesDirectionlessChannels();
+    auto bothTwoDFields = usesPositionedChannels() && usesPositionedHeightChannels() && !usesDirectionlessChannels();
+    auto bothTwoDFieldsWithMeterbridge = usesPositionedChannels() && usesPositionedHeightChannels() && usesDirectionlessChannels();
+    if (coreTwoDFieldOnly)
+        return 1.0f;
+    else if (coreTwoDFieldWithMeterbridge)
+        return (5.0f / 6.0f);
+    else if (bothTwoDFields)
+        return (5.0f / 6.0f);
+    else if (bothTwoDFieldsWithMeterbridge)
+        return (5.0f / 7.0f);
+    
+    jassertfalse;
+    return 0.0f;
 }
 
 

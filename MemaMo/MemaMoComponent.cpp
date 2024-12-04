@@ -116,10 +116,12 @@ void MemaMoComponent::resized()
     {
         auto margin = 8;
         auto bounds = getLocalBounds().reduced(margin, margin);
-        if (bounds.getAspectRatio() >= 1)
+        auto boundsAspect = bounds.toFloat().getAspectRatio();
+        auto fieldAspect = m_outputFieldComponent->getRequiredAspectRatio();
+        if (boundsAspect >= 1 / fieldAspect)
         {
-
-            auto outputsBounds = bounds.removeFromRight(bounds.getHeight());
+            // landscape
+            auto outputsBounds = bounds.removeFromRight(bounds.getHeight() / fieldAspect);
             outputsBounds.removeFromLeft(margin / 2);
             auto inputsBounds = bounds;
             inputsBounds.removeFromRight(margin / 2);
@@ -129,7 +131,8 @@ void MemaMoComponent::resized()
         }
         else
         {
-            auto outputBounds = bounds.removeFromBottom(bounds.getWidth());
+            // portrait
+            auto outputBounds = bounds.removeFromBottom(bounds.getWidth() * fieldAspect);
             outputBounds.removeFromTop(margin / 2);
             auto inputBounds = bounds;
             inputBounds.removeFromBottom(margin / 2);
@@ -144,6 +147,7 @@ void MemaMoComponent::resized()
         auto bounds = getLocalBounds().reduced(margin, margin);
         if (bounds.getAspectRatio() >= 1)
         {
+            // landscape
             if (m_inputMeteringComponent && m_outputMeteringComponent)
             {
                 auto ic = float(m_inputMeteringComponent->getChannelCount());
@@ -163,6 +167,7 @@ void MemaMoComponent::resized()
         }
         else
         {
+            // portrait
             auto inputBounds = bounds.removeFromTop(bounds.getHeight() / 2);
             inputBounds.removeFromBottom(margin / 2);
             auto outputBounds = bounds;
