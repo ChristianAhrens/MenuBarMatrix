@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.3.2] 2024-12-05
+### Added
+- Added configurable 2D surround field visualization to Mema.Mo
+
+### Changed
+
+### Fixed
+- Fixed Mema crosspoint patch to not be reset to unity when new Mema.Mo connections are established
+
 ## [0.3.1] 2024-11-23
 ### Added
 - Added automatic update detection
