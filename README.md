@@ -60,6 +60,8 @@ Use what is provided here at your own risk!
 
 ![Showreel.005.png](Resources/Documentation/Showreel/Showreel.005.png "Mema.Mo UI")
 
+![Showreel.006.png](Resources/Documentation/Showreel/Showreel.006.png "Mema.Mo UI output formats")
+
 
 <a name="howtobuild" />
 
@@ -117,9 +119,9 @@ This does only work up to Raspberry Pi OS Bullseye versions, that use X server a
 
 ## Usecase: Studio rack monitoring
 
-![Showreel.006.png](Resources/Documentation/Showreel/Showreel.006.png "Homestudio setup")
+![Showreel.007.png](Resources/Documentation/Showreel/Showreel.007.png "Homestudio setup")
 
-![Showreel.007.png](Resources/Documentation/Showreel/Showreel.007.png "RaspberryPi rack DIY device")
+![Showreel.008.png](Resources/Documentation/Showreel/Showreel.008.png "RaspberryPi rack DIY device")
 
 * Mema on macOS
   * BlackHole 16ch used to route signal from LogicPro, Apple Music, etc. to Mema
@@ -133,7 +135,7 @@ This does only work up to Raspberry Pi OS Bullseye versions, that use X server a
 
 ## Usecase: Mobile recording monitoring
 
-![Showreel.008.png](Resources/Documentation/Showreel/Showreel.008.png "Mobile rig")
+![Showreel.009.png](Resources/Documentation/Showreel/Showreel.009.png "Mobile rig")
 
 * Mema on macOS
   * BlackHole 16ch used to route signal from LogicPro, Apple Music, etc. to Mema

@@ -69,11 +69,13 @@ void ProcessorDataAnalyzer::setHoldTime(int holdTimeMs)
 
 void ProcessorDataAnalyzer::addListener(Listener* listener)
 {
+	std::lock_guard<std::mutex> lock(m_callbackListenersMutex);
 	m_callbackListeners.add(listener);
 }
 
 void ProcessorDataAnalyzer::removeListener(Listener* listener)
 {
+	std::lock_guard<std::mutex> lock(m_callbackListenersMutex);
 	m_callbackListeners.remove(m_callbackListeners.indexOf(listener));
 }
 
@@ -207,6 +209,7 @@ void ProcessorDataAnalyzer::analyzeData(const AudioBuffer<float>& buffer)
 
 void ProcessorDataAnalyzer::BroadcastData(AbstractProcessorData* data)
 {
+	std::lock_guard<std::mutex> lock(m_callbackListenersMutex);
 	for (Listener* l : m_callbackListeners)
 		l->processingDataChanged(data);
 }

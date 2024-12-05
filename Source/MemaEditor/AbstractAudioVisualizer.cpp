@@ -29,7 +29,7 @@ AbstractAudioVisualizer::AbstractAudioVisualizer()
 {
     m_changesPending = false;
 
-    setRefreshFrequency(30);
+    setRefreshFrequency(15);
 }
 
 AbstractAudioVisualizer::~AbstractAudioVisualizer()

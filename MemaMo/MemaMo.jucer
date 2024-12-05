@@ -39,6 +39,10 @@
       </GROUP>
     </GROUP>
     <GROUP id="{B4C42B10-6A29-1C3A-435D-5CB7A9DE671E}" name="Source">
+      <FILE id="HGrWel" name="TwoDFieldOutputComponent.cpp" compile="1" resource="0"
+            file="../Source/MemaEditor/TwoDFieldOutputComponent.cpp"/>
+      <FILE id="R4FcNe" name="TwoDFieldOutputComponent.h" compile="0" resource="0"
+            file="../Source/MemaEditor/TwoDFieldOutputComponent.h"/>
       <FILE id="cpO0IL" name="MeterbridgeComponent.cpp" compile="1" resource="0"
             file="../Source/MemaEditor/MeterbridgeComponent.cpp"/>
       <FILE id="k5NfZT" name="MeterbridgeComponent.h" compile="0" resource="0"
