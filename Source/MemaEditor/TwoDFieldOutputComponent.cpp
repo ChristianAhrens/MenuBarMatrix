@@ -87,7 +87,7 @@ void TwoDFieldOutputComponent::paintCircularLevelIndication(juce::Graphics& g, c
         if (0 < channelLevelMaxPoints.count(channelType))
             maxPoints[channelType] = circleCenter - channelLevelMaxPoints.at(channelType);
 
-    // hold values
+    // calculate hold values
     std::map<int, float> holdLevels;
     if (getUsesValuesInDB())
     {
@@ -100,27 +100,7 @@ void TwoDFieldOutputComponent::paintCircularLevelIndication(juce::Graphics& g, c
             holdLevels[channelType] = m_levelData.GetLevel(getChannelNumberForChannelTypeInCurrentConfiguration(channelType)).hold;
     }
 
-    g.setColour(juce::Colours::grey);
-    juce::Path holdPath;
-    auto holdPathStarted = false;
-    for (auto const& channelType : channelsToPaint)
-    {
-        if (!holdPathStarted)
-        {
-            holdPath.startNewSubPath(circleCenter - maxPoints[channelType] * holdLevels[channelType]);
-            holdPathStarted = true;
-        }
-        else
-            holdPath.lineTo(circleCenter - maxPoints[channelType] * holdLevels[channelType]);
-    }
-    holdPath.closeSubPath();
-    g.strokePath(holdPath, PathStrokeType(1));
-#if defined DEBUG && defined PAINTINGHELPER
-    g.setColour(juce::Colours::yellow);
-    g.drawRect(holdPath.getBounds());
-#endif
-
-    // peak values
+    // calculate peak values
     std::map<int, float> peakLevels;
     if (getUsesValuesInDB())
     {
@@ -133,27 +113,7 @@ void TwoDFieldOutputComponent::paintCircularLevelIndication(juce::Graphics& g, c
             peakLevels[channelType] = m_levelData.GetLevel(getChannelNumberForChannelTypeInCurrentConfiguration(channelType)).peak;
     }
 
-    g.setColour(juce::Colours::forestgreen.darker());
-    juce::Path peakPath;
-    auto peakPathStarted = false;
-    for (auto const& channelType : channelsToPaint)
-    {
-        if (!peakPathStarted)
-        {
-            peakPath.startNewSubPath(circleCenter - maxPoints[channelType] * peakLevels[channelType]);
-            peakPathStarted = true;
-        }
-        else
-            peakPath.lineTo(circleCenter - maxPoints[channelType] * peakLevels[channelType]);
-    }
-    peakPath.closeSubPath();
-    g.fillPath(peakPath);
-#if defined DEBUG && defined PAINTINGHELPER
-    g.setColour(juce::Colours::orange);
-    g.drawRect(peakPath.getBounds());
-#endif
-
-    // rms values    
+    // calculate rms values    
     std::map<int, float> rmsLevels;
     if (getUsesValuesInDB())
     {
@@ -166,25 +126,116 @@ void TwoDFieldOutputComponent::paintCircularLevelIndication(juce::Graphics& g, c
             rmsLevels[channelType] = m_levelData.GetLevel(getChannelNumberForChannelTypeInCurrentConfiguration(channelType)).rms;
     }
 
-    g.setColour(juce::Colours::forestgreen);
-    juce::Path rmsPath;
-    auto rmsPathStarted = false;
-    for (auto const& channelType : channelsToPaint)
+    auto twoChannelsAndOpposite = false;
+    if (2 == channelsToPaint.size())
+        twoChannelsAndOpposite = bool(180.0f == fabs(getAngleForChannelTypeInCurrentConfiguration(channelsToPaint[0]) - getAngleForChannelTypeInCurrentConfiguration(channelsToPaint[1])));
+
+    if (twoChannelsAndOpposite)
     {
-        if (!rmsPathStarted)
-        {
-            rmsPath.startNewSubPath(circleCenter - maxPoints[channelType] * rmsLevels[channelType]);
-            rmsPathStarted = true;
-        }
-        else
-            rmsPath.lineTo(circleCenter - maxPoints[channelType] * rmsLevels[channelType]);
+        // paint hold values as metering-path
+        juce::Path holdPath;
+        auto fCh = maxPoints[channelsToPaint[0]] * holdLevels[channelsToPaint[0]];
+        holdPath.addLineSegment(juce::Line<float>(circleCenter - juce::Point<float>(fCh.getX(), fCh.getY() + 4 ), circleCenter - juce::Point<float>(fCh.getX(), fCh.getY() - 4 )), 1.0f);
+        holdPath.closeSubPath();
+        auto sCh = maxPoints[channelsToPaint[1]] * holdLevels[channelsToPaint[1]];
+        holdPath.addLineSegment(juce::Line<float>(circleCenter - juce::Point<float>(sCh.getX(), sCh.getY() + 4 ), circleCenter - juce::Point<float>(sCh.getX(), sCh.getY() - 4 )), 1.0f);
+        holdPath.closeSubPath();
+
+        g.setColour(juce::Colours::grey);
+        g.strokePath(holdPath, PathStrokeType(1.0f));
+
+        // paint peak values as metering-path
+        juce::Path peakPath;
+        fCh = maxPoints[channelsToPaint[0]] * peakLevels[channelsToPaint[0]];
+        peakPath.addLineSegment(juce::Line<float>(circleCenter, circleCenter - fCh), 9.0f);
+        peakPath.closeSubPath();
+        sCh = maxPoints[channelsToPaint[1]] * peakLevels[channelsToPaint[1]];
+        peakPath.addLineSegment(juce::Line<float>(circleCenter, circleCenter - sCh), 9.0f);
+        peakPath.closeSubPath();
+
+        g.setColour(juce::Colours::forestgreen.darker());
+        g.fillPath(peakPath);
+
+        // paint rms values as metering-path
+        juce::Path rmsPath;
+        fCh = maxPoints[channelsToPaint[0]] * rmsLevels[channelsToPaint[0]];
+        rmsPath.addLineSegment(juce::Line<float>(circleCenter, circleCenter - fCh), 9.0f);
+        rmsPath.closeSubPath();
+        sCh = maxPoints[channelsToPaint[1]] * rmsLevels[channelsToPaint[1]];
+        rmsPath.addLineSegment(juce::Line<float>(circleCenter, circleCenter - sCh), 9.0f);
+        rmsPath.closeSubPath();
+
+        g.setColour(juce::Colours::forestgreen);
+        g.fillPath(rmsPath);
     }
-    rmsPath.closeSubPath();
-    g.fillPath(rmsPath);
+    else
+    {
+        // paint hold values as pathx
+        juce::Path holdPath;
+        auto holdPathStarted = false;
+        for (auto const& channelType : channelsToPaint)
+        {
+            if (!holdPathStarted)
+            {
+                holdPath.startNewSubPath(circleCenter - maxPoints[channelType] * holdLevels[channelType]);
+                holdPathStarted = true;
+            }
+            else
+                holdPath.lineTo(circleCenter - maxPoints[channelType] * holdLevels[channelType]);
+        }
+        holdPath.closeSubPath();
+
+        g.setColour(juce::Colours::grey);
+        g.strokePath(holdPath, PathStrokeType(1));
 #if defined DEBUG && defined PAINTINGHELPER
-    g.setColour(juce::Colours::turquoise);
-    g.drawRect(rmsPath.getBounds());
+        g.setColour(juce::Colours::yellow);
+        g.drawRect(holdPath.getBounds());
 #endif
+
+        // paint peak values as path
+        juce::Path peakPath;
+        auto peakPathStarted = false;
+        for (auto const& channelType : channelsToPaint)
+        {
+            if (!peakPathStarted)
+            {
+                peakPath.startNewSubPath(circleCenter - maxPoints[channelType] * peakLevels[channelType]);
+                peakPathStarted = true;
+            }
+            else
+                peakPath.lineTo(circleCenter - maxPoints[channelType] * peakLevels[channelType]);
+        }
+        peakPath.closeSubPath();
+
+        g.setColour(juce::Colours::forestgreen.darker());
+        g.fillPath(peakPath);
+#if defined DEBUG && defined PAINTINGHELPER
+        g.setColour(juce::Colours::orange);
+        g.drawRect(peakPath.getBounds());
+#endif
+
+        // paint rms values as path
+        juce::Path rmsPath;
+        auto rmsPathStarted = false;
+        for (auto const& channelType : channelsToPaint)
+        {
+            if (!rmsPathStarted)
+            {
+                rmsPath.startNewSubPath(circleCenter - maxPoints[channelType] * rmsLevels[channelType]);
+                rmsPathStarted = true;
+            }
+            else
+                rmsPath.lineTo(circleCenter - maxPoints[channelType] * rmsLevels[channelType]);
+        }
+        rmsPath.closeSubPath();
+
+        g.setColour(juce::Colours::forestgreen);
+        g.fillPath(rmsPath);
+#if defined DEBUG && defined PAINTINGHELPER
+        g.setColour(juce::Colours::turquoise);
+        g.drawRect(rmsPath.getBounds());
+#endif
+    }
 
     // draw a simple circle surrounding
     g.setColour(getLookAndFeel().findColour(juce::TextButton::textColourOffId));
